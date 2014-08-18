@@ -1,0 +1,5 @@
+FILE=iteminterface.h
+DESTFILE=../plugins/standard/core_plugins/_script_template/itemHeader.tmpl
+CLASSNAME=ItemInterface
+OBJECTNAME=Item
+OBJECTTAG=ITEMOBJECTNAME

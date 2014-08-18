@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/propertyEditor/stringList/" >
+        <file>images/up.png</file>
+        <file>images/down.png</file>
+        <file>images/plus.png</file>
+        <file>images/minus.png</file>
+    </qresource>
+</RCC>

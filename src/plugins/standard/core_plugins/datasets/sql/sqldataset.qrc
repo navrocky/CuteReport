@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/" >
+        <file>images/sql.png</file>
+	<file>syntax/sql.txt</file>
+    </qresource>
+</RCC>

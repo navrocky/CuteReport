@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/" >
+        <file>pageFooter.png</file>
+    </qresource>
+</RCC>

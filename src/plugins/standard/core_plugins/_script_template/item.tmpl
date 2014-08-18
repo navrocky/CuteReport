@@ -1,0 +1,90 @@
+#include "iteminterface.h"
+
+/** ======================= ShiftMode =========================== */
+
+static const Item::ShiftMode qtscript_Item_ShiftMode_values[] = {
+    Item::AlwaysShift,
+    Item::DontShift,
+    Item::ShiftWhenOverlapped
+};
+
+static const char * const qtscript_Item_ShiftMode_keys[] = {
+    "AlwaysShift",
+    "DontShift",
+    "ShiftWhenOverlapped"
+};
+
+static int Item_ShiftMode_num = 3;
+
+
+static QString qtscript_Item_ShiftMode_toStringHelper(Item::ShiftMode value)
+{
+    const QMetaObject meta = Item::staticMetaObject;
+    int idx = meta.indexOfEnumerator("ShiftMode");
+    Q_ASSERT(idx != -1);
+    QMetaEnum menum = meta.enumerator(idx);
+    return QString::fromLatin1(menum.valueToKey(value));
+}
+
+
+static QScriptValue qtscript_Item_ShiftMode_toScriptValue(QScriptEngine *engine, const Item::ShiftMode &value)
+{
+    QScriptValue clazz = engine->globalObject().property(QString::fromLatin1("OBJECTNAME"));
+    return clazz.property(qtscript_Item_ShiftMode_toStringHelper(value));
+}
+
+
+static void qtscript_Item_ShiftMode_fromScriptValue(const QScriptValue &value, Item::ShiftMode &out)
+{
+    out = qvariant_cast<Item::ShiftMode>(value.toVariant());
+}
+
+
+static QScriptValue qtscript_construct_Item_ShiftMode(QScriptContext *context, QScriptEngine *engine)
+{
+    int arg = context->argument(0).toInt32();
+    const QMetaObject *meta = qtscript_Qt_metaObject();
+    int idx = meta->indexOfEnumerator("ShiftMode");
+    Q_ASSERT(idx != -1);
+    QMetaEnum menum = meta->enumerator(idx);
+    if (menum.valueToKey(arg) != 0)
+        return qScriptValueFromValue(engine,  static_cast<Item::ShiftMode>(arg));
+    return context->throwError(QString::fromLatin1("ShiftMode(): invalid enum value (%0)").arg(arg));
+}
+
+
+static QScriptValue qtscript_Item_ShiftMode_valueOf(QScriptContext *context, QScriptEngine *engine)
+{
+    Item::ShiftMode value = qscriptvalue_cast<Item::ShiftMode>(context->thisObject());
+    return QScriptValue(engine, static_cast<int>(value));
+}
+
+
+static QScriptValue qtscript_Item_ShiftMode_toString(QScriptContext *context, QScriptEngine *engine)
+{
+    Item::ShiftMode value = qscriptvalue_cast<Item::ShiftMode>(context->thisObject());
+    return QScriptValue(engine, qtscript_Item_ShiftMode_toStringHelper(value));
+}
+
+
+static QScriptValue qtscript_create_Item_ShiftMode_class(QScriptEngine *engine, QScriptValue &clazz)
+{
+    QScriptValue ctor = qtscript_create_enum_class_helper(
+                            engine, qtscript_construct_Item_ShiftMode,
+                            qtscript_Item_ShiftMode_valueOf, qtscript_Item_ShiftMode_toString);
+
+    qScriptRegisterMetaType<Item::ShiftMode>(engine, qtscript_Item_ShiftMode_toScriptValue,
+                                                   qtscript_Item_ShiftMode_fromScriptValue, ctor.property(QString::fromLatin1("prototype")));
+
+    for (int i = 0; i < Item_ShiftMode_num; ++i) {
+        qDebug() << qtscript_Item_ShiftMode_keys[i];
+        qDebug() << qVariantFromValue(qtscript_Item_ShiftMode_values[i]);
+        clazz.setProperty(QString::fromLatin1(qtscript_Item_ShiftMode_keys[i]),
+                          engine->newVariant(qVariantFromValue(qtscript_Item_ShiftMode_values[i])),
+                          QScriptValue::ReadOnly | QScriptValue::Undeletable);
+    }
+
+    return ctor;
+}
+
+

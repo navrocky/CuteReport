@@ -1,0 +1,6 @@
+templates | templates
+reports | reports
+objects | objects
+databases | objects
+images | objects
+forms | forms

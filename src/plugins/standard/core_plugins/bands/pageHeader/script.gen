@@ -1,0 +1,6 @@
+FILE=pageheader.h
+DESTFILE=pageheaderscripting.h
+HEADER=../../_script_template/header_simple.tmpl
+ENUMSECTION=../../_script_template/enumsection.tmpl
+CLASSNAME=PageHeader
+OBJECTNAME=PageHeader

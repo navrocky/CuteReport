@@ -1,0 +1,8 @@
+FILE=memo.h
+DESTFILE=memoitemscript.h
+HEADER=../_script_templates/header.tmpl
+FOOTER=../_script_templates/footer.tmpl
+COMMON=../_script_templates/common.tmpl
+ENUMSECTION=../_script_templates/enumsection.tmpl
+CLASSNAME=MemoItem
+OBJECTNAME=Memo

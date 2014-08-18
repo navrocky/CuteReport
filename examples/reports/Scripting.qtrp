@@ -1,0 +1,1051 @@
+<!DOCTYPE CuteReport>
+<Report className="CuteReport::ReportInterface">
+ <properties>
+  <name type="QString"></name>
+  <author type="QString">Author</author>
+  <description type="QString"></description>
+  <script type="QString">memoitem.rendering.connect(memo_test);&lt;newline>&lt;newline>function memo_test() {&lt;newline>     memoitem.text = data.value("name");&lt;newline>     memoitem.backgroundBrush = new QBrush(new QColor("#665544"));&lt;newline>}&lt;newline></script>
+  <version type="int">0</version>
+  <filePath type="QString">git:reports/Scripting.qtrp</filePath>
+  <defaultStorageName type="QString"></defaultStorageName>
+  <variables type="QVariantHash"/>
+ </properties>
+ <children>
+  <Page moduleName="Standard" moduleVersion="1" className="Page">
+   <properties>
+    <objectName type="QString">page</objectName>
+    <orientation type="int">0</orientation>
+    <format type="QString">A4</format>
+    <paperSize type="QSizeF">210,297</paperSize>
+    <unit type="QString">Millimeter</unit>
+    <dpi type="int">96</dpi>
+    <margins type="CuteReport::Margins">10,10,10,10</margins>
+    <background type="QColor">255,255,255,255</background>
+    <useGrid type="bool">false</useGrid>
+    <gridStep type="double">0.5</gridStep>
+    <magnetValue type="int">15</magnetValue>
+    <magnetRate type="int">6</magnetRate>
+    <gridSteps type="QString">0=0.5</gridSteps>
+   </properties>
+   <children>
+    <Band layoutType="1" moduleName="Detail" moduleVersion="1" layoutPriority="50" className="Detail">
+     <properties>
+      <objectName type="QString">detail</objectName>
+      <enabled type="bool">true</enabled>
+      <geometry type="QRectF">10,10,190,31.5</geometry>
+      <frame type="int">15</frame>
+      <opacity type="double">1</opacity>
+      <rotation type="double">0</rotation>
+      <borderPen type="QPen">
+       <brush type="QBrush">
+        <color type="QColor">0,0,0,255</color>
+        <style type="int">1</style>
+        <texture type="QPixmap"></texture>
+       </brush>
+       <capStyle type="int">16</capStyle>
+       <color type="QColor">0,0,0,255</color>
+       <isCosmetic type="bool">true</isCosmetic>
+       <joinStyle type="int">64</joinStyle>
+       <miterLimit type="double">2</miterLimit>
+       <style type="int">1</style>
+       <width type="int">0</width>
+      </borderPen>
+      <backgroundBrush type="QBrush">
+       <color type="QColor">0,0,0,255</color>
+       <style type="int">0</style>
+       <texture type="QPixmap"></texture>
+      </backgroundBrush>
+      <order type="int">0</order>
+      <stretchable type="bool">false</stretchable>
+      <showStretchability type="bool">false</showStretchability>
+      <stretchOriginalSize type="QSizeF">-1,-1</stretchOriginalSize>
+      <dataset type="QString">data</dataset>
+      <zebra type="bool">false</zebra>
+      <alternateBrush type="QBrush">
+       <color type="QColor">0,0,0,255</color>
+       <style type="int">0</style>
+       <texture type="QPixmap"></texture>
+      </alternateBrush>
+      <forceNewPage type="bool">false</forceNewPage>
+     </properties>
+     <children>
+      <Item moduleName="Image" moduleVersion="1" className="ImageItem">
+       <properties>
+        <objectName type="QString">imageitem</objectName>
+        <enabled type="bool">true</enabled>
+        <geometry type="QRectF">124,0,66,31.5</geometry>
+        <frame type="int">15</frame>
+        <opacity type="double">1</opacity>
+        <rotation type="double">0</rotation>
+        <borderPen type="QPen">
+         <brush type="QBrush">
+          <color type="QColor">0,0,0,255</color>
+          <style type="int">1</style>
+          <texture type="QPixmap"></texture>
+         </brush>
+         <capStyle type="int">16</capStyle>
+         <color type="QColor">0,0,0,255</color>
+         <isCosmetic type="bool">true</isCosmetic>
+         <joinStyle type="int">64</joinStyle>
+         <miterLimit type="double">2</miterLimit>
+         <style type="int">1</style>
+         <width type="int">0</width>
+        </borderPen>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">0,0,0,255</color>
+         <style type="int">0</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <order type="int">1</order>
+        <shiftMode type="int">0</shiftMode>
+        <sourceType alternateValue="0" type="QString">Script</sourceType>
+        <source type="QString">file://[data."name"]</source>
+        <image type="QPixmap"></image>
+        <paintType alternateValue="3" type="QString">ResizeImageToItem_keepAspectRatio</paintType>
+        <textPosition alternateValue="3" type="QString">TextAbove</textPosition>
+        <text type="QString">[data."name"]</text>
+        <font type="QFont">Ubuntu,10,-1,5,50,0,0,0,0,0</font>
+        <textColor type="QColor">0,0,0,255</textColor>
+       </properties>
+      </Item>
+      <Item moduleName="Memo" moduleVersion="1" className="MemoItem">
+       <properties>
+        <objectName type="QString">memoitem</objectName>
+        <enabled type="bool">true</enabled>
+        <geometry type="QRectF">5.5,10.5,109.5,8</geometry>
+        <frame type="int">0</frame>
+        <opacity type="double">1</opacity>
+        <rotation type="double">0</rotation>
+        <borderPen type="QPen">
+         <brush type="QBrush">
+          <color type="QColor">0,0,0,255</color>
+          <style type="int">1</style>
+          <texture type="QPixmap"></texture>
+         </brush>
+         <capStyle type="int">16</capStyle>
+         <color type="QColor">0,0,0,255</color>
+         <isCosmetic type="bool">true</isCosmetic>
+         <joinStyle type="int">64</joinStyle>
+         <miterLimit type="double">2</miterLimit>
+         <style type="int">1</style>
+         <width type="int">0</width>
+        </borderPen>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">0,0,0,255</color>
+         <style type="int">0</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <order type="int">2</order>
+        <shiftMode type="int">0</shiftMode>
+        <textFlags type="int">129</textFlags>
+        <stretchMode alternateValue="1" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <text type="QString">[data."Name"]</text>
+        <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
+        <font type="QFont">Ubuntu,10,-1,5,50,0,0,0,0,0</font>
+        <stretchFont type="bool">false</stretchFont>
+        <expDelimiters type="QString">[ , ]</expDelimiters>
+       </properties>
+       <children>
+        <QGraphicsObject>
+         <properties>
+          <parent type=""/>
+          <opacity type="double">1</opacity>
+          <enabled type="bool">true</enabled>
+          <visible type="bool">true</visible>
+          <pos type="QPointF">97,116</pos>
+          <x type="double">97</x>
+          <y type="double">116</y>
+          <z type="double">100</z>
+          <rotation type="double">0</rotation>
+          <scale type="double">1</scale>
+          <transformOriginPoint type="QPointF">0,0</transformOriginPoint>
+          <effect type=""/>
+          <children type=""/>
+          <width type="double">0</width>
+          <height type="double">0</height>
+         </properties>
+        </QGraphicsObject>
+       </children>
+      </Item>
+     </children>
+    </Band>
+    <PageGUI>
+     <properties/>
+     <children>
+      <QGraphicsScene>
+       <properties>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">160,160,164,255</color>
+         <style type="int">1</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <foregroundBrush type="QBrush">
+         <color type="QColor">0,0,0,255</color>
+         <style type="int">0</style>
+         <texture type="QPixmap"></texture>
+        </foregroundBrush>
+        <itemIndexMethod type=""/>
+        <sceneRect type="QRectF">0,0,870,1199</sceneRect>
+        <bspTreeDepth type="int">5</bspTreeDepth>
+        <palette type="QPalette"/>
+        <font type="QFont">Droid Sans [unknown],11,-1,5,50,0,0,0,0,0</font>
+        <sortCacheEnabled type="bool">false</sortCacheEnabled>
+        <stickyFocus type="bool">false</stickyFocus>
+       </properties>
+       <children>
+        <QGraphicsSceneBspTreeIndex>
+         <properties>
+          <bspTreeDepth type="int">5</bspTreeDepth>
+         </properties>
+        </QGraphicsSceneBspTreeIndex>
+       </children>
+      </QGraphicsScene>
+      <Magnets>
+       <properties/>
+      </Magnets>
+     </children>
+    </PageGUI>
+   </children>
+  </Page>
+  <Dataset moduleName="FileSystem Dataset" moduleVersion="1" className="FileSystemDataset">
+   <properties>
+    <objectName type="QString">data</objectName>
+    <parentDataset type="QString"></parentDataset>
+    <filterCondition type="QString"></filterCondition>
+    <filterColumn type="int">-1</filterColumn>
+    <directory type="QString">/home/alex</directory>
+    <recursionLevel type="int">3</recursionLevel>
+    <maxFiles type="int">5</maxFiles>
+    <filters type="int">882</filters>
+    <nameFilters type="QStringList">
+     <string type="QString">*.jpg</string>
+     <string type="QString">*.png</string>
+    </nameFilters>
+    <pathAppearance type="int">1</pathAppearance>
+   </properties>
+   <children>
+    <FSModel>
+     <properties/>
+    </FSModel>
+    <QSortFilterProxyModel>
+     <properties>
+      <filterRegExp type="QRegExp"/>
+      <filterKeyColumn type="int">0</filterKeyColumn>
+      <dynamicSortFilter type="bool">false</dynamicSortFilter>
+      <filterCaseSensitivity type="int">1</filterCaseSensitivity>
+      <sortCaseSensitivity type="int">1</sortCaseSensitivity>
+      <isSortLocaleAware type="bool">false</isSortLocaleAware>
+      <sortRole type="int">0</sortRole>
+      <filterRole type="int">0</filterRole>
+     </properties>
+    </QSortFilterProxyModel>
+   </children>
+  </Dataset>
+  <Storage moduleName="FileSystem" moduleVersion="1" className="StorageFileSystem">
+   <properties>
+    <objectName type="QString">storage</objectName>
+    <objectsRootPath type="QString"></objectsRootPath>
+    <askForOverwrite type="bool">true</askForOverwrite>
+   </properties>
+  </Storage>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString">renderer</objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">600</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">1200</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">1200</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">1200</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Form moduleName="Standard" moduleVersion="1" className="Form">
+   <properties>
+    <objectName type="QString">form</objectName>
+    <data type="QString">&lt;?xml version="1.0" encoding="UTF-8"?>&lt;newline>&lt;ui version="4.0">&lt;newline> &lt;class>form&lt;/class>&lt;newline> &lt;widget class="QDialog" name="form">&lt;newline>  &lt;property name="geometry">&lt;newline>   &lt;rect>&lt;newline>    &lt;x>0&lt;/x>&lt;newline>    &lt;y>0&lt;/y>&lt;newline>    &lt;width>400&lt;/width>&lt;newline>    &lt;height>300&lt;/height>&lt;newline>   &lt;/rect>&lt;newline>  &lt;/property>&lt;newline>  &lt;property name="windowTitle">&lt;newline>   &lt;string>Dialog&lt;/string>&lt;newline>  &lt;/property>&lt;newline>  &lt;widget class="QDialogButtonBox" name="buttonBox">&lt;newline>   &lt;property name="geometry">&lt;newline>    &lt;rect>&lt;newline>     &lt;x>310&lt;/x>&lt;newline>     &lt;y>10&lt;/y>&lt;newline>     &lt;width>81&lt;/width>&lt;newline>     &lt;height>271&lt;/height>&lt;newline>    &lt;/rect>&lt;newline>   &lt;/property>&lt;newline>   &lt;property name="orientation">&lt;newline>    &lt;enum>Qt::Vertical&lt;/enum>&lt;newline>   &lt;/property>&lt;newline>   &lt;property name="standardButtons">&lt;newline>    &lt;set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok&lt;/set>&lt;newline>   &lt;/property>&lt;newline>  &lt;/widget>&lt;newline>  &lt;widget class="CuteReportComboBox" name="comboBox">&lt;newline>   &lt;property name="geometry">&lt;newline>    &lt;rect>&lt;newline>     &lt;x>10&lt;/x>&lt;newline>     &lt;y>10&lt;/y>&lt;newline>     &lt;width>251&lt;/width>&lt;newline>     &lt;height>25&lt;/height>&lt;newline>    &lt;/rect>&lt;newline>   &lt;/property>&lt;newline>  &lt;/widget>&lt;newline> &lt;/widget>&lt;newline> &lt;customwidgets>&lt;newline>  &lt;customwidget>&lt;newline>   &lt;class>CuteReportComboBox&lt;/class>&lt;newline>   &lt;extends>QComboBox&lt;/extends>&lt;newline>   &lt;header>combobox.h&lt;/header>&lt;newline>  &lt;/customwidget>&lt;newline> &lt;/customwidgets>&lt;newline> &lt;resources/>&lt;newline> &lt;connections>&lt;newline>  &lt;connection>&lt;newline>   &lt;sender>buttonBox&lt;/sender>&lt;newline>   &lt;signal>accepted()&lt;/signal>&lt;newline>   &lt;receiver>form&lt;/receiver>&lt;newline>   &lt;slot>accept()&lt;/slot>&lt;newline>   &lt;hints>&lt;newline>    &lt;hint type="sourcelabel">&lt;newline>     &lt;x>248&lt;/x>&lt;newline>     &lt;y>254&lt;/y>&lt;newline>    &lt;/hint>&lt;newline>    &lt;hint type="destinationlabel">&lt;newline>     &lt;x>157&lt;/x>&lt;newline>     &lt;y>274&lt;/y>&lt;newline>    &lt;/hint>&lt;newline>   &lt;/hints>&lt;newline>  &lt;/connection>&lt;newline>  &lt;connection>&lt;newline>   &lt;sender>buttonBox&lt;/sender>&lt;newline>   &lt;signal>rejected()&lt;/signal>&lt;newline>   &lt;receiver>form&lt;/receiver>&lt;newline>   &lt;slot>reject()&lt;/slot>&lt;newline>   &lt;hints>&lt;newline>    &lt;hint type="sourcelabel">&lt;newline>     &lt;x>316&lt;/x>&lt;newline>     &lt;y>260&lt;/y>&lt;newline>    &lt;/hint>&lt;newline>    &lt;hint type="destinationlabel">&lt;newline>     &lt;x>286&lt;/x>&lt;newline>     &lt;y>274&lt;/y>&lt;newline>    &lt;/hint>&lt;newline>   &lt;/hints>&lt;newline>  &lt;/connection>&lt;newline> &lt;/connections>&lt;newline>&lt;/ui>&lt;newline></data>
+   </properties>
+  </Form>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+  <Renderer moduleName="Standard" moduleVersion="1" className="Renderer">
+   <properties>
+    <objectName type="QString"></objectName>
+    <antialiasing type="bool">false</antialiasing>
+    <textAntialiasing type="bool">false</textAntialiasing>
+    <smoothPixmapTransform type="bool">false</smoothPixmapTransform>
+    <dpi type="int">300</dpi>
+    <iterationDelay type="int">0</iterationDelay>
+   </properties>
+  </Renderer>
+ </children>
+</Report>

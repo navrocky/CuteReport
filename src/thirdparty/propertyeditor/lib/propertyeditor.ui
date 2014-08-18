@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>propertyeditor</class>
+ <widget class="QWidget" name="propertyeditor">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>291</width>
+    <height>513</height>
+   </rect>
+  </property>
+  <property name="mouseTracking">
+   <bool>true</bool>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="margin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QTreeView" name="view">
+     <property name="verticalScrollBarPolicy">
+      <enum>Qt::ScrollBarAsNeeded</enum>
+     </property>
+     <property name="editTriggers">
+      <set>QAbstractItemView::CurrentChanged|QAbstractItemView::SelectedClicked</set>
+     </property>
+     <property name="alternatingRowColors">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QTextEdit" name="description">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>80</height>
+      </size>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+  <action name="actionNew_Form">
+   <property name="icon">
+    <iconset resource="../../../apps/designerModules/ui_editor/resources.qrc">
+     <normaloff>:/images/form_add_48.png</normaloff>:/images/form_add_48.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Form</string>
+   </property>
+   <property name="toolTip">
+    <string>Create New form</string>
+   </property>
+  </action>
+  <action name="actionOpen_From_File">
+   <property name="icon">
+    <iconset resource="../../../apps/designerModules/report_editor/reporteditor.qrc">
+     <normaloff>:/images/newReport.png</normaloff>:/images/newReport.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open From File</string>
+   </property>
+   <property name="toolTip">
+    <string>Open Form From File</string>
+   </property>
+  </action>
+  <action name="actionDelete_Form">
+   <property name="icon">
+    <iconset resource="../../../apps/designerModules/ui_editor/resources.qrc">
+     <normaloff>:/images/form_remove_48.png</normaloff>:/images/form_remove_48.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete Form</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete Form</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="../../../apps/designerModules/ui_editor/resources.qrc"/>
+  <include location="../../../apps/designerModules/report_editor/reporteditor.qrc"/>
+ </resources>
+ <connections/>
+</ui>

@@ -1,0 +1,7 @@
+FILE=iteminterface.h
+DESTFILE=../plugins/standard/core_plugins/_script_template/itemBody.tmpl
+ENUMSECTION=_script_template/enumsection.tmpl
+CLASSNAME=ItemInterface
+OBJECTNAME=Item
+OBJECTTAG=ITEMOBJECTNAME
+ADDINCLUDE=false

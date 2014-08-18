@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Version=0.4
+Name=eXaro
+GenericName=CuteReport
+Icon=application-qtrp
+Comment=
+TryExec=cutereport
+Exec=cutereport
+MimeType=application/qtrp;
+X-KDE-NativeMimeType=application/qtrp;
+Categories=Qt;KDE;Development;GUIDesigner;Office;

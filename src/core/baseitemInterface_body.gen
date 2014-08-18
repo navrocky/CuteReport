@@ -1,0 +1,7 @@
+FILE=baseiteminterface.h
+DESTFILE=../plugins/standard/core_plugins/_script_template/baseitemBody.tmpl
+ENUMSECTION=_script_template/enumsection.tmpl
+CLASSNAME=BaseItemInterface
+OBJECTNAME=BaseItem
+OBJECTTAG=ITEMOBJECTNAME
+ADDINCLUDE=false

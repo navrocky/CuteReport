@@ -1,0 +1,7 @@
+FILE=baseiteminterface.h
+DESTFILE=../plugins/standard/core_plugins/_script_template/baseitemRepeat.tmpl
+FOOTER=_script_template/footer.tmpl
+CLASSNAME=BaseItemInterface
+OBJECTNAME=BaseItem
+OBJECTTAG=ITEMOBJECTNAME
+ADDINCLUDE=false

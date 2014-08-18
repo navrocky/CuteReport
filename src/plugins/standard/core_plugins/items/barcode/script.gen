@@ -1,0 +1,10 @@
+FILE=barcode.h
+DESTFILE=barcodescripting.h
+HEADER=../../_script_template/header.tmpl
+HEADERADDONS=../../_script_template/baseitemHeader.tmpl;../../_script_template/itemHeader.tmpl
+BODYFILES=../../_script_template/common.tmpl;../../_script_template/baseitemBody.tmpl;../../_script_template/itemBody.tmpl
+FOOTER=../../_script_template/footer.tmpl
+ENUMSECTION=../../_script_template/enumsection.tmpl
+ENUMREPEATADDONS=../../_script_template/baseitemRepeat.tmpl;../../_script_template/itemRepeat.tmpl
+CLASSNAME=BarcodeItem
+OBJECTNAME=Barcode

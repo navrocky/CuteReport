@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/editor_48.png</file>
+        <file>images/document-new.png</file>
+        <file>images/document-close.png</file>
+        <file>images/document-multiple.png</file>
+    </qresource>
+</RCC>

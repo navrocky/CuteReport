@@ -1,0 +1,14 @@
+Source: cutereport
+Section: X11
+Priority: extra
+Maintainer: Alexander <alexander.mikhalov@gmail.com>
+Build-Depends: debhelper (>= 8.0.0), qt4-qmake, libqt4-dev
+Standards-Version: 3.9.4
+Homepage: http://cute-report.com
+#Vcs-Git: git://git.debian.org/collab-maint/cutereport.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/cutereport.git;a=summary
+
+Package: cutereport
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Report solution

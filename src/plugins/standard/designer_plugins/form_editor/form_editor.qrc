@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/form_48.png</file>
+        <file>templates/Dialog_with_Buttons_Bottom.ui</file>
+        <file>templates/Dialog_with_Buttons_Right.ui</file>
+        <file>templates/Dialog_without_Buttons.ui</file>
+        <file>images/form_ok_48.png</file>
+        <file>images/form_add_48.png</file>
+        <file>images/form_remove_48.png</file>
+        <file>images/text-xml.png</file>
+        <file>images/settings3.png</file>
+        <file>images/document-open.png</file>
+    </qresource>
+</RCC>

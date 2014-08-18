@@ -1,0 +1,17 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/preview_48.png</file>
+        <file>images/zoom-fit-width.png</file>
+        <file>images/zoom-fit-best.png</file>
+        <file>images/zoom-1-to-2.png</file>
+        <file>images/zoom-in.png</file>
+        <file>images/zoom-out.png</file>
+        <file>images/go-first-view.png</file>
+        <file>images/go-last-view.png</file>
+        <file>images/go-next-view.png</file>
+        <file>images/go-previous-view.png</file>
+        <file>images/document-print.png</file>
+        <file>images/media-playback-start.png</file>
+        <file>images/export-icon.png</file>
+    </qresource>
+</RCC>

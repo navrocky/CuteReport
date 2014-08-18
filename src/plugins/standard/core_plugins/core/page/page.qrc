@@ -1,0 +1,26 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/align_bottom.png</file>
+        <file>images/align_height.png</file>
+        <file>images/align_left.png</file>
+        <file>images/align_right.png</file>
+        <file>images/align_top.png</file>
+        <file>images/align_width.png</file>
+        <file>images/move_down.png</file>
+        <file>images/move_up.png</file>
+        <file>images/move_left.png</file>
+        <file>images/move_right.png</file>
+        <file>formats.txt</file>
+        <file>images/page_icon.png</file>
+        <file>images/zoom-fit-best.png</file>
+        <file>images/zoom-in.png</file>
+        <file>images/zoom-original.png</file>
+        <file>images/zoom-out.png</file>
+        <file>images/magnet_bottom.png</file>
+        <file>images/magnet_left.png</file>
+        <file>images/magnet_right.png</file>
+        <file>images/magnet_top.png</file>
+        <file>images/bring-forward.png</file>
+        <file>images/bring-backward.png</file>
+    </qresource>
+</RCC>

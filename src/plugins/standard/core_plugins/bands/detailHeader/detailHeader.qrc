@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>detailHeader.png</file>
+    </qresource>
+</RCC>

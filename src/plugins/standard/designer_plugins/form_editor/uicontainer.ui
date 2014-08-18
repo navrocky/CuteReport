@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>uicontainer</class>
+ <widget class="QWidget" name="uicontainer">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>610</width>
+    <height>414</height>
+   </rect>
+  </property>
+  <property name="mouseTracking">
+   <bool>true</bool>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="margin">
+    <number>0</number>
+   </property>
+   <item>
+    <layout class="QHBoxLayout" name="layout">
+     <property name="sizeConstraint">
+      <enum>QLayout::SetDefaultConstraint</enum>
+     </property>
+     <item>
+      <widget class="QFrame" name="frame">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <property name="margin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="ItemsToolWidget" name="designerActions" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>20</width>
+            <height>0</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Maximum</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="FancyTabContainer" name="tabs" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>50</width>
+       <height>50</height>
+      </size>
+     </property>
+     <property name="baseSize">
+      <size>
+       <width>50</width>
+       <height>50</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+  </layout>
+  <action name="actionNew_Form">
+   <property name="icon">
+    <iconset resource="ui_editor.qrc">
+     <normaloff>:/images/form_add_48.png</normaloff>:/images/form_add_48.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Form</string>
+   </property>
+   <property name="toolTip">
+    <string>Create New form</string>
+   </property>
+  </action>
+  <action name="actionOpen_From_File">
+   <property name="icon">
+    <iconset resource="../report_editor/reporteditor.qrc">
+     <normaloff>:/images/document-open.png</normaloff>:/images/document-open.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open From File</string>
+   </property>
+   <property name="toolTip">
+    <string>Open Form From File</string>
+   </property>
+  </action>
+  <action name="actionDelete_Form">
+   <property name="icon">
+    <iconset resource="ui_editor.qrc">
+     <normaloff>:/images/form_remove_48.png</normaloff>:/images/form_remove_48.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete Form</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete Form</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ItemsToolWidget</class>
+   <extends>QWidget</extends>
+   <header>itemstoolwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>FancyTabContainer</class>
+   <extends>QWidget</extends>
+   <header>fancytabs.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../report_editor/reporteditor.qrc"/>
+  <include location="ui_editor.qrc"/>
+ </resources>
+ <connections/>
+</ui>

@@ -1,0 +1,5 @@
+FILE=baseiteminterface.h
+DESTFILE=../plugins/standard/core_plugins/_script_template/baseitemHeader.tmpl
+CLASSNAME=BaseItemInterface
+OBJECTNAME=BaseItem
+OBJECTTAG=ITEMOBJECTNAME

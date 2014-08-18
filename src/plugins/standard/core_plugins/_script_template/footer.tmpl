@@ -1,0 +1,45 @@
+/** ============================================================================================================= */
+
+
+static const char * const qtscript_CLASSNAME_function_names[] = {
+    "OBJECTNAME"
+    , "toString"
+};
+
+
+static QScriptValue qtscript_CLASSNAME_static_call(QScriptContext *context, QScriptEngine *)
+{
+    uint _id = context->callee().data().toUInt32();
+    Q_ASSERT((_id & 0xFFFF0000) == 0xBABE0000);
+    _id &= 0x0000FFFF;
+    switch (_id) {
+        case 0:
+            return context->throwError(QScriptContext::TypeError,
+                                       QString::fromLatin1("CLASSNAME cannot be constructed"));
+            break;
+
+        default:
+            Q_ASSERT(false);
+    }
+    return qtscript_Qt_throw_ambiguity_error_helper(context,  qtscript_CLASSNAME_function_names[_id],  "" /*qtscript_Qt_function_signatures[_id]*/);
+}
+
+
+QScriptValue qtscript_create_CLASSNAME_class(QScriptEngine *engine)
+{
+    QScriptValue proto = QScriptValue();
+    QScriptValue ctor = engine->newFunction(qtscript_CLASSNAME_static_call, proto, 0);
+    ctor.setData(QScriptValue(engine, uint(0xBABE0000 + 0)));
+
+ENUMREPEAT    ctor.setProperty(QString::fromLatin1("ENUMNAME"), qtscript_create_CLASSNAME_ENUMNAME_class(engine, ctor));
+
+    return ctor;
+}
+
+
+void registerCLASSNAMEScriptClass(QScriptEngine *engine)
+{
+    QScriptValue extensionObject = engine->globalObject();
+    extensionObject.setProperty("OBJECTNAME", qtscript_create_CLASSNAME_class(engine), QScriptValue::SkipInEnumeration);
+}
+

@@ -1,0 +1,59 @@
+using namespace CuteReport;
+
+static QScriptValue qtscript_Qt_throw_ambiguity_error_helper(
+        QScriptContext *context, const char *functionName, const char *signatures)
+{
+    QStringList lines = QString::fromLatin1(signatures).split(QLatin1Char('\n'));
+    QStringList fullSignatures;
+    for (int i = 0; i < lines.size(); ++i)
+        fullSignatures.append(QString::fromLatin1("%0(%1)").arg(functionName).arg(lines.at(i)));
+    return context->throwError(QString::fromLatin1("Qt::%0(): could not find a function match; candidates are:\n%1")
+                               .arg(functionName).arg(fullSignatures.join(QLatin1String("\n"))));
+}
+
+
+static QScriptValue qtscript_create_enum_class_helper(
+        QScriptEngine *engine,
+        QScriptEngine::FunctionSignature construct,
+        QScriptEngine::FunctionSignature valueOf,
+        QScriptEngine::FunctionSignature toString)
+{
+    QScriptValue proto = engine->newObject();
+    proto.setProperty(QString::fromLatin1("valueOf"),
+                      engine->newFunction(valueOf), QScriptValue::SkipInEnumeration);
+
+    proto.setProperty(QString::fromLatin1("toString"),
+                      engine->newFunction(toString), QScriptValue::SkipInEnumeration);
+    return engine->newFunction(construct, proto, 1);
+}
+
+
+static QScriptValue qtscript_create_flags_class_helper(
+        QScriptEngine *engine,
+        QScriptEngine::FunctionSignature construct,
+        QScriptEngine::FunctionSignature valueOf,
+        QScriptEngine::FunctionSignature toString,
+        QScriptEngine::FunctionSignature equals)
+{
+    QScriptValue proto = engine->newObject();
+    proto.setProperty(QString::fromLatin1("valueOf"),
+                      engine->newFunction(valueOf), QScriptValue::SkipInEnumeration);
+    proto.setProperty(QString::fromLatin1("toString"),
+                      engine->newFunction(toString), QScriptValue::SkipInEnumeration);
+    proto.setProperty(QString::fromLatin1("equals"),
+                      engine->newFunction(equals), QScriptValue::SkipInEnumeration);
+    return engine->newFunction(construct, proto);
+}
+
+
+struct qtscript_Qt_metaObject_helper : private QObject
+{
+    static const QMetaObject *get()
+    { return &static_cast<qtscript_Qt_metaObject_helper*>(0)->staticQtMetaObject; }
+};
+
+
+static const QMetaObject *qtscript_Qt_metaObject()
+{
+    return qtscript_Qt_metaObject_helper::get();
+}

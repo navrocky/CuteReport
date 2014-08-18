@@ -1,0 +1,124 @@
+<ui version="4.0" >
+ <class>flagsDialog</class>
+ <widget class="QDialog" name="flagsDialog" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>309</width>
+    <height>458</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Flags</string>
+  </property>
+  <property name="sizeGripEnabled" >
+   <bool>false</bool>
+  </property>
+  <property name="modal" >
+   <bool>false</bool>
+  </property>
+  <layout class="QGridLayout" name="gridLayout" >
+   <item row="0" column="0" >
+    <widget class="QListWidget" name="list" />
+   </item>
+   <item row="1" column="0" >
+    <layout class="QHBoxLayout" name="horizontalLayout_2" >
+     <item>
+      <widget class="QPushButton" name="checkAllButton" >
+       <property name="text" >
+        <string>C&amp;heck all</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="uncheckAllButton" >
+       <property name="text" >
+        <string>&amp;Uncheck all</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer" >
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0" >
+        <size>
+         <width>152</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item row="2" column="0" >
+    <layout class="QHBoxLayout" name="horizontalLayout" >
+     <item>
+      <spacer name="horizontalSpacer_2" >
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0" >
+        <size>
+         <width>152</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton" >
+       <property name="text" >
+        <string>&amp;OK</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton_2" >
+       <property name="text" >
+        <string>&amp;Cancel</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>flagsDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>212</x>
+     <y>390</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>75</x>
+     <y>390</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_2</sender>
+   <signal>clicked()</signal>
+   <receiver>flagsDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>321</x>
+     <y>386</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>134</x>
+     <y>371</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

@@ -1,0 +1,5 @@
+cutereport (1.0rc1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- Alexander <alexander.mikhalov@gmail.com>  Wed, 19 Jun 2013 21:33:04 -0700

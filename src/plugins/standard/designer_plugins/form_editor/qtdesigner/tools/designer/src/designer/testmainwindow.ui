@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TestMainWindow</class>
+ <widget class="QMainWindow" name="TestMainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>640</width>
+    <height>480</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>640</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu1111">
+    <property name="title">
+     <string>1111</string>
+    </property>
+    <addaction name="action3333333"/>
+    <addaction name="action4444444"/>
+    <addaction name="action555555555"/>
+    <addaction name="action6666666"/>
+   </widget>
+   <widget class="QMenu" name="menu222">
+    <property name="title">
+     <string>222</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menu3333">
+    <property name="title">
+     <string>3333</string>
+    </property>
+   </widget>
+   <addaction name="menu1111"/>
+   <addaction name="menu222"/>
+   <addaction name="menu3333"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="action3333333">
+   <property name="text">
+    <string>3333333</string>
+   </property>
+  </action>
+  <action name="action4444444">
+   <property name="text">
+    <string>4444444</string>
+   </property>
+  </action>
+  <action name="action555555555">
+   <property name="text">
+    <string>555555555</string>
+   </property>
+  </action>
+  <action name="action6666666">
+   <property name="text">
+    <string>6666666</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

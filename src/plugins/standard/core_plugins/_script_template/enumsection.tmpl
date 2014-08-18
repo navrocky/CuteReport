@@ -1,0 +1,128 @@
+
+/** ======================= ENUMNAME =========================== */
+
+static const CLASSNAME::ENUMNAME qtscript_CLASSNAME_ENUMNAME_values[] = {ENUMVALUES};
+
+static const char * const qtscript_CLASSNAME_ENUMNAME_keys[] = {ENUMKEYS};
+
+static int CLASSNAME_ENUMNAME_num = ENUMCOUNT;
+
+
+static QString qtscript_CLASSNAME_ENUMNAME_toStringHelper(CLASSNAME::ENUMNAME value)
+{
+    const QMetaObject meta = CLASSNAME::staticMetaObject;
+    int idx = meta.indexOfEnumerator("ENUMNAME");
+    Q_ASSERT(idx != -1);
+    QMetaEnum menum = meta.enumerator(idx);
+    return QString::fromLatin1(menum.valueToKey(value));
+}
+
+
+static QScriptValue qtscript_CLASSNAME_ENUMNAME_toScriptValue(QScriptEngine *engine, const CLASSNAME::ENUMNAME &value)
+{
+    QScriptValue clazz = engine->globalObject().property(QString::fromLatin1("OBJECTNAME"));
+    return clazz.property(qtscript_CLASSNAME_ENUMNAME_toStringHelper(value));
+}
+
+
+static void qtscript_CLASSNAME_ENUMNAME_fromScriptValue(const QScriptValue &value, CLASSNAME::ENUMNAME &out)
+{
+    out = qvariant_cast<CLASSNAME::ENUMNAME>(value.toVariant());
+}
+
+
+static QScriptValue qtscript_construct_CLASSNAME_ENUMNAME(QScriptContext *context, QScriptEngine *engine)
+{
+    int arg = context->argument(0).toInt32();
+    const QMetaObject *meta = qtscript_Qt_metaObject();
+    int idx = meta->indexOfEnumerator("ENUMNAME");
+    Q_ASSERT(idx != -1);
+    QMetaEnum menum = meta->enumerator(idx);
+    if (menum.valueToKey(arg) != 0)
+        return qScriptValueFromValue(engine,  static_cast<CLASSNAME::ENUMNAME>(arg));
+    return context->throwError(QString::fromLatin1("ENUMNAME(): invalid enum value (%0)").arg(arg));
+}
+
+
+static QScriptValue qtscript_CLASSNAME_ENUMNAME_valueOf(QScriptContext *context, QScriptEngine *engine)
+{
+    CLASSNAME::ENUMNAME value = qscriptvalue_cast<CLASSNAME::ENUMNAME>(context->thisObject());
+    return QScriptValue(engine, static_cast<int>(value));
+}
+
+
+static QScriptValue qtscript_CLASSNAME_ENUMNAME_toString(QScriptContext *context, QScriptEngine *engine)
+{
+    CLASSNAME::ENUMNAME value = qscriptvalue_cast<CLASSNAME::ENUMNAME>(context->thisObject());
+    return QScriptValue(engine, qtscript_CLASSNAME_ENUMNAME_toStringHelper(value));
+}
+
+
+static QScriptValue qtscript_create_CLASSNAME_ENUMNAME_class(QScriptEngine *engine, QScriptValue &clazz)
+{
+    QScriptValue ctor = qtscript_create_enum_class_helper(
+                            engine, qtscript_construct_CLASSNAME_ENUMNAME,
+                            qtscript_CLASSNAME_ENUMNAME_valueOf, qtscript_CLASSNAME_ENUMNAME_toString);
+
+    qScriptRegisterMetaType<CLASSNAME::ENUMNAME>(engine, qtscript_CLASSNAME_ENUMNAME_toScriptValue,
+                                                   qtscript_CLASSNAME_ENUMNAME_fromScriptValue, ctor.property(QString::fromLatin1("prototype")));
+
+    for (int i = 0; i < CLASSNAME_ENUMNAME_num; ++i) {
+        clazz.setProperty(QString::fromLatin1(qtscript_CLASSNAME_ENUMNAME_keys[i]),
+                          engine->newVariant(qVariantFromValue(qtscript_CLASSNAME_ENUMNAME_values[i])),
+                          QScriptValue::ReadOnly | QScriptValue::Undeletable);
+    }
+
+    return ctor;
+}
+
+
+QString CLASSNAME_ENUMNAME_toString(CLASSNAME::ENUMNAME value)
+{
+    int idx = -1;
+    for (int i = 0; i < CLASSNAME_ENUMNAME_num; ++i) {
+        if (qtscript_CLASSNAME_ENUMNAME_values[i] == value) {
+            idx = i;
+            break;
+        }
+    }
+
+    if (idx == -1) {
+        CuteReport::ReportCore::log(LogError, "CLASSNAME", "CLASSNAME_ENUMNAME_toString", QString("Value \'%1\' is not within range").arg((int)value));
+        return QString();
+    }
+
+    return QString(qtscript_CLASSNAME_ENUMNAME_keys[idx]);
+}
+
+
+CLASSNAME::ENUMNAME CLASSNAME_ENUMNAME_fromString(const QString &value, bool *ok)
+{
+    QString strIn = value.toLower();
+    int idx = -1;
+    for (int i = 0; i < CLASSNAME_ENUMNAME_num; ++i) {
+        QString str(qtscript_CLASSNAME_ENUMNAME_keys[i]);
+        if (strIn == str.toLower()) {
+            idx = i;
+            break;
+        }
+    }
+
+    if (idx == -1) {
+        CuteReport::ReportCore::log(LogError, "CLASSNAME", "CLASSNAME_ENUMNAME_fromString", QString("Value \'%1\' is not within range").arg(value));
+        if (ok)
+            *ok = false;
+    }
+
+    return CLASSNAME::ENUMNAME(qtscript_CLASSNAME_ENUMNAME_values[idx]);
+}
+
+
+QStringList CLASSNAME_ENUMNAME_variants()
+{
+    QStringList list;
+    for (int i = 0; i < CLASSNAME_ENUMNAME_num; ++i) {
+        list << QString(qtscript_CLASSNAME_ENUMNAME_keys[i]);
+    }
+    return list;
+}

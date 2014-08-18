@@ -1,0 +1,7 @@
+FILE=iteminterface.h
+DESTFILE=../plugins/standard/core_plugins/_script_template/itemRepeat.tmpl
+FOOTER=_script_template/footer.tmpl
+CLASSNAME=ItemInterface
+OBJECTNAME=Item
+OBJECTTAG=ITEMOBJECTNAME
+ADDINCLUDE=false

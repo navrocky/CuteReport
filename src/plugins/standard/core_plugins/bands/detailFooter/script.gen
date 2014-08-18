@@ -1,0 +1,6 @@
+FILE=detailfooter.h
+DESTFILE=detailfooterscripting.h
+HEADER=../../_script_template/header_simple.tmpl
+ENUMSECTION=../../_script_template/enumsection.tmpl
+CLASSNAME=DetailFooter
+OBJECTNAME=DetailFooter

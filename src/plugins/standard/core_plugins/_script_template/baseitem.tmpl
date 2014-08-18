@@ -1,0 +1,187 @@
+#include "baseiteminterface.h"
+
+/** ======================= Frame =========================== */
+
+static const BaseItem::Frame qtscript_BaseItem_Frame_values[] = {
+    BaseItem::DrawLeft,
+    BaseItem::/**< Draw left frame*/                DrawRight,
+    BaseItem::/**< Draw right frame*/                DrawTop,
+    BaseItem::/**< Draw top frame*/                DrawBottom
+};
+
+static const char * const qtscript_BaseItem_Frame_keys[] = {
+    "DrawLeft",
+    "/**< Draw left frame*/                DrawRight",
+    "/**< Draw right frame*/                DrawTop",
+    "/**< Draw top frame*/                DrawBottom"
+};
+
+static int BaseItem_Frame_num = 4;
+
+
+static QString qtscript_BaseItem_Frame_toStringHelper(BaseItem::Frame value)
+{
+    const QMetaObject meta = BaseItem::staticMetaObject;
+    int idx = meta.indexOfEnumerator("Frame");
+    Q_ASSERT(idx != -1);
+    QMetaEnum menum = meta.enumerator(idx);
+    return QString::fromLatin1(menum.valueToKey(value));
+}
+
+
+static QScriptValue qtscript_BaseItem_Frame_toScriptValue(QScriptEngine *engine, const BaseItem::Frame &value)
+{
+    QScriptValue clazz = engine->globalObject().property(QString::fromLatin1("OBJECTNAME"));
+    return clazz.property(qtscript_BaseItem_Frame_toStringHelper(value));
+}
+
+
+static void qtscript_BaseItem_Frame_fromScriptValue(const QScriptValue &value, BaseItem::Frame &out)
+{
+    out = qvariant_cast<BaseItem::Frame>(value.toVariant());
+}
+
+
+static QScriptValue qtscript_construct_BaseItem_Frame(QScriptContext *context, QScriptEngine *engine)
+{
+    int arg = context->argument(0).toInt32();
+    const QMetaObject *meta = qtscript_Qt_metaObject();
+    int idx = meta->indexOfEnumerator("Frame");
+    Q_ASSERT(idx != -1);
+    QMetaEnum menum = meta->enumerator(idx);
+    if (menum.valueToKey(arg) != 0)
+        return qScriptValueFromValue(engine,  static_cast<BaseItem::Frame>(arg));
+    return context->throwError(QString::fromLatin1("Frame(): invalid enum value (%0)").arg(arg));
+}
+
+
+static QScriptValue qtscript_BaseItem_Frame_valueOf(QScriptContext *context, QScriptEngine *engine)
+{
+    BaseItem::Frame value = qscriptvalue_cast<BaseItem::Frame>(context->thisObject());
+    return QScriptValue(engine, static_cast<int>(value));
+}
+
+
+static QScriptValue qtscript_BaseItem_Frame_toString(QScriptContext *context, QScriptEngine *engine)
+{
+    BaseItem::Frame value = qscriptvalue_cast<BaseItem::Frame>(context->thisObject());
+    return QScriptValue(engine, qtscript_BaseItem_Frame_toStringHelper(value));
+}
+
+
+static QScriptValue qtscript_create_BaseItem_Frame_class(QScriptEngine *engine, QScriptValue &clazz)
+{
+    QScriptValue ctor = qtscript_create_enum_class_helper(
+                            engine, qtscript_construct_BaseItem_Frame,
+                            qtscript_BaseItem_Frame_valueOf, qtscript_BaseItem_Frame_toString);
+
+    qScriptRegisterMetaType<BaseItem::Frame>(engine, qtscript_BaseItem_Frame_toScriptValue,
+                                                   qtscript_BaseItem_Frame_fromScriptValue, ctor.property(QString::fromLatin1("prototype")));
+
+    for (int i = 0; i < BaseItem_Frame_num; ++i) {
+        qDebug() << qtscript_BaseItem_Frame_keys[i];
+        qDebug() << qVariantFromValue(qtscript_BaseItem_Frame_values[i]);
+        clazz.setProperty(QString::fromLatin1(qtscript_BaseItem_Frame_keys[i]),
+                          engine->newVariant(qVariantFromValue(qtscript_BaseItem_Frame_values[i])),
+                          QScriptValue::ReadOnly | QScriptValue::Undeletable);
+    }
+
+    return ctor;
+}
+
+
+
+/** ======================= ResizeFlags =========================== */
+
+static const BaseItem::ResizeFlags qtscript_BaseItem_ResizeFlags_values[] = {
+    BaseItem::Fixed,
+    BaseItem::/**< Item cant be resized*/                      ResizeLeft,
+    BaseItem::/**< Item can be resized to left*/                      ResizeRight,
+    BaseItem::/**< Item can be resized to right*/                      ResizeTop,
+    BaseItem::/**< Item can be resized to top*/                      ResizeBottom,
+    BaseItem::/**< Item can be resized to bottom*/                      FixedPos
+};
+
+static const char * const qtscript_BaseItem_ResizeFlags_keys[] = {
+    "Fixed",
+    "/**< Item cant be resized*/                      ResizeLeft",
+    "/**< Item can be resized to left*/                      ResizeRight",
+    "/**< Item can be resized to right*/                      ResizeTop",
+    "/**< Item can be resized to top*/                      ResizeBottom",
+    "/**< Item can be resized to bottom*/                      FixedPos"
+};
+
+static int BaseItem_ResizeFlags_num = 6;
+
+
+static QString qtscript_BaseItem_ResizeFlags_toStringHelper(BaseItem::ResizeFlags value)
+{
+    const QMetaObject meta = BaseItem::staticMetaObject;
+    int idx = meta.indexOfEnumerator("ResizeFlags");
+    Q_ASSERT(idx != -1);
+    QMetaEnum menum = meta.enumerator(idx);
+    return QString::fromLatin1(menum.valueToKey(value));
+}
+
+
+static QScriptValue qtscript_BaseItem_ResizeFlags_toScriptValue(QScriptEngine *engine, const BaseItem::ResizeFlags &value)
+{
+    QScriptValue clazz = engine->globalObject().property(QString::fromLatin1("OBJECTNAME"));
+    return clazz.property(qtscript_BaseItem_ResizeFlags_toStringHelper(value));
+}
+
+
+static void qtscript_BaseItem_ResizeFlags_fromScriptValue(const QScriptValue &value, BaseItem::ResizeFlags &out)
+{
+    out = qvariant_cast<BaseItem::ResizeFlags>(value.toVariant());
+}
+
+
+static QScriptValue qtscript_construct_BaseItem_ResizeFlags(QScriptContext *context, QScriptEngine *engine)
+{
+    int arg = context->argument(0).toInt32();
+    const QMetaObject *meta = qtscript_Qt_metaObject();
+    int idx = meta->indexOfEnumerator("ResizeFlags");
+    Q_ASSERT(idx != -1);
+    QMetaEnum menum = meta->enumerator(idx);
+    if (menum.valueToKey(arg) != 0)
+        return qScriptValueFromValue(engine,  static_cast<BaseItem::ResizeFlags>(arg));
+    return context->throwError(QString::fromLatin1("ResizeFlags(): invalid enum value (%0)").arg(arg));
+}
+
+
+static QScriptValue qtscript_BaseItem_ResizeFlags_valueOf(QScriptContext *context, QScriptEngine *engine)
+{
+    BaseItem::ResizeFlags value = qscriptvalue_cast<BaseItem::ResizeFlags>(context->thisObject());
+    return QScriptValue(engine, static_cast<int>(value));
+}
+
+
+static QScriptValue qtscript_BaseItem_ResizeFlags_toString(QScriptContext *context, QScriptEngine *engine)
+{
+    BaseItem::ResizeFlags value = qscriptvalue_cast<BaseItem::ResizeFlags>(context->thisObject());
+    return QScriptValue(engine, qtscript_BaseItem_ResizeFlags_toStringHelper(value));
+}
+
+
+static QScriptValue qtscript_create_BaseItem_ResizeFlags_class(QScriptEngine *engine, QScriptValue &clazz)
+{
+    QScriptValue ctor = qtscript_create_enum_class_helper(
+                            engine, qtscript_construct_BaseItem_ResizeFlags,
+                            qtscript_BaseItem_ResizeFlags_valueOf, qtscript_BaseItem_ResizeFlags_toString);
+
+    qScriptRegisterMetaType<BaseItem::ResizeFlags>(engine, qtscript_BaseItem_ResizeFlags_toScriptValue,
+                                                   qtscript_BaseItem_ResizeFlags_fromScriptValue, ctor.property(QString::fromLatin1("prototype")));
+
+    for (int i = 0; i < BaseItem_ResizeFlags_num; ++i) {
+        qDebug() << qtscript_BaseItem_ResizeFlags_keys[i];
+        qDebug() << qVariantFromValue(qtscript_BaseItem_ResizeFlags_values[i]);
+        clazz.setProperty(QString::fromLatin1(qtscript_BaseItem_ResizeFlags_keys[i]),
+                          engine->newVariant(qVariantFromValue(qtscript_BaseItem_ResizeFlags_values[i])),
+                          QScriptValue::ReadOnly | QScriptValue::Undeletable);
+    }
+
+    return ctor;
+}
+
+

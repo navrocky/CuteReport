@@ -1,0 +1,6 @@
+FILE=overlay.h
+DESTFILE=overlayscripting.h
+HEADER=../../_script_template/header_simple.tmpl
+ENUMSECTION=../../_script_template/enumsection.tmpl
+CLASSNAME=Overlay
+OBJECTNAME=Overlay

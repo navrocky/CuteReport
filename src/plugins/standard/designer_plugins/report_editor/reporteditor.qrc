@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/report.png</file>
+        <file>images/application-vnd.sun.xml.calc.template.png</file>
+        <file>images/document-close.png</file>
+        <file>images/document-new.png</file>
+        <file>images/document-save.png</file>
+        <file>images/document-open.png</file>
+        <file>images/document-save-as.png</file>
+    </qresource>
+</RCC>
