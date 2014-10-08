@@ -57,9 +57,10 @@
 
 using namespace Zint;
 
+inline void initResource() { Q_INIT_RESOURCE(barcode); }
 
 BarcodeItem::BarcodeItem(QObject* parent)
-    : ItemInterface(*new BarcodeItemPrivate, parent)
+    : ItemInterface(new BarcodeItemPrivate, parent)
 {
     Q_INIT_RESOURCE(barcode);
     m_renderer = 0;
@@ -70,7 +71,7 @@ BarcodeItem::BarcodeItem(QObject* parent)
 }
 
 
-BarcodeItem::BarcodeItem(BarcodeItemPrivate &dd, QObject * parent)
+BarcodeItem::BarcodeItem(BarcodeItemPrivate *dd, QObject * parent)
     :ItemInterface(dd, parent)
 {
     Q_INIT_RESOURCE(barcode);
@@ -80,13 +81,14 @@ BarcodeItem::BarcodeItem(BarcodeItemPrivate &dd, QObject * parent)
 
 void BarcodeItem::moduleInit()
 {
+    initResource();
 }
 
 
-BaseItemInterface *BarcodeItem::clone()
+BaseItemInterface *BarcodeItem::itemClone() const
 {
-    Q_D(BarcodeItem);
-    return new BarcodeItem(*new BarcodeItemPrivate(*d), parent());
+    Q_D(const BarcodeItem);
+    return new BarcodeItem(new BarcodeItemPrivate(*d), parent());
 }
 
 
@@ -169,28 +171,23 @@ void BarcodeItem::renderReset()
 }
 
 
-CuteReport::RenderedItemInterface * BarcodeItem::render(int customDPI)
+bool BarcodeItem::renderPrepare()
 {
-    Q_UNUSED(customDPI);
     Q_D(BarcodeItem);
+    emit printBefore();
+    setRenderingPointer(new BarcodeItemPrivate(*(reinterpret_cast<BarcodeItemPrivate*>(d_ptr))));
+    emit printDataBefore();
+    d->script = m_renderer->processString(d->script, "[", "]", this);
+    d->primaryMessage = m_renderer->processString(d->primaryMessage, "[", "]", this);
+    emit printDataAfter();
+    return true;
+}
 
-    emit renderingBefore();
 
-    BarcodeItemPrivate * pCurrent = d;
-    BarcodeItemPrivate * pNew = new BarcodeItemPrivate(*d);
-
-    d_ptr = pNew;
-    emit rendering();
-    d_ptr = pCurrent;
-
-    pNew->script = m_renderer->processString(pNew->script, "[", "]", this);
-    pNew->primaryMessage = m_renderer->processString(pNew->primaryMessage, "[", "]", this);
-
-    RenderedBarcodeItem * view = new RenderedBarcodeItem(this, pNew);
-
-    emit rendered(view);
-    emit renderingAfter();
-
+RenderedItemInterface *BarcodeItem::renderView()
+{
+    Q_D(BarcodeItem);
+    RenderedBarcodeItem * view = new RenderedBarcodeItem(this, new BarcodeItemPrivate(*d));
     return view;
 }
 
@@ -740,7 +737,7 @@ QIcon BarcodeItem::itemIcon() const
 }
 
 
-QString BarcodeItem::moduleName() const
+QString BarcodeItem::moduleShortName() const
 {
 	return tr("Barcode");
 }
@@ -753,5 +750,5 @@ QString BarcodeItem::itemGroup() const
 
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(barcode, BarcodeItem)
+Q_EXPORT_PLUGIN2(Barcode, BarcodeItem)
 #endif

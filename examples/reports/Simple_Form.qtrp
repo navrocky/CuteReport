@@ -12,7 +12,7 @@
   <variables type="QVariantHash"/>
  </properties>
  <children>
-  <Page moduleVersion="1" moduleName="Standard" className="Page">
+  <Page moduleVersion="1" moduleName="Page" className="Page">
    <properties>
     <objectName type="QString">page</objectName>
     <orientation type="int">0</orientation>
@@ -1057,7 +1057,7 @@
     </PageGUI>
    </children>
   </Page>
-  <Dataset moduleVersion="1" moduleName="SQL dataset" className="SqlDataset">
+  <Dataset moduleVersion="1" moduleName="SQL" className="SqlDataset">
    <properties>
     <objectName type="QString">data</objectName>
     <parentDataset type="QString"></parentDataset>

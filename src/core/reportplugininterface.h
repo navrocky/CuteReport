@@ -34,11 +34,21 @@
 #include <QStringList>
 
 #include "globals.h"
+#include "types.h"
 
 namespace CuteReport
 {
 
 class ReportCore;
+
+
+struct ModuleInfo {
+    QString moduleName;
+    int minVersion;
+    int maxVersion;
+    ModuleType type;
+};
+
 
 class CUTEREPORT_EXPORTS ReportPluginInterface : public QObject
 {
@@ -60,7 +70,9 @@ public:
     void setReportCore(ReportCore *reportCore);
 
     virtual int moduleVersion() const;
-    virtual QString moduleName() const = 0;
+    virtual QString moduleShortName() const = 0;
+    virtual QString suitName() const = 0;
+    QString moduleFullName() const { return suitName() + "::" + moduleShortName();}
 
     // replaces modules in this with extended functionality without removing it from list
     virtual QStringList extendsModules() const {return QStringList();}
@@ -68,11 +80,15 @@ public:
     // removes modules from module list
     virtual QStringList removesModules() const {return QStringList();}
 
+    // defines mudule's dependencies including name maxVersion, MinVersion, type, etc.
+    virtual QList<ModuleInfo> dependencies() const { return QList<ModuleInfo>();}
+
 #if QT_VERSION <= 0x050000
     void setObjectName(const QString &name);
 #endif
 
 signals:
+    void changed();
     void objectNameChanged(QString name);
 
 protected:

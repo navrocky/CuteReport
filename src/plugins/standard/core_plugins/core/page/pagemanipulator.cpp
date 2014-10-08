@@ -36,9 +36,11 @@
 #include <QAction>
 #include <QtGui>
 
-#define MANIPULATOR_ID 1345732212
+#define MANIPULATOR_ID 17322121
 
 using namespace CuteReport;
+
+SUIT_BEGIN_NAMESPACE
 
 PageManipulator::PageManipulator(QObject *parent)
     : PageManipulatorInterface(parent),
@@ -269,3 +271,5 @@ void PageManipulator::slotBringBackward()
 {
     m_activePage->bringCurrentItemBackward();
 }
+
+SUIT_END_NAMESPACE

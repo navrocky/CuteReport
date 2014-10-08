@@ -1,80 +1,39 @@
 <!DOCTYPE CuteReport>
-<CuteReport::ReportInterface>
+<Report>
  <properties>
-  <objectName type="QString">report</objectName>
   <name type="QString">My Test Report</name>
   <author type="QString">Author</author>
   <description type="QString">Just a Demo</description>
   <script type="QString"></script>
   <version type="int">0</version>
-  <filePath type="QString"></filePath>
+  <filePath type="QString">git:reports/MyReport.qtrp</filePath>
   <defaultStorageName type="QString"></defaultStorageName>
+  <variables type="QVariantHash"/>
  </properties>
  <children>
-  <Page>
+  <Page moduleName="Extended::Page" moduleVersion="1" extends="Standard::Page">
    <properties>
-    <objectName type="QString">page</objectName>
     <objectName type="QString">page</objectName>
     <orientation type="int">0</orientation>
     <format type="QString">A4</format>
-    <formatSize type="QSizeF">210,297</formatSize>
-    <meassure type="int">0</meassure>
+    <paperSize type="QSizeF">210,297</paperSize>
+    <unit type="QString">Millimeter</unit>
     <dpi type="int">96</dpi>
-    <margins type="Margins"/>
-    <units type="Units"/>
-    <currentUnit type="double">0.5</currentUnit>
+    <margins type="CuteReport::Margins">10,10,10,10</margins>
+    <background type="QColor">255,255,255,255</background>
+    <useGrid type="bool">true</useGrid>
+    <gridStep type="double">0.5</gridStep>
     <magnetValue type="int">15</magnetValue>
     <magnetRate type="int">6</magnetRate>
+    <gridSteps type="QString">0=0.5</gridSteps>
    </properties>
    <children>
-    <PageGUI>
-     <properties>
-      <objectName type="QString"></objectName>
-     </properties>
-     <children>
-      <QGraphicsScene>
-       <properties>
-        <objectName type="QString"></objectName>
-        <backgroundBrush type="QBrush">
-         <color type="QColor">160,160,164,255</color>
-         <style type="int">1</style>
-         <texture type="QPixmap"></texture>
-        </backgroundBrush>
-        <foregroundBrush type="QBrush">
-         <color type="QColor">0,0,0,255</color>
-         <style type="int">0</style>
-         <texture type="QPixmap"></texture>
-        </foregroundBrush>
-        <itemIndexMethod type=""/>
-        <sceneRect type="QRectF">0,0,870,1199</sceneRect>
-        <bspTreeDepth type="int">5</bspTreeDepth>
-        <palette type="QPalette"/>
-        <font type="QFont">Ubuntu,10,-1,5,50,0,0,0,0,0</font>
-        <sortCacheEnabled type="bool">false</sortCacheEnabled>
-        <stickyFocus type="bool">false</stickyFocus>
-       </properties>
-       <children>
-        <QGraphicsSceneBspTreeIndex>
-         <properties>
-          <objectName type="QString"></objectName>
-          <bspTreeDepth type="int">5</bspTreeDepth>
-         </properties>
-        </QGraphicsSceneBspTreeIndex>
-       </children>
-      </QGraphicsScene>
-      <Magnets>
-       <properties>
-        <objectName type="QString"></objectName>
-       </properties>
-      </Magnets>
-     </children>
-    </PageGUI>
-    <Detail>
+    <Band layoutType="1" moduleName="Standard::Detail" moduleVersion="1" extends="" layoutPriority="50">
      <properties>
       <objectName type="QString">detail</objectName>
-      <objectName type="QString">detail</objectName>
-      <meassure type="int">0</meassure>
+      <enabled type="bool">true</enabled>
       <geometry type="QRectF">10,41,190,6.5</geometry>
+      <boundingRect type="QRectF">10,41,190,6.5</boundingRect>
       <frame type="int">15</frame>
       <opacity type="double">1</opacity>
       <rotation type="double">0</rotation>
@@ -97,24 +56,26 @@
        <style type="int">0</style>
        <texture type="QPixmap"></texture>
       </backgroundBrush>
-      <enabled type="bool">true</enabled>
       <order type="int">0</order>
+      <stretchable type="bool">false</stretchable>
+      <showStretchability type="bool">false</showStretchability>
+      <stretchOriginalSize type="QSizeF">-1,-1</stretchOriginalSize>
       <dataset type="QString">data</dataset>
       <zebra type="bool">false</zebra>
-      <evenBrush type="QBrush">
+      <alternateBrush type="QBrush">
        <color type="QColor">0,0,0,255</color>
        <style type="int">0</style>
        <texture type="QPixmap"></texture>
-      </evenBrush>
+      </alternateBrush>
       <forceNewPage type="bool">false</forceNewPage>
      </properties>
      <children>
-      <MemoItem>
+      <Item moduleName="Extended::Memo" moduleVersion="1" extends="Standard::Memo">
        <properties>
         <objectName type="QString">memoitem</objectName>
-        <objectName type="QString">memoitem</objectName>
-        <meassure type="int">0</meassure>
+        <enabled type="bool">true</enabled>
         <geometry type="QRectF">0,0,138,6.5</geometry>
+        <boundingRect type="QRectF">0,0,138,6.5</boundingRect>
         <frame type="int">0</frame>
         <opacity type="double">1</opacity>
         <rotation type="double">0</rotation>
@@ -137,23 +98,27 @@
          <style type="int">0</style>
          <texture type="QPixmap"></texture>
         </backgroundBrush>
-        <enabled type="bool">true</enabled>
         <order type="int">1</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
         <textFlags type="int">129</textFlags>
-        <sizePolicy type="int">0</sizePolicy>
+        <stretchMode alternateValue="0" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <allowExpressions type="bool">true</allowExpressions>
         <text type="QString">[data."title"]</text>
         <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
         <font type="QFont">Ubuntu,10,-1,5,50,0,0,0,0,0</font>
         <stretchFont type="bool">false</stretchFont>
         <expDelimiters type="QString">[ , ]</expDelimiters>
        </properties>
-      </MemoItem>
-      <MemoItem>
+      </Item>
+      <Item moduleName="Extended::Memo" moduleVersion="1" extends="Standard::Memo">
        <properties>
         <objectName type="QString">memoitem_1</objectName>
-        <objectName type="QString">memoitem_1</objectName>
-        <meassure type="int">0</meassure>
+        <enabled type="bool">true</enabled>
         <geometry type="QRectF">138,0,52,6.5</geometry>
+        <boundingRect type="QRectF">138,0,52,6.5</boundingRect>
         <frame type="int">0</frame>
         <opacity type="double">1</opacity>
         <rotation type="double">0</rotation>
@@ -176,25 +141,29 @@
          <style type="int">0</style>
          <texture type="QPixmap"></texture>
         </backgroundBrush>
-        <enabled type="bool">true</enabled>
         <order type="int">2</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
         <textFlags type="int">132</textFlags>
-        <sizePolicy type="int">0</sizePolicy>
+        <stretchMode alternateValue="0" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <allowExpressions type="bool">true</allowExpressions>
         <text type="QString">[data."length"]</text>
         <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
         <font type="QFont">Ubuntu,10,-1,5,50,0,0,0,0,0</font>
         <stretchFont type="bool">false</stretchFont>
         <expDelimiters type="QString">[ , ]</expDelimiters>
        </properties>
-      </MemoItem>
+      </Item>
      </children>
-    </Detail>
-    <Title>
+    </Band>
+    <Band layoutType="1" moduleName="Standard::Title" moduleVersion="1" extends="" layoutPriority="75">
      <properties>
       <objectName type="QString">title</objectName>
-      <objectName type="QString">title</objectName>
-      <meassure type="int">0</meassure>
+      <enabled type="bool">true</enabled>
       <geometry type="QRectF">10,10,190,20</geometry>
+      <boundingRect type="QRectF">10,10,190,20</boundingRect>
       <frame type="int">15</frame>
       <opacity type="double">1</opacity>
       <rotation type="double">0</rotation>
@@ -217,16 +186,18 @@
        <style type="int">1</style>
        <texture type="QPixmap"></texture>
       </backgroundBrush>
-      <enabled type="bool">true</enabled>
       <order type="int">0</order>
+      <stretchable type="bool">false</stretchable>
+      <showStretchability type="bool">false</showStretchability>
+      <stretchOriginalSize type="QSizeF">-1,-1</stretchOriginalSize>
      </properties>
      <children>
-      <MemoItem>
+      <Item moduleName="Extended::Memo" moduleVersion="1" extends="Standard::Memo">
        <properties>
         <objectName type="QString">memoitem_2</objectName>
-        <objectName type="QString">memoitem_2</objectName>
-        <meassure type="int">0</meassure>
-        <geometry type="QRectF">13,3.5,164,12</geometry>
+        <enabled type="bool">true</enabled>
+        <geometry type="QRectF">13,3.5,164,12.5</geometry>
+        <boundingRect type="QRectF">13,3.5,164,12.5</boundingRect>
         <frame type="int">0</frame>
         <opacity type="double">1</opacity>
         <rotation type="double">0</rotation>
@@ -249,45 +220,29 @@
          <style type="int">0</style>
          <texture type="QPixmap"></texture>
         </backgroundBrush>
-        <enabled type="bool">true</enabled>
         <order type="int">1</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
         <textFlags type="int">132</textFlags>
-        <sizePolicy type="int">128</sizePolicy>
-        <text type="QString">My Music Cathalog</text>
+        <stretchMode alternateValue="0" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <allowExpressions type="bool">true</allowExpressions>
+        <text type="QString">My Music Catalog</text>
         <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
         <font type="QFont">Ubuntu,30.6142,-1,5,50,0,0,0,0,0</font>
         <stretchFont type="bool">true</stretchFont>
         <expDelimiters type="QString">[ , ]</expDelimiters>
        </properties>
-      </MemoItem>
-      <QGraphicsObject>
-       <properties>
-        <objectName type="QString"></objectName>
-        <parent type="QGraphicsObject*"/>
-        <opacity type="double">1</opacity>
-        <enabled type="bool">true</enabled>
-        <visible type="bool">true</visible>
-        <pos type="QPointF">74.7953,74.7953</pos>
-        <x type="double">74.7952755905512</x>
-        <y type="double">74.7952755905512</y>
-        <z type="double">100</z>
-        <rotation type="double">0</rotation>
-        <scale type="double">1</scale>
-        <transformOriginPoint type="QPointF">0,0</transformOriginPoint>
-        <effect type="QGraphicsEffect*"/>
-        <children type="QDeclarativeListProperty&lt;QGraphicsObject>"/>
-        <width type="double">0</width>
-        <height type="double">0</height>
-       </properties>
-      </QGraphicsObject>
+      </Item>
      </children>
-    </Title>
-    <Title>
+    </Band>
+    <Band layoutType="1" moduleName="Standard::Title" moduleVersion="1" extends="" layoutPriority="75">
      <properties>
       <objectName type="QString">title_1</objectName>
-      <objectName type="QString">title_1</objectName>
-      <meassure type="int">0</meassure>
+      <enabled type="bool">true</enabled>
       <geometry type="QRectF">10,30,190,11</geometry>
+      <boundingRect type="QRectF">10,30,190,11</boundingRect>
       <frame type="int">15</frame>
       <opacity type="double">1</opacity>
       <rotation type="double">0</rotation>
@@ -310,16 +265,18 @@
        <style type="int">0</style>
        <texture type="QPixmap"></texture>
       </backgroundBrush>
-      <enabled type="bool">true</enabled>
       <order type="int">1</order>
+      <stretchable type="bool">false</stretchable>
+      <showStretchability type="bool">false</showStretchability>
+      <stretchOriginalSize type="QSizeF">-1,-1</stretchOriginalSize>
      </properties>
      <children>
-      <MemoItem>
+      <Item moduleName="Extended::Memo" moduleVersion="1" extends="Standard::Memo">
        <properties>
         <objectName type="QString">memoitem_3</objectName>
-        <objectName type="QString">memoitem_3</objectName>
-        <meassure type="int">0</meassure>
+        <enabled type="bool">true</enabled>
         <geometry type="QRectF">0,0,138,11</geometry>
+        <boundingRect type="QRectF">0,0,138,11</boundingRect>
         <frame type="int">0</frame>
         <opacity type="double">1</opacity>
         <rotation type="double">0</rotation>
@@ -342,23 +299,27 @@
          <style type="int">0</style>
          <texture type="QPixmap"></texture>
         </backgroundBrush>
-        <enabled type="bool">true</enabled>
         <order type="int">1</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
         <textFlags type="int">132</textFlags>
-        <sizePolicy type="int">128</sizePolicy>
+        <stretchMode alternateValue="0" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <allowExpressions type="bool">true</allowExpressions>
         <text type="QString">Song title</text>
         <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
         <font type="QFont">Ubuntu,14,-1,5,75,1,0,0,0,0</font>
         <stretchFont type="bool">false</stretchFont>
         <expDelimiters type="QString">[ , ]</expDelimiters>
        </properties>
-      </MemoItem>
-      <MemoItem>
+      </Item>
+      <Item moduleName="Extended::Memo" moduleVersion="1" extends="Standard::Memo">
        <properties>
         <objectName type="QString">memoitem_4</objectName>
-        <objectName type="QString">memoitem_4</objectName>
-        <meassure type="int">0</meassure>
+        <enabled type="bool">true</enabled>
         <geometry type="QRectF">138,0,52,11</geometry>
+        <boundingRect type="QRectF">138,0,52,11</boundingRect>
         <frame type="int">0</frame>
         <opacity type="double">1</opacity>
         <rotation type="double">0</rotation>
@@ -381,25 +342,29 @@
          <style type="int">0</style>
          <texture type="QPixmap"></texture>
         </backgroundBrush>
-        <enabled type="bool">true</enabled>
         <order type="int">2</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
         <textFlags type="int">132</textFlags>
-        <sizePolicy type="int">128</sizePolicy>
+        <stretchMode alternateValue="0" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <allowExpressions type="bool">true</allowExpressions>
         <text type="QString">length</text>
         <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
         <font type="QFont">Ubuntu,14,-1,5,75,1,0,0,0,0</font>
         <stretchFont type="bool">false</stretchFont>
         <expDelimiters type="QString">[ , ]</expDelimiters>
        </properties>
-      </MemoItem>
+      </Item>
      </children>
-    </Title>
-    <PageFooter>
+    </Band>
+    <Band layoutType="2" moduleName="Standard::Page Footer" moduleVersion="1" extends="" layoutPriority="100">
      <properties>
       <objectName type="QString">pagefooter</objectName>
-      <objectName type="QString">pagefooter</objectName>
-      <meassure type="int">0</meassure>
+      <enabled type="bool">true</enabled>
       <geometry type="QRectF">10,279.5,190,7.5</geometry>
+      <boundingRect type="QRectF">10,279.5,190,7.5</boundingRect>
       <frame type="int">15</frame>
       <opacity type="double">1</opacity>
       <rotation type="double">0</rotation>
@@ -422,18 +387,21 @@
        <style type="int">1</style>
        <texture type="QPixmap"></texture>
       </backgroundBrush>
-      <enabled type="bool">true</enabled>
       <order type="int">0</order>
+      <stretchable type="bool">false</stretchable>
+      <showStretchability type="bool">false</showStretchability>
+      <stretchOriginalSize type="QSizeF">-1,-1</stretchOriginalSize>
       <firstPage type="bool">true</firstPage>
+      <lastPage type="bool">true</lastPage>
       <once type="bool">false</once>
      </properties>
      <children>
-      <MemoItem>
+      <Item moduleName="Extended::Memo" moduleVersion="1" extends="Standard::Memo">
        <properties>
         <objectName type="QString">memoitem_5</objectName>
-        <objectName type="QString">memoitem_5</objectName>
-        <meassure type="int">0</meassure>
+        <enabled type="bool">true</enabled>
         <geometry type="QRectF">147,0,43,7.5</geometry>
+        <boundingRect type="QRectF">147,0,43,7.5</boundingRect>
         <frame type="int">0</frame>
         <opacity type="double">1</opacity>
         <rotation type="double">0</rotation>
@@ -456,24 +424,62 @@
          <style type="int">0</style>
          <texture type="QPixmap"></texture>
         </backgroundBrush>
-        <enabled type="bool">true</enabled>
         <order type="int">1</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
         <textFlags type="int">129</textFlags>
-        <sizePolicy type="int">128</sizePolicy>
+        <stretchMode alternateValue="0" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <allowExpressions type="bool">true</allowExpressions>
         <text type="QString">page [_page]</text>
         <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
         <font type="QFont">Ubuntu,10,-1,5,50,0,0,0,0,0</font>
         <stretchFont type="bool">false</stretchFont>
         <expDelimiters type="QString">[ , ]</expDelimiters>
        </properties>
-      </MemoItem>
+      </Item>
      </children>
-    </PageFooter>
+    </Band>
+    <PageGUI>
+     <properties/>
+     <children>
+      <Scene>
+       <properties>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">160,160,164,255</color>
+         <style type="int">1</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <foregroundBrush type="QBrush">
+         <color type="QColor">0,0,0,255</color>
+         <style type="int">0</style>
+         <texture type="QPixmap"></texture>
+        </foregroundBrush>
+        <sceneRect type="QRectF">0,0,870,1199</sceneRect>
+        <bspTreeDepth type="int">5</bspTreeDepth>
+        <palette type="QPalette"/>
+        <font type="QFont">Ubuntu,11,-1,5,50,0,0,0,0,0</font>
+        <sortCacheEnabled type="bool">false</sortCacheEnabled>
+        <stickyFocus type="bool">false</stickyFocus>
+       </properties>
+       <children>
+        <QGraphicsSceneBspTreeIndex>
+         <properties>
+          <bspTreeDepth type="int">5</bspTreeDepth>
+         </properties>
+        </QGraphicsSceneBspTreeIndex>
+       </children>
+      </Scene>
+      <Magnets>
+       <properties/>
+      </Magnets>
+     </children>
+    </PageGUI>
    </children>
   </Page>
-  <SqlDataset>
+  <Dataset moduleName="Standard::SQL" moduleVersion="1" extends="">
    <properties>
-    <objectName type="QString">data</objectName>
     <objectName type="QString">data</objectName>
     <parentDataset type="QString"></parentDataset>
     <filterCondition type="QString"></filterCondition>
@@ -487,13 +493,10 @@
    </properties>
    <children>
     <QSqlQueryModel>
-     <properties>
-      <objectName type="QString"></objectName>
-     </properties>
+     <properties/>
     </QSqlQueryModel>
     <QSortFilterProxyModel>
      <properties>
-      <objectName type="QString"></objectName>
       <filterRegExp type="QRegExp"/>
       <filterKeyColumn type="int">0</filterKeyColumn>
       <dynamicSortFilter type="bool">false</dynamicSortFilter>
@@ -505,6 +508,6 @@
      </properties>
     </QSortFilterProxyModel>
    </children>
-  </SqlDataset>
+  </Dataset>
  </children>
-</CuteReport::ReportInterface>
+</Report>

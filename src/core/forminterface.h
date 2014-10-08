@@ -51,7 +51,7 @@ public:
 
     virtual void init(){}
     virtual FormHelperInterface * helper() {return 0;}
-    virtual QString moduleName() const {return QString("Standard");}
+    virtual FormInterface * clone() const = 0;
 
     virtual QString data() const = 0;
     virtual void setData(const QString &data) = 0;
@@ -70,7 +70,6 @@ signals:
     void accepted();
     void rejected();
     void dataChanged(const QString &);
-    void changed();
     void scriptingStringsChanged();
 
 protected:

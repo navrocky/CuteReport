@@ -79,33 +79,36 @@ public:
 
     virtual QIcon icon();
 
-    DatasetInterface * createInstance(QObject* parent = 0) const;
-    CuteReport::DatasetHelperInterface * helper();
-    QAbstractItemModel * model();
+    virtual DatasetInterface * createInstance(QObject* parent = 0) const;
+    virtual CuteReport::DatasetHelperInterface * helper();
+    virtual QAbstractItemModel * model();
 
-    QString lastError();
+    virtual QString lastError();
 
-    bool populate();
-    bool isPopulated();
-    void setPopulated(bool b);
-    void reset();
-    void resetCursor();
-    bool firstRow();
-    bool lastRow();
-    bool nextRow();
-    bool previousRow();
-    int  currentRow();
-    bool setCurrentRow(int index);
-    int rows();
-    QVariant value(int index) const;
-    QVariant value(const QString & field) const;
-    QVariant lookaheadValue(int index) const;
-    QVariant lookaheadValue(const QString & field) const;
-    QVariant lookbackValue(int index) const;
-    QVariant lookbackValue(const QString & field) const;
-    QString fieldName(int column );
+    virtual bool populate();
+    virtual bool isPopulated();
+    virtual void setPopulated(bool b);
+    virtual void reset();
+    virtual void resetCursor();
+    virtual bool firstRow();
+    virtual bool lastRow();
+    virtual bool nextRow();
+    virtual bool previousRow();
+    virtual int  currentRow();
+    virtual bool setCurrentRow(int index);
+    virtual int rows();
+    virtual int columns();
+    virtual QVariant value(int index) const;
+    virtual QVariant value(const QString & field) const;
+    virtual QVariant lookaheadValue(int index) const;
+    virtual QVariant lookaheadValue(const QString & field) const;
+    virtual QVariant lookbackValue(int index) const;
+    virtual QVariant lookbackValue(const QString & field) const;
+    virtual QString fieldName(int column );
+    virtual QVariant::Type fieldType(int column);
 
-    virtual QString moduleName() const;
+    virtual QString moduleShortName() const;
+    virtual QString suitName() const { return "Standard"; }
 
     QString	dir() const;
     void setDir(const QString &str);
@@ -136,6 +139,9 @@ signals:
     void nameFiltersChanged(const QStringList &);
 
 private:
+    explicit FileSystemDataset(const FileSystemDataset &dd, QObject * parent);
+    virtual DatasetInterface * objectClone() const;
+
     Filters m_filters;
     int m_currentRow;
     QString m_dir;

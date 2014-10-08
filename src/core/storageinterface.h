@@ -51,8 +51,9 @@ class StorageHelperInterface;
 
 class CUTEREPORT_EXPORTS StorageInterface : public ReportPluginInterface
 {
-//    Q_INTERFACES(CuteReport::ReportPluginInterface)
     Q_OBJECT
+    Q_INTERFACES(CuteReport::ReportPluginInterface)
+
 public:
     explicit StorageInterface(QObject * parent):ReportPluginInterface(parent) {}
     virtual ~StorageInterface(){}
@@ -101,7 +102,6 @@ public:
     virtual QString lastError() const = 0;
 
 signals:
-    void changed();
     void syncFinished(int syncStatus);
     // TODO
 //    void reportsInfoListResult(StorageListResult result);
@@ -110,8 +110,8 @@ signals:
 
 protected:
     virtual StorageInterface * createInstance(QObject * parent = 0) const = 0;
-    explicit StorageInterface(const StorageInterface & source)
-        :ReportPluginInterface(source.parent()){}
+    explicit StorageInterface(const StorageInterface & source, QObject * parent = 0)
+        :ReportPluginInterface(source, parent){}
 
     friend class ReportCore;
 };

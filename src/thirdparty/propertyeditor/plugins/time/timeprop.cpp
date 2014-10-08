@@ -98,5 +98,5 @@ PropertyInterface* TimeProp::createInstance(QObject * object, int property, cons
 }
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(timeProp, TimeProp)
+Q_EXPORT_PLUGIN2(TimeProperty, TimeProp)
 #endif

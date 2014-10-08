@@ -27,12 +27,36 @@
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
  *   GNU General Public License for more details.                          *
  ***************************************************************************/
-#ifndef IMAGEITEM_P_H
-#define IMAGEITEM_P_H
+#ifndef MEMOITEM_P_H
+#define MEMOITEM_P_H
 
 #include "iteminterface_p.h"
 #include "iteminterface.h"
 #include "memo.h"
+
+SUIT_BEGIN_NAMESPACE
+
+class TemplateRenderingStruct;
+class MemoItemPrivate;
+
+struct FlowToStruct {
+    FlowToStruct(): flowToPrivate(0)/*, textPart1(0), textPart2(0)*/, vShift2(0), flowId(0),
+    marginPixel(0), textAddonWidth(-1) {}
+    ~FlowToStruct() {
+        delete flowToPrivate;
+    }
+
+    MemoItemPrivate * flowToPrivate;
+    QPointF textAddonPos;
+    qreal  textAddonWidth;
+    QRectF clipRect;
+    qreal vShift2;
+    int pos1;
+    int pos2;
+    quint32 flowId;
+    qreal marginPixel;
+};
+
 
 class MemoItemPrivate : public CuteReport::ItemInterfacePrivate
 {
@@ -43,12 +67,15 @@ public:
           delimiters("[ , ]"),
           stretchFont(false),
           allowHtml(false),
+          allowExpressions(true),
           textMargin(1), //mm
           textDocument(0),
-          adjustedFontPointSize(0),
+          fontScale(0),
           originalHeight(-1),
           showStretchability(true)
-    {}
+    {
+    }
+
     MemoItemPrivate(const MemoItemPrivate & p)
         :ItemInterfacePrivate(p),
           stretchMode(p.stretchMode),
@@ -59,12 +86,18 @@ public:
           delimiters(p.delimiters),
           stretchFont(p.stretchFont),
           allowHtml(p.allowHtml),
+          allowExpressions(p.allowExpressions),
           textMargin(p.textMargin),
           textDocument(0),
-          adjustedFontPointSize(p.adjustedFontPointSize),
+          fontScale(p.fontScale),
           originalHeight(p.originalHeight),
-          showStretchability(p.showStretchability)
-    {}
+          showStretchability(p.showStretchability),
+          absoluteRect(p.absoluteRect),
+          //
+          textPos(p.textPos)
+    {
+    }
+
     virtual ~MemoItemPrivate(){
         delete textDocument;
     }
@@ -77,14 +110,26 @@ public:
     QString delimiters;
     bool stretchFont;
     bool allowHtml;
+    bool allowExpressions;
     qreal textMargin;
     QTextDocument * textDocument;
-    qreal adjustedFontPointSize;
+    qreal fontScale;
     qreal originalHeight;
     bool showStretchability;
+
+    // rendering
+    QPointF posDeltaMM;
+    QRectF absoluteRect;
+    QPointF textPos;
+    QRectF textClipRect;
+    qreal sw;
 };
+
 
 QDataStream &operator<<(QDataStream &s, const MemoItemPrivate &p);
 QDataStream &operator>>(QDataStream &s, MemoItemPrivate &p);
 
-#endif // IMAGEITEM_P_H
+
+SUIT_END_NAMESPACE
+
+#endif // MEMOITEM_P_H

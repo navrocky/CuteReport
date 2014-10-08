@@ -29,11 +29,11 @@
 #include <QHash>
 
 class ReportContainer;
-class ReportProperties;
 class TemplateDialog;
 
 namespace PropertyEditor{
-    class PropertyEditor;
+    class ReportProperties;
+    class EditorWidget;
 }
 
 namespace CuteReport {
@@ -45,27 +45,31 @@ class ReportInterface;
 class StorageInterface;
 }
 
+
 struct ReportStruct
 {
     explicit ReportStruct(): reportProperties(0), rendererPropertyEditor(0), printerPropertyEditor(0) {}
     CuteReport::ReportInterface * report;
     QString tabText;
-    QPointer<ReportProperties> reportProperties;
-    QPointer<PropertyEditor::PropertyEditor> rendererPropertyEditor;
-    QPointer<PropertyEditor::PropertyEditor> printerPropertyEditor;
+    QPointer<PropertyEditor::ReportProperties> reportProperties;
+    QPointer<PropertyEditor::EditorWidget> rendererPropertyEditor;
+    QPointer<PropertyEditor::EditorWidget> printerPropertyEditor;
 };
 
 class ReportEditor : public CuteDesigner::ModuleInterface
 {
     Q_OBJECT
+    Q_INTERFACES(CuteDesigner::ModuleInterface)
 #if QT_VERSION >= 0x050000
     Q_PLUGIN_METADATA(IID "CuteDesigner.ModuleInterface/1.0")
 #endif
-    Q_INTERFACES(CuteDesigner::ModuleInterface)
 
 public:
     explicit ReportEditor(QObject *parent = 0);
     ~ReportEditor();
+
+    virtual void init(CuteDesigner::Core *core);
+
     virtual void reloadSettings();
     virtual void saveSettings();
     virtual void activate();
@@ -101,18 +105,25 @@ private slots:
 //    void slotRequestForRenameReport(int index);
     void slotReportNameChangedOutside(QString name);
     void slotDirtynessChanged(bool isDirty);
+    void slotCoreReportCreated(CuteReport::ReportInterface*report);
+    void slotSetCurrentReport();
+    void slotDesignerInitDone();
+    void slotAppIsAboutToClose();
 
 private:
-    bool saveCurrentReport(bool askFileName = true);
+    bool saveReport(CuteReport::ReportInterface *report, bool askFileName = true);
     void newReportPreprocess(CuteReport::ReportInterface * report);
     QString makeCorrectObjectName(CuteReport::ReportInterface * report);
+    CuteReport::ReportInterface* sameReportExists(CuteReport::ReportInterface* newReport);
 
 private:
     QPointer<ReportContainer> ui;
     TemplateDialog * m_templateDialog;
     QList<ReportStruct> m_reports;
     typedef QList<ReportStruct>::iterator ReportIterator;
+    QPointer<CuteReport::ReportInterface> m_reportToSwitch;
 };
 
-//} //namespace
+
+//SUIT_END_NAMESPACE
 #endif // REPORTEDITOR_H

@@ -44,8 +44,10 @@
 
 using namespace CuteReport;
 
+inline void initMyResource() { Q_INIT_RESOURCE(detail); }
+
 Detail::Detail(QObject * parent)
-    : BandInterface(*new DetailPrivate,parent)
+    : BandInterface(new DetailPrivate,parent)
 {
     Q_D(Detail);
     d->rect = QRectF(0,0,50,10);
@@ -53,10 +55,10 @@ Detail::Detail(QObject * parent)
 }
 
 
-Detail::Detail(DetailPrivate &dd, QObject * parent)
+Detail::Detail(DetailPrivate *dd, QObject * parent)
     :CuteReport::BandInterface(dd, parent)
 {
-    setResizeFlags(FixedPos | ResizeBottom);
+    //setResizeFlags(FixedPos | ResizeBottom);
 }
 
 
@@ -65,10 +67,16 @@ Detail::~Detail()
 }
 
 
-BaseItemInterface *Detail::clone()
+void Detail::moduleInit()
 {
-    Q_D(Detail);
-    return new Detail(*d, parent());
+    initMyResource();
+}
+
+
+BaseItemInterface *Detail::itemClone() const
+{
+    Q_D(const Detail);
+    return new Detail(new DetailPrivate(*d), parent());
 }
 
 
@@ -122,7 +130,7 @@ QIcon Detail::itemIcon() const
 }
 
 
-QString Detail::moduleName() const
+QString Detail::moduleShortName() const
 {
     return tr("Detail");
 }
@@ -162,7 +170,7 @@ void Detail::renderInit(RendererPublicInterface * renderer)
         m_renderer->error(this->objectName(), "\'dataset\' field is empty");
     }
 
-    emit renderingInit();
+    emit printInit();
 }
 
 
@@ -171,44 +179,42 @@ void Detail::renderReset()
     Q_D(Detail);
     m_renderer = 0;
     d->alternateRow = false;
-    emit renderingReset();
+    emit printReset();
 }
 
 
-CuteReport::RenderedItemInterface * Detail::render(int customDPI)
+bool Detail::renderPrepare()
 {
-    Q_UNUSED(customDPI)
+    emit printBefore();
+    setRenderingPointer( new DetailPrivate(*(reinterpret_cast<DetailPrivate*>(d_ptr))));
     Q_D(Detail);
+    emit printDataBefore();
 
-    emit renderingBefore();
-
-    DetailPrivate * pCurrent = d;
-    DetailPrivate * pNew = new DetailPrivate(*d);
-
-    d_ptr = pNew;
-    emit rendering();
-    d_ptr = pCurrent;
-
-    if (pNew->forceNewPage)
+    if (d->forceNewPage)
         m_renderer->createNewPage();
 
-    CuteReport::RenderedItemInterface * view = 0;
+    bool result = true;
 
-    if (pNew->alternateRow) {
-        if (pNew->alternateBrush == QBrush())
-            pNew->bgBrush.setColor(pNew->bgBrush.color().darker(110));
+    if (d->alternateRow) {
+        if (d->alternateBrush == QBrush())
+            d->bgBrush.setColor(d->bgBrush.color().darker(110));
         else
-            pNew->bgBrush = pNew->alternateBrush;
-        view = new SimpleRenderedItem(this, pNew);
+            d->bgBrush = d->alternateBrush;
     } else
-        view = new SimpleRenderedItem(this, pNew);
 
     if (d->zebra)
-        d->alternateRow = !d->alternateRow;
+        (reinterpret_cast<DetailPrivate*>(orig_ptr))->alternateRow = !d->alternateRow;
 
-    emit rendered(view);
-    emit renderingAfter();
+    emit printDataAfter();
 
+    return result;
+}
+
+
+RenderedItemInterface * Detail::renderView()
+{
+    Q_D(Detail);
+    CuteReport::RenderedItemInterface * view = new SimpleRenderedItem(this, new DetailPrivate(*d));
     return view;
 }
 
@@ -284,6 +290,6 @@ QString Detail::_current_property_description() const
 }
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(detail, Detail)
+Q_EXPORT_PLUGIN2(Detail, Detail)
 #endif
 

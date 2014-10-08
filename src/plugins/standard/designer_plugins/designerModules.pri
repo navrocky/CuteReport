@@ -28,3 +28,7 @@ contains(DEFINES, SYSTEMINSTALL) {
 } else {
     DESTDIR = ../../../../../$$BUILD_DIR/$$REPORT_DESIGNER_PLUGINS_PATH
 }
+
+contains(DEFINES, STATICPLUGINS_DESIGNER) {
+    CONFIG += static
+}

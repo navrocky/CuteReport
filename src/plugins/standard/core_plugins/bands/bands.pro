@@ -3,8 +3,8 @@ SUBDIRS = pageHeader \
         pageFooter \
         title \
         summary \
-	detail \
-	detailHeader \
-	detailFooter \
-	overlay \
+        detail \
+        detailHeader \
+        detailFooter \
+        overlay \
 

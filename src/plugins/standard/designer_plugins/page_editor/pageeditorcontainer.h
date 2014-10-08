@@ -36,13 +36,17 @@ class PageAction;
 class PageInterface;
 }
 
+class PageEditor;
+
 class PageEditorContainer : public QWidget
 {
     Q_OBJECT
     
 public:
-    explicit PageEditorContainer(CuteDesigner::Core * core, QWidget *parent = 0);
+    explicit PageEditorContainer(PageEditor * pageEditor, QWidget *parent = 0);
     ~PageEditorContainer();
+
+    void init();
 
     void addTab(QWidget * widget, QIcon icon, const QString &name);
     void removeTab(const QString & name);
@@ -54,7 +58,7 @@ public:
     void addPropertyEditor(QWidget * widget);
     void addObjectInspector(QWidget * widget);
 
-    void addItem(const QIcon &icon, const QString &name, const QString &className, const QString &group);
+    void addItem(const QIcon &icon, const QString &name, const QString &suiteName, const QString &group);
     void setPageActions(QList<CuteReport::PageAction*> actions);
 
     void reloadSettings();
@@ -79,7 +83,7 @@ private slots:
     
 private:
     Ui::PageEditorContainer *ui;
-    CuteDesigner::Core * m_core;
+    PageEditor * m_pageEditor;
 };
 
 #endif // PAGEEDITORCONTAINER_H

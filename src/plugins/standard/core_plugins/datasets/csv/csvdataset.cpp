@@ -52,6 +52,24 @@ CsvDataset::CsvDataset(QObject *parent)
 }
 
 
+CsvDataset::CsvDataset(const CsvDataset &dd, QObject * parent)
+    : DatasetInterface(parent),
+      m_firstRowIsHeader(dd.m_firstRowIsHeader),
+      m_currentRow(0),
+      m_isPopulated(false),
+      m_delimeter(dd.m_delimeter),
+      m_keepData(dd.m_keepData)
+{
+    m_model = new Model (this);
+    m_fmodel = new QSortFilterProxyModel(this);
+    m_fmodel->setSourceModel(m_model);
+    if (dd.m_isPopulated) {
+        populate();
+        setCurrentRow(dd.m_currentRow);
+    }
+}
+
+
 CsvDataset::~CsvDataset()
 {
 }
@@ -79,9 +97,15 @@ DatasetHelperInterface * CsvDataset::helper()
 }
 
 
-QString CsvDataset::moduleName() const
+DatasetInterface *CsvDataset::objectClone() const
 {
-    return QString("CSV Dataset");
+    return new CsvDataset(*this, parent());
+}
+
+
+QString CsvDataset::moduleShortName() const
+{
+    return QString("CSV");
 }
 
 
@@ -188,6 +212,12 @@ void CsvDataset::setFirstRowIsHeader(bool value)
 QString CsvDataset::fieldName(int column )
 {
     return m_model->headerData ( column, Qt::Horizontal).toString();
+}
+
+
+QVariant::Type CsvDataset::fieldType(int column)
+{
+    return QVariant::String;
 }
 
 
@@ -339,6 +369,14 @@ int CsvDataset::rows()
 }
 
 
+int CsvDataset::columns()
+{
+    if (!m_isPopulated)
+        populate();
+    return m_fmodel->columnCount();
+}
+
+
 QVariant CsvDataset::value(int index) const
 {
     return m_fmodel->data( m_fmodel->index(m_currentRow,index) );
@@ -380,5 +418,5 @@ QVariant CsvDataset::lookbackValue(const QString & /*field*/) const
 }
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(csvDataset, CsvDataset)
+Q_EXPORT_PLUGIN2(DatasetCSV, CsvDataset)
 #endif

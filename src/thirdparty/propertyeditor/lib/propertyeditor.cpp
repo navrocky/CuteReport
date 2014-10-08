@@ -1,5 +1,5 @@
 /***************************************************************************
- *   This file is part of the propertyEditor project                       *
+ *   This file is part of the propertypropertyChanged project                       *
  *   Copyright (C) 2008 by BogDan Vatra                                    *
  *   bog_dan_ro@yahoo.com                                                  *
  *   Copyright (C) 2013 by Mikhalov Alexander                              *
@@ -47,82 +47,119 @@
 namespace PropertyEditor
 {
 
-PropertyEditor::PropertyEditor(QWidget *parent)
+EditorWidget::EditorWidget(QWidget *parent)
     : QWidget(parent),
       ui(new Ui::propertyeditor),
-      m_object(0), m_model(0), m_delegate(0)
+      m_object(0), m_model(0), m_delegate(0), m_pluginManager(0)
 {
-    PropertyEditorCore::instance()->inc();
-
-    ui->setupUi(this);
-
-    m_delegate = new PropertyDelegate(this);
-    ui->view->setItemDelegate(m_delegate);
-
-    m_model = new PropertyModel(this, 0, &PropertyEditorCore::instance()->plugins());
-    ui->view->setModel(m_model);
-    connect (ui->view->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(currentRowChanged(QModelIndex,QModelIndex)));
+    init();
 }
 
 
-PropertyEditor::~PropertyEditor()
+EditorWidget::EditorWidget(PluginManager * pluginManager, QWidget *parent)
+    : QWidget(parent),
+      ui(new Ui::propertyeditor),
+      m_object(0), m_model(0), m_delegate(0), m_pluginManager(pluginManager)
+{
+    init();
+}
+
+
+EditorWidget::~EditorWidget()
 {
     qDebug() << "PropertyEditor DTOR";
-    PropertyEditorCore::instance()->dec();
 }
 
 
-void PropertyEditor::setValidator(QVariant::Type type, PropertyValidator * validator)
+void EditorWidget::init()
 {
-	m_validators[type]=validator;
+    ui->setupUi(this);
+    m_delegate = new PropertyDelegate(this);
+    ui->view->setItemDelegate(m_delegate);
 }
 
-PropertyValidator* PropertyEditor::validator(QVariant::Type type)
+
+PropertyModel *EditorWidget::model()
+{
+    if (!m_model) {
+        if (!m_pluginManager) {
+            m_pluginManager = new PluginManager(this);
+        }
+        m_model = new PropertyModel(&m_pluginManager->plugins(), this);
+        ui->view->setModel(m_model);
+        connect (ui->view->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(currentRowChanged(QModelIndex,QModelIndex)));
+    }
+    return m_model;
+}
+
+
+PluginManager *EditorWidget::pluginManager() const
+{
+    return m_pluginManager;
+}
+
+
+void EditorWidget::setPluginManager(PluginManager *pluginManager)
+{
+    delete pluginManager;
+    m_pluginManager = pluginManager;
+}
+
+
+
+void EditorWidget::setValidator(QVariant::Type type, PropertyValidator * validator)
+{
+    m_validators[type]=validator;
+}
+
+
+PropertyValidator* EditorWidget::validator(QVariant::Type type)
 {
 	return m_validators[type];
 }
 
-void PropertyEditor::clearValidators()
+
+void EditorWidget::clearValidators()
 {
 	m_validators.clear();
 }
 
-void PropertyEditor::setObject(QObject * object)
+
+void EditorWidget::setObject(QObject * object)
 {
 	if (object == m_object)
 		return;
 	m_object = object;
-	if (m_model)
-		m_model->setObject(object);
+    model()->setObject(object);
 	emit(objectChanged(object));
 }
 
-void PropertyEditor::resetProperties()
+
+void EditorWidget::resetProperties()
 {
-	if (m_model)
-		m_model->resetModel();
+    model()->resetModel();
 }
 
-QObject *PropertyEditor::object() const
+
+QObject *EditorWidget::object() const
 {
 	return m_object;
 }
 
-void PropertyEditor::setSizeHint(int s)
+
+void EditorWidget::setSizeHint(int s)
 {
-    if (m_model)
-	m_model->setSizeHint(s);
+    model()->setSizeHint(s);
 }
 
 
-void PropertyEditor::currentRowChanged(const QModelIndex &current, const QModelIndex &)
+void EditorWidget::currentRowChanged(const QModelIndex &current, const QModelIndex &)
 {
     if (current.parent().isValid()) {    // only top level values are supported;
         ui->description->clear();
         return;
     }
-    if (m_model)
-        ui->description->setText(m_model->property(current.row())->propertyDescription());
+    ui->description->setText(model()->property(current.row())->propertyDescription());
 }
 
 

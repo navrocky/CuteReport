@@ -44,6 +44,8 @@ class BaseItemInterfacePrivate;
 class CUTEREPORT_EXPORTS ItemInterfaceView: public QGraphicsRectItem
 {
 public:
+    enum { Type = UserType + 101 };
+
     explicit ItemInterfaceView(BaseItemInterface * item);
     virtual ~ItemInterfaceView();
 
@@ -51,6 +53,7 @@ public:
 
     void paint(QPainter * painter, const QStyleOptionGraphicsItem *option, BaseItemInterfacePrivate *data = 0);
 
+    int type() const { return Type; }
 
 protected:
     CuteReport::BaseItemInterfacePrivate *ptr();

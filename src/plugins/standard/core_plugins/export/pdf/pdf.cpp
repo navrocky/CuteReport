@@ -184,5 +184,5 @@ bool ExportPDF::process_(CuteReport::ReportInterface * report, const QString & o
 
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(exportPDF, ExportPDF)
+Q_EXPORT_PLUGIN2(ExportPDF, ExportPDF)
 #endif

@@ -45,8 +45,9 @@ class ScriptEditor : public CuteDesigner::ModuleInterface
 
 public:
     ScriptEditor(QObject* parent = 0);
-
     ~ScriptEditor();
+
+    virtual void init(CuteDesigner::Core *core);
 
     virtual void reloadSettings();
     virtual void saveSettings();

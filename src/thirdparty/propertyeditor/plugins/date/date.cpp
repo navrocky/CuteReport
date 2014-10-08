@@ -99,5 +99,5 @@ PropertyInterface* Date::createInstance(QObject * object, int property, const Pr
 
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(date, Date);
+Q_EXPORT_PLUGIN2(DateProperty, Date)
 #endif

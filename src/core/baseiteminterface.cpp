@@ -1,38 +1,39 @@
 /***************************************************************************
- *   This file is part of the CuteReport project                           *
- *   Copyright (C) 2012-2014 by Alexander Mikhalov                         *
- *   alexander.mikhalov@gmail.com                                          *
- *                                                                         *
- **                   GNU General Public License Usage                    **
- *                                                                         *
- *   This library is free software: you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation, either version 3 of the License, or     *
- *   (at your option) any later version.                                   *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>. *
- *                                                                         *
- **                  GNU Lesser General Public License                    **
- *                                                                         *
- *   This library is free software: you can redistribute it and/or modify  *
- *   it under the terms of the GNU Lesser General Public License as        *
- *   published by the Free Software Foundation, either version 3 of the    *
- *   License, or (at your option) any later version.                       *
- *   You should have received a copy of the GNU Lesser General Public      *
- *   License along with this library.                                      *
- *   If not, see <http://www.gnu.org/licenses/>.                           *
- *                                                                         *
- *   This library is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- ****************************************************************************/
+     *   This file is part of the CuteReport project                           *
+     *   Copyright (C) 2012-2014 by Alexander Mikhalov                         *
+     *   alexander.mikhalov@gmail.com                                          *
+     *                                                                         *
+     **                   GNU General Public License Usage                    **
+     *                                                                         *
+     *   This library is free software: you can redistribute it and/or modify  *
+     *   it under the terms of the GNU General Public License as published by  *
+     *   the Free Software Foundation, either version 3 of the License, or     *
+     *   (at your option) any later version.                                   *
+     *   You should have received a copy of the GNU General Public License     *
+     *   along with this program.  If not, see <http://www.gnu.org/licenses/>. *
+     *                                                                         *
+     **                  GNU Lesser General Public License                    **
+     *                                                                         *
+     *   This library is free software: you can redistribute it and/or modify  *
+     *   it under the terms of the GNU Lesser General Public License as        *
+     *   published by the Free Software Foundation, either version 3 of the    *
+     *   License, or (at your option) any later version.                       *
+     *   You should have received a copy of the GNU Lesser General Public      *
+     *   License along with this library.                                      *
+     *   If not, see <http://www.gnu.org/licenses/>.                           *
+     *                                                                         *
+     *   This library is distributed in the hope that it will be useful,       *
+     *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+     *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+     *   GNU General Public License for more details.                          *
+     ****************************************************************************/
 #include "baseiteminterface.h"
 #include "baseiteminterface_p.h"
 #include "iteminterfaceview.h"
 #include "renderediteminterface.h"
 #include "pageinterface.h"
 #include "reportinterface.h"
+#include "bandinterface.h"
 
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
@@ -43,35 +44,46 @@ namespace CuteReport
 
 BaseItemInterface::BaseItemInterface(QObject * parent) :
     ReportPluginInterface(parent),
-    d_ptr(new BaseItemInterfacePrivate)
+    d_ptr(new BaseItemInterfacePrivate),
+    orig_ptr(0)
 {
-    m_parentItem = qobject_cast<CuteReport::BaseItemInterface*>(parent);
-    m_page = m_parentItem ? BaseItemInterface::itemPage(m_parentItem) : qobject_cast<CuteReport::PageInterface*>(parent);
     initMe();
 }
 
 
-BaseItemInterface::BaseItemInterface(BaseItemInterfacePrivate &dd, QObject * parent)
+BaseItemInterface::BaseItemInterface(BaseItemInterfacePrivate *dd, QObject * parent)
     :ReportPluginInterface(parent),
-      d_ptr(&dd)
+      d_ptr(dd),
+      orig_ptr(0)
 {
-    m_parentItem = qobject_cast<CuteReport::BaseItemInterface*>(parent);
-    if (m_parentItem)
-        m_page = BaseItemInterface::itemPage(m_parentItem);
-    else
-        m_page = qobject_cast<CuteReport::PageInterface*>(parent);
     initMe();
+}
+
+
+void BaseItemInterface::setRenderingPointer(BaseItemInterfacePrivate *r)
+{
+    Q_ASSERT(!orig_ptr);
+    //delete orig_ptr;
+    orig_ptr = d_ptr;
+    d_ptr = r;
+    d_ptr->renderingType = RenderingReport;
+}
+
+
+void BaseItemInterface::replaceRenderingPointer()
+{
+    if (!orig_ptr)
+        return;
+    delete d_ptr;
+    d_ptr = orig_ptr;
+    orig_ptr = 0;
 }
 
 
 BaseItemInterface::~BaseItemInterface()
 {
-    //    if (m_gui->scene()) {
-    //        QGraphicsScene * scene = m_gui->scene();
-    //        scene->removeItem(m_gui);
-    //    }
-    //    delete m_gui;
     delete d_ptr;
+    delete orig_ptr;
     qDeleteAll(dataStack);
 }
 
@@ -89,10 +101,8 @@ void BaseItemInterface::initMe()
     d->resizeFlags = ResizeTop | ResizeBottom | ResizeLeft | ResizeRight;
     m_inited = false;
     m_currentProperty = -1;
-
-    connect(this, SIGNAL(backgroundBrushChanged(QBrush)), this, SLOT(updateViewIfExists()), Qt::QueuedConnection);
-    connect(this, SIGNAL(borderPenChanged(QPen)), this, SLOT(updateViewIfExists()), Qt::QueuedConnection);
-    connect(this, SIGNAL(opacityChanged(qreal)), this, SLOT(updateViewIfExists()), Qt::QueuedConnection);
+    m_page = 0;
+    m_parentItem = 0;
 }
 
 
@@ -101,12 +111,13 @@ void BaseItemInterface::init()
     if (m_inited)
         return;
 
+    m_parentItem = qobject_cast<CuteReport::BaseItemInterface*>(parent());
+    m_page = m_parentItem ? BaseItemInterface::itemPage(m_parentItem) : qobject_cast<CuteReport::PageInterface*>(parent());
+
     updateMeassure();
 
     m_inited = true;
 }
-
-
 
 
 void BaseItemInterface::check_gui()
@@ -136,11 +147,36 @@ void BaseItemInterface::update_gui()
     QPointF absPos = pageItem ? pageItem->mapToScene(itemPixelpos) : itemPixelpos;
     QPointF pos = parentGuiItem ? parentGuiItem->mapFromScene(absPos) : absPos;
 
-    m_gui->setPos(pos);
     m_gui->setRect(0,0, itemPixelRect.width(), itemPixelRect.height());
     m_gui->setZValue(order());
 
+    m_gui->setRotation(-d_ptr->rotation);
+
+    QPointF transPos = BaseItemInterface::transformedPos(d_ptr, QRectF(pos, itemPixelRect.size()));
+    m_gui->setPos(transPos);
+
     m_gui->update();
+}
+
+
+BaseItemInterface *BaseItemInterface::clone(bool withChildren, bool init) const
+{
+    BaseItemInterface * newItem = this->itemClone();
+    newItem->setReportCore(this->reportCore());
+    newItem->setObjectName(this->objectName());
+
+    if (withChildren) {
+        foreach (CuteReport::BaseItemInterface* child, findChildren<BaseItemInterface * >()) {
+            if (child->parent() != this)     // only direct children
+                continue;
+            CuteReport::BaseItemInterface * childCopy = child->clone(withChildren, init);
+            childCopy->setParent(newItem);
+        }
+    }
+    if  (init)
+        newItem->init();
+
+    return newItem;
 }
 
 
@@ -185,6 +221,7 @@ void BaseItemInterface::setParentItem(BaseItemInterface *parentItem)
         m_parentItem->childAdded(this);
 
     emit parentItemChanged(m_parentItem);
+    emit changed();
 }
 
 
@@ -201,6 +238,18 @@ CuteReport::ReportInterface * BaseItemInterface::reportObject()
 int BaseItemInterface::childLevel()
 {
     return m_parentItem ? m_parentItem->childLevel() + 1 : 0;
+}
+
+
+BandInterface *BaseItemInterface::carrierBand()
+{
+    if (qobject_cast<CuteReport::BandInterface*> (this))
+        return static_cast<CuteReport::BandInterface*>(this);
+
+    if (parentItem())
+        return parentItem()->carrierBand();
+    else
+        return 0;
 }
 
 
@@ -309,13 +358,23 @@ void BaseItemInterface::restoreState()
 void BaseItemInterface::renderInit(RendererPublicInterface *renderer)
 {
     Q_UNUSED(renderer);
-    emit renderingInit();
+    delete orig_ptr;
+    orig_ptr = 0;
+    emit printInit();
 }
 
 
 void BaseItemInterface::renderReset()
 {
-    emit renderingReset();
+    emit printReset();
+}
+
+
+bool BaseItemInterface::renderEnd()
+{
+    replaceRenderingPointer();
+    emit printAfter();
+    return true;
 }
 
 
@@ -399,6 +458,8 @@ void BaseItemInterface::setDpi(int dpi)
     update_gui();
 
     emit dpiChanged(d->dpi);
+    emit boundingRectChanged(boundingRect());
+    emit changed();
 }
 
 
@@ -429,6 +490,10 @@ void BaseItemInterface::paintBegin(QPainter * painter, const QStyleOptionGraphic
 {
     Q_UNUSED(type);
 
+    painter->setRenderHints(QPainter::TextAntialiasing|QPainter::Antialiasing);
+#if QT_VERSION >= 0x050000
+    painter->setRenderHint(QPainter::Qt4CompatiblePainting);
+#endif
     const BaseItemInterfacePrivate * const d = data /*? data : d_func()*/;
 
     /// border pen
@@ -607,6 +672,20 @@ void BaseItemInterface::setAbsoluteGeometry(const QRectF & rect, Unit inputUnit)
 }
 
 
+QRectF BaseItemInterface::absoluteBoundingRect(Unit unit) const
+{
+    QRectF rect = QRectF(QPointF(0,0), QSizeF(d_ptr->rect.size()));
+    QRectF resRect = QRectF(QPointF(0,0), transform().mapRect(rect).size());
+    return mapToPage(resRect, d_ptr->unit, unit);
+}
+
+
+QPolygonF BaseItemInterface::absolutePolygon(Unit unit) const
+{
+    return transform().map(QPolygonF(absoluteGeometry(unit)));
+}
+
+
 CuteReport::PageInterface * BaseItemInterface::itemPage(CuteReport::BaseItemInterface * item)
 {
     if (item->page())
@@ -686,6 +765,12 @@ QString BaseItemInterface::_current_property_description() const
     return QString();
 }
 
+
+int BaseItemInterface::_current_property_precision() const
+{
+    return 1;
+}
+
 ////////////////////////////////////////// shared data
 
 Unit BaseItemInterface::unit() const
@@ -723,6 +808,20 @@ QRectF BaseItemInterface::geometry(Unit unit) const
 }
 
 
+QRectF BaseItemInterface::boundingRect(Unit unit) const
+{
+    QRectF rect = QRectF(QPointF(0,0), QSizeF(d_ptr->rect.size()));
+    QRectF resRect = QRectF(d_ptr->rect.topLeft(), transform().mapRect(rect).size());
+    return convertUnit(resRect, d_ptr->unit, unit, d_ptr->dpi);
+}
+
+
+QPolygonF BaseItemInterface::polygon(Unit unit) const
+{
+    return transform().map(QPolygonF(geometry(unit)));
+}
+
+
 void BaseItemInterface::setGeometry(const QRectF &rect, Unit unit)
 {
     Q_D(BaseItemInterface);
@@ -734,7 +833,7 @@ void BaseItemInterface::setGeometry(const QRectF &rect, Unit unit)
     Unit u = (unit == UnitNotDefined) ? d->unit : unit;
     QRectF newRect = convertUnit(rect, u, Millimeter, d->dpi);
 
-    if (d->rect  == newRect)
+    if (d->rect == newRect)
         return;
 
     d->rect = newRect;
@@ -747,6 +846,7 @@ void BaseItemInterface::setGeometry(const QRectF &rect, Unit unit)
     update_gui();
 
     emit geometryChanged(geometry());
+    emit boundingRectChanged(boundingRect());
     emit changed();
 }
 
@@ -787,6 +887,7 @@ void BaseItemInterface::setHeight(qreal height, Unit unit)
     update_gui();
 
     emit geometryChanged(geometry());
+    emit boundingRectChanged(boundingRect());
     emit changed();
 }
 
@@ -826,6 +927,7 @@ void BaseItemInterface::setWidth(qreal width, Unit unit)
     update_gui();
 
     emit geometryChanged(geometry());
+    emit boundingRectChanged(boundingRect());
     emit changed();
 }
 
@@ -897,12 +999,17 @@ void BaseItemInterface::setRotation(qreal angle)
     Q_D(BaseItemInterface);
     if (d->rotation == angle)
         return;
+
     d->rotation = angle;
+
+    if (d->rotation < 0)
+        d->rotation = 0;
 
     update_gui();
 
     emit rotationChanged(angle);
     emit changed();
+    emit boundingRectChanged(boundingRect());
 }
 
 
@@ -956,6 +1063,30 @@ void BaseItemInterface::updateMeassure()
 }
 
 
+QTransform BaseItemInterface::transform() const
+{
+    Q_D(const BaseItemInterface);
+    return transform(d);
+}
+
+
+QTransform BaseItemInterface::transform(const BaseItemInterfacePrivate *d)
+{
+    QTransform trans;
+    trans.rotate(-d->rotation);
+    return trans;
+}
+
+
+QPointF BaseItemInterface::transformedPos(const BaseItemInterfacePrivate *d, const QRectF &rect)
+{
+    QTransform trans = transform(d);
+    QRectF rotatedRect = trans.mapRect(QRectF(QPointF(0,0), rect.size()));
+    QPointF pos = rect.topLeft() - rotatedRect.topLeft();
+    return pos;
+}
+
+
 /*********************************************************************************************
  *
  *          ItemInterfacePrivate
@@ -964,7 +1095,8 @@ void BaseItemInterface::updateMeassure()
 
 QDataStream &operator<<(QDataStream &s, const BaseItemInterfacePrivate &p) {
     s << p.borderPen << p.bgBrush << p.rect << p.frame << p.opacity << p.rotation   << p.enabled << p.order
-      << p.dpi << (qint8)p.unit << p.selfRendering << p.childrenSelfRendering << p.minRectSize << (qint16) p.resizeFlags;
+      << p.dpi << (qint8)p.unit << p.selfRendering << p.childrenSelfRendering << p.minRectSize << (qint16) p.resizeFlags
+      << (qint8)p.renderingType;
 
     return s;
 }
@@ -973,12 +1105,15 @@ QDataStream &operator<<(QDataStream &s, const BaseItemInterfacePrivate &p) {
 QDataStream &operator>>(QDataStream &s, BaseItemInterfacePrivate &p) {
     qint8 unit;
     qint16 resizeFlags;
+    qint8 renderingType;
 
     s >> p.borderPen; s >> p.bgBrush; s >> p.rect; s >> p.frame; s >> p.opacity; s >> p.rotation;   s >> p.enabled; s >> p.order;
     s >> p.dpi; s >> unit; s >> p.selfRendering; s >> p.childrenSelfRendering; s >> p.minRectSize; s >>resizeFlags;
+    s >> renderingType;
 
     p.unit = (Unit)unit;
     p.resizeFlags = resizeFlags;
+    p.renderingType = (RenderingType)renderingType;
 
     return s;
 }

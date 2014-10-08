@@ -115,5 +115,5 @@ PropertyInterface* SizeF::createInstance(QObject * object, int property, const P
 }
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(sizef, SizeF)
+Q_EXPORT_PLUGIN2(SizeFProperty, SizeF)
 #endif

@@ -3,3 +3,4 @@ SUBDIRS = \
     filesystem \
     git \
     resource \
+    sql

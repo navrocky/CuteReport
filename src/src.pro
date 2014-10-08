@@ -1,11 +1,19 @@
+!include( ../common.pri ) {
+    error( Can not find the common.pri file! )
+}
+
 TEMPLATE = subdirs
 SUBDIRS = \
         thirdparty \
         core \
+        widgets \
         plugins \
         apps \
-        widgets \
 
-widgets.depends = core
-apps.depends = core thirdparty
-plugins.depends = core widgets apps thirdparty
+!contains(DEFINES, STATICBUILD) {
+    widgets.depends = core
+    plugins.depends = core widgets apps thirdparty
+    apps.depends = core thirdparty widgets
+}
+
+

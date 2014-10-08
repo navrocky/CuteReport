@@ -30,8 +30,8 @@
 #ifndef ITEMSELECTION_H
 #define ITEMSELECTION_H
 
-
 #include "iteminterface.h"
+#include "plugins_common.h"
 
 #include <QtCore/QHash>
 #include <QtCore/QPointer>
@@ -40,9 +40,16 @@
 class QMouseEvent;
 class QPaintEvent;
 
+SUIT_BEGIN_NAMESPACE
 class ItemSelection;
 class PageGUI;
+class ItemHandle;
+class ItemSelection;
+SUIT_END_NAMESPACE
 
+USING_SUIT_NAMESPACE
+
+SUIT_BEGIN_NAMESPACE
 class ItemHandle: public QGraphicsItem
 {
 public:
@@ -83,6 +90,7 @@ private:
     QRectF m_geom, m_origGeom;
     bool m_active;
     bool m_useMagnets;
+    QList<CuteReport::BaseItemInterface*> m_checkingItems;
 };
 
 
@@ -109,6 +117,7 @@ protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *e);
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *e);
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *e);
+    virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *e);
 
 private:
     ItemHandle *m_handles[ItemHandle::TypeCount];
@@ -118,6 +127,10 @@ private:
     QRectF m_geom, m_origGeom;
     bool m_moved;
     PageGUI * m_pageGui;
+    QList<CuteReport::BaseItemInterface*> m_checkingItems;
 };
+
+
+SUIT_END_NAMESPACE
 
 #endif // ITEMSELECTION_H

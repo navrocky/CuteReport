@@ -48,8 +48,9 @@ public:
     Overlay(QObject * parent = 0);
     ~Overlay();
 
+    virtual void moduleInit();
+
     virtual BaseItemInterface *createInstance(QObject * parent) const;
-    virtual BaseItemInterface * clone();
     virtual QByteArray serialize();
     virtual void deserialize(QByteArray &data);
     virtual bool canContain(QObject * object);
@@ -59,19 +60,18 @@ public:
     CuteReport::BandInterface::AccomodationType accommodationType() const { return AccomodationEveryPage;}
 
     QIcon itemIcon() const;
-    QString moduleName() const;
+    QString moduleShortName() const;
+    virtual QString suitName() const { return "Standard"; }
     QString itemGroup() const;
 
-    virtual void setOrder(int order);
-
-    virtual CuteReport::RenderedItemInterface * render(int customDPI = 0);
-    virtual CuteReport::RenderedItemInterface * renderNewPage(int customDPI = 0);
-
-protected:
-    Overlay(OverlayPrivate &dd, QObject * parent);
+    virtual bool renderPrepare();
+    virtual CuteReport::RenderedItemInterface * renderView();
 
 private:
     Q_DECLARE_PRIVATE(Overlay)
+
+    Overlay(OverlayPrivate *dd, QObject * parent);
+    virtual BaseItemInterface * itemClone() const;
 };
 
 class OverlayPrivate : public CuteReport::BandInterfacePrivate

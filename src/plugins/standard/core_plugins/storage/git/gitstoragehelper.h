@@ -46,11 +46,12 @@ public:
     explicit GitStorageHelper(StorageGit * storage, VisibleOptions visibleOptions = AllOptions);
     ~GitStorageHelper();
 
-    virtual void load();
-    virtual void save();
 
     void showSyncMessage(const QString &message);
 
+public slots:
+    virtual void load();
+    virtual void save();
     
 private slots:
     void slotSync();
@@ -59,6 +60,9 @@ private slots:
     bool setGitVersion();
 
 private:
+    void connectObject();
+    void disconnectObject();
+
     Ui::GitStorageHelper *ui;
     StorageGit * m_storage;
 };

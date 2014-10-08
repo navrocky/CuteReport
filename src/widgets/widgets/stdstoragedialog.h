@@ -62,18 +62,15 @@ public:
     };
     Q_DECLARE_FLAGS(ViewOptions, ViewOption)
 
-//    explicit StdStorageDialog(StorageInterface * storage, QWidget *parent = 0, const QString windowTitle = QString());
-//    explicit StdStorageDialog(ReportCore * reportCore, const QString & storageScheme, QWidget *parent = 0, const QString windowTitle = QString());
     explicit StdStorageDialog(ReportCore * reportCore, QWidget *parent, const QString &windowTitle = QString());
     explicit StdStorageDialog(ReportCore * reportCore, ReportInterface * report, QWidget *parent = 0, const QString &windowTitle = QString());
-//    explicit StdStorageDialog(ReportInterface * report, QWidget *parent = 0, const QString &windowTitle = QString());
     ~StdStorageDialog();
 
     void setViewOptions(ViewOptions f);
     void setExtensionAutocomplete(bool b);
 
-    void setCurrentStorage(const QString & moduleName, bool exclusive = false);
-    void setCurrentStorageByScheme(const QString & storageScheme, bool exclusive = false);
+    void setCurrentStorage(const QString & storageName, bool exclusive = false);
+//    void setCurrentStorageByName(const QString & storageScheme, bool exclusive = false);
     QString currentStorageName();
 
     /** set default path(s) if it found */

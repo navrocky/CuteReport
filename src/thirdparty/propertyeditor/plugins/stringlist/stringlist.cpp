@@ -108,5 +108,5 @@ PropertyInterface* StringList::createInstance(QObject * object, int property, co
 }
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(stringlist, StringList)
+Q_EXPORT_PLUGIN2(StringListProperty, StringList)
 #endif

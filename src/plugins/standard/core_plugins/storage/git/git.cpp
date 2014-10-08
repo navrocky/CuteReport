@@ -40,6 +40,8 @@
 
 #define MODULENAME "StorageGit"
 
+inline void initMyResource() { Q_INIT_RESOURCE(gitresources); }
+
 using namespace CuteReport;
 
 QMap<QString, QString> StorageGit::m_urlHints;
@@ -90,6 +92,12 @@ StorageGit::~StorageGit()
         m_syncStruct->future.waitForFinished();
     delete m_helper;
     delete m_syncStruct;
+}
+
+
+void StorageGit::moduleInit()
+{
+    initMyResource();
 }
 
 
@@ -467,5 +475,5 @@ void StorageGit::setAskForOverwrite(bool b)
 }
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(StorageGit, StorageGit)
+Q_EXPORT_PLUGIN2(StorageGIT, StorageGit)
 #endif

@@ -39,19 +39,18 @@ class ImageItemPrivate : public CuteReport::ItemInterfacePrivate
 public:
     ImageItemPrivate()
         : ItemInterfacePrivate(),
-          paintType(ImageItem::ResizeImageToItem_keepAspectRatio),
-          textPosition(ImageItem::TextAbove),
-          sourceType(ImageItem::Script)
+          scaleType(ImageItem::ScaleImage),
+          sourceType(ImageItem::Static),
+          keepAspectRatio(true),
+          center(true)
     {}
     ImageItemPrivate(const ImageItemPrivate & p)
         :ItemInterfacePrivate(p),
           source(p.source),
-          comment(p.comment),
-          font(p.font),
-          paintType(p.paintType),
-          textPosition(p.textPosition),
-          textColor(p.textColor),
-          sourceType(p.sourceType)
+          scaleType(p.scaleType),
+          sourceType(p.sourceType),
+          keepAspectRatio(p.keepAspectRatio),
+          center(p.center)
     {
         if (sourceType == ImageItem::Static)
             image = p.image;
@@ -60,12 +59,10 @@ public:
 
     QImage image;
     QString source;
-    QString comment;
-    QFont font;
-    ImageItem::PaintType paintType;
-    ImageItem::TextPosition textPosition;
-    QColor textColor;
+    ImageItem::ScaleType scaleType;
     ImageItem::SourceType sourceType;
+    bool keepAspectRatio;
+    bool center;
 };
 
 QDataStream &operator<<(QDataStream &s, const ImageItemPrivate &p);

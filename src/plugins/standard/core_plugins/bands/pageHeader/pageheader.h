@@ -52,22 +52,25 @@ public:
     PageHeader(QObject * parent = 0);
     virtual ~PageHeader();
 
+    virtual void moduleInit();
+
     virtual CuteReport::BaseItemInterface *createInstance(QObject * parent) const;
-    virtual CuteReport::BaseItemInterface *clone();
     virtual QByteArray serialize();
     virtual void deserialize(QByteArray &data);
     virtual bool canContain(QObject * object);
 
     virtual void renderInit(CuteReport::RendererPublicInterface * renderer);
     virtual void renderReset();
-    virtual CuteReport::RenderedItemInterface * render(int customDPI = 0);
-    virtual CuteReport::RenderedItemInterface * renderNewPage(int customDPI = 0);
+    virtual bool renderPrepare();
+    virtual bool renderNewPage();
+    virtual CuteReport::RenderedItemInterface * renderView();
 
     int layoutPriority() const { return 100;}
     BandInterface::AccomodationType accommodationType() const {return AccomodationEveryPage;}
 
     virtual QIcon itemIcon() const;
-    virtual QString moduleName() const;
+    virtual QString moduleShortName() const;
+    virtual QString suitName() const { return "Standard"; }
     virtual QString itemGroup() const;
 
     virtual bool printOnFirstPage() const;
@@ -82,7 +85,8 @@ signals:
     void printOnceChanged();
 
 protected:
-    PageHeader(PageHeaderPrivate &dd, QObject * parent);
+    PageHeader(PageHeaderPrivate *dd, QObject * parent);
+    virtual CuteReport::BaseItemInterface *itemClone() const;
 
 private:
     Q_DECLARE_PRIVATE(PageHeader)
@@ -93,7 +97,7 @@ private:
 class  PageHeaderPrivate : public CuteReport::BandInterfacePrivate
 {
 public:
-    PageHeaderPrivate(): BandInterfacePrivate(), onFirstPage(true), once(false){}
+    explicit PageHeaderPrivate(): BandInterfacePrivate(), onFirstPage(true), once(false){}
     virtual ~PageHeaderPrivate(){}
 
     bool onFirstPage;
@@ -103,5 +107,5 @@ public:
 QDataStream &operator<<(QDataStream &s, const PageHeaderPrivate &p);
 QDataStream &operator>>(QDataStream &s, PageHeaderPrivate &p);
 
-//} //namespace
+//SUIT_END_NAMESPACE
 #endif

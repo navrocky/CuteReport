@@ -35,6 +35,8 @@
 #include <QGraphicsWidget>
 #include <QPen>
 #include <QWidget>
+#include <QPolygonF>
+
 #include "reportplugininterface.h"
 #include "types.h"
 #include "functions.h"
@@ -62,11 +64,13 @@ class CUTEREPORT_EXPORTS BaseItemInterface : public ReportPluginInterface
 {
     Q_OBJECT
     Q_INTERFACES(CuteReport::ReportPluginInterface)
+
     Q_FLAGS(Frame Frames)
     Q_ENUMS(Frame ResizeFlags)
 
     Q_PROPERTY(bool enabled READ enabled WRITE setEnabled NOTIFY enabledChanged)
     Q_PROPERTY(QRectF geometry READ geometry WRITE setGeometry NOTIFY geometryChanged)
+    Q_PROPERTY(QRectF boundingRect READ boundingRect NOTIFY boundingRectChanged)
     Q_PROPERTY(Frames frame READ frame WRITE setFrame NOTIFY frameChanged)
     Q_PROPERTY(qreal opacity READ opacity WRITE setOpacity NOTIFY opacityChanged)
     Q_PROPERTY(qreal rotation READ rotation WRITE setRotation NOTIFY rotationChanged)
@@ -76,6 +80,7 @@ class CUTEREPORT_EXPORTS BaseItemInterface : public ReportPluginInterface
 
     Q_PROPERTY(int _current_property READ _currentProperty WRITE _setCurrentProperty DESIGNABLE false)
     Q_PROPERTY(QString _current_property_description READ _current_property_description DESIGNABLE false)
+    Q_PROPERTY(int _current_property_precision READ _current_property_precision DESIGNABLE false)
 
 public:
     enum Frame {DrawLeft = 1, /**< Draw left frame*/
@@ -106,19 +111,22 @@ public:
     virtual void update_gui();
     virtual void init_gui() = 0;
 
+    virtual BaseItemInterface * createInstance(QObject * parent) const = 0;
+    virtual BaseItemInterface * clone(bool withChildren = true, bool init = true) const;
+
     virtual PageInterface * page() const;
     virtual void setPage(PageInterface * page);
     virtual BaseItemInterface * parentItem() const;
     virtual void setParentItem(BaseItemInterface *parentItem);
     CuteReport::ReportInterface * reportObject();
     virtual int childLevel();
+    CuteReport::BandInterface * carrierBand();
 
     virtual BaseItemInterface * topmostChildAt(const QPointF & localPos);
     virtual QList<BaseItemInterface *> childrenAt(const QPointF & localPos);
     QList<BaseItemInterface *> allChildrenAt(const QPointF & localPos);
 
     virtual BaseItemHelperInterface * helper() { return 0; }
-    virtual BaseItemInterface * clone() = 0;
     virtual QByteArray serialize();
     virtual void deserialize(QByteArray &data);
 
@@ -129,19 +137,34 @@ public:
     virtual void saveState();
     virtual void restoreState();
 
-    /** method called when renderer starts its work, nothing rendered yet */
-    virtual void renderInit(RendererPublicInterface * renderer);
-    /** method called when renderer has completed its work, all is already rendered */
-    virtual void renderReset();
-
     /** method called while script engine initing for export any custom types to the engine
     * Method should be called once per engine
     */
     virtual void initScript(QScriptEngine * scriptEngine) {Q_UNUSED(scriptEngine);}
 
+    /** method called when renderer starts its work, nothing rendered yet */
+    virtual void renderInit(RendererPublicInterface * renderer);
+
+    /** method called when renderer has completed its work, all is already rendered */
+    virtual void renderReset();
+
+    /** method is called to calculate rendered item data, replace internal item's data pointer with the
+     * new rendered data and return rendered itemView if needed
+     * return bool: true - item is printable; false - item is not printable
+     */
+    virtual bool renderPrepare() = 0;
+
+    /** render image to print */
+    virtual RenderedItemInterface * renderView() = 0;
+
+    /** method called after rendered item's geometry and position was managed and became final
+     * Every item must implement this method, return back correct internal data pointer and send printAfter signal
+     */
+    virtual bool renderEnd();
+
     /** method called before items on the same level (have the same parent) will be rendered */
     virtual void beforeSiblingsRendering() {}
-    virtual RenderedItemInterface * render(int customDPI = 0) = 0;
+    /** method called after items on the same level (have the same parent) have rendered */
     virtual void afterSiblingsRendering() {}
 
     /** item provides its own geometry logic so renderer will net change it */
@@ -164,6 +187,8 @@ public:
     virtual qreal width(Unit unit = UnitNotDefined) const;
     virtual void setWidth(qreal width, Unit unit = UnitNotDefined);
     virtual QSizeF minSize(Unit unit = UnitNotDefined) const;
+    virtual QRectF boundingRect(Unit unit = UnitNotDefined) const;
+    virtual QPolygonF polygon(Unit unit = UnitNotDefined) const;
 
     virtual qint8 frame() const;
     virtual void setFrame(Frames frame);
@@ -188,11 +213,15 @@ public:
     virtual void setDpi(int dpi);
     virtual int dpi() const;
 
+    virtual bool isSplitAllowed() const {return false;}
+
     virtual QStringList scriptingStrings(){return QStringList();}
 
     // common painter
     static void paintBegin(QPainter * painter, const QStyleOptionGraphicsItem *option, const BaseItemInterfacePrivate * data, const QRectF &boundingRect = QRectF(), RenderingType type = RenderingTemplate);
     static void paintEnd(QPainter * painter, const QStyleOptionGraphicsItem *option, const BaseItemInterfacePrivate * data, const QRectF &boundingRect = QRectF(), RenderingType type = RenderingTemplate);
+
+    virtual QTransform transform() const;
 
     // values in local unit
     // NotDefined = default item meassure
@@ -206,19 +235,24 @@ public:
     QPointF mapFromParent(const QPointF & point, Unit inputUnit = UnitNotDefined, Unit outputUnit = UnitNotDefined) const;
     QRectF absoluteGeometry(Unit outputUnit = UnitNotDefined) const;
     void setAbsoluteGeometry(const QRectF & rect, Unit inputUnit = UnitNotDefined);
+    QRectF absoluteBoundingRect(Unit unit = UnitNotDefined) const;
+    QPolygonF absolutePolygon(Unit unit = UnitNotDefined) const;
 
     static CuteReport::PageInterface * itemPage(CuteReport::BaseItemInterface * item);
     static QFont fontPrepared(const QFont & font, qint16 dpi);
     static QPen penPrepared(const QPen & pen, qint16 dpi);
+    static QTransform transform(const BaseItemInterfacePrivate *d);
+    static QPointF transformedPos(const BaseItemInterfacePrivate *d, const QRectF &rect);
 
     virtual void _setCurrentProperty(int num) {m_currentProperty = num;}
     virtual int _currentProperty() { return m_currentProperty;}
-    virtual QString  _current_property_description() const;
+    virtual QString _current_property_description() const;
+    virtual int _current_property_precision() const;
 
 signals:
-    void changed();
     void unitChanged(Unit);
     void geometryChanged(QRectF newGeometry);
+    void boundingRectChanged(QRectF newRect);
     void opacityChanged(qreal newOpacity);
     void frameChanged(Frames);
     void rotationChanged(qreal angle);
@@ -231,32 +265,39 @@ signals:
     void scriptingStringsChanged();
 
     /** signal emited when renderInit() method is called */
-    void renderingInit();
+    void printInit();
 
     /** signal emited when renderReset() method is called */
-    void renderingReset();
+    void printReset();
 
     /** signal emited when render() method processing started */
-    void renderingBefore();
+    void printBefore();
 
-    /** signal emited in render() method when item's private data repleced by itemView's private data
-     *  So any method will work direct with itemView's data and not affect private item's data itself
-     *  Signal emited before any item's string precessing */
-    void rendering();
+    /** signal emited in render() method when item's private data replaced by itemView's private data
+     * but before data processing
+     *  So any method will work direct with new item's data and not original private item's data itself
+     */
+    void printDataBefore();
 
-    /** signal emited when itemView already generated and all preprocessing done */
-    void rendered(CuteReport::RenderedItemInterface *itemView);
+    /** signal emited in render() method when item's private data replaced by itemView's private data
+     * and data processed
+     *  So any method will work direct with itemView's data and not affect private original item's data itself
+     */
+    void printDataAfter();
 
-    /** signal emited when itemView already generated and all preprocessing done *
-     * The same as rendered(...), but without exposing itemView */
-    void renderingAfter();
+    /** signal emited when itemView already generated and all preprocessing is done
+     * This signal must be inited after all gemetry arrangement is done, so only rendering module can init it from outside item
+    */
+    void printAfter();
     
 public slots:
     void updateViewIfExists();
 
 protected:
-    virtual BaseItemInterface * createInstance(QObject * parent) const = 0;
-    BaseItemInterface(BaseItemInterfacePrivate &dd, QObject * parent);
+    BaseItemInterface(BaseItemInterfacePrivate *dd, QObject * parent);
+    virtual BaseItemInterface * itemClone() const = 0;
+    void setRenderingPointer(BaseItemInterfacePrivate * r);
+    void replaceRenderingPointer();
 
     virtual void childAdded(BaseItemInterface * item) { Q_UNUSED(item); }
     virtual void childRemoved(BaseItemInterface * item) { Q_UNUSED(item); }
@@ -268,6 +309,7 @@ protected:
 
 protected:
     BaseItemInterfacePrivate * d_ptr;
+    BaseItemInterfacePrivate * orig_ptr;
     QList <BaseItemInterfacePrivate*>  dataStack;
     ItemInterfaceView * m_gui;
     PageInterface * m_page;
@@ -289,6 +331,7 @@ class CUTEREPORT_EXPORTS BaseItemHelperInterface: public QWidget
 {
 public:
     virtual void sync(){}
+    virtual bool screenBack(bool accept = true){Q_UNUSED(accept); return false;} //only one screen by default;
 };
 
 

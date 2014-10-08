@@ -27,7 +27,7 @@
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
  *   GNU General Public License for more details.                          *
  ****************************************************************************/
-#include "xml.h"
+#include "serializerxml.h"
 #include "reportinterface.h"
 #include "datasetinterface.h"
 #include "pageinterface.h"
@@ -51,7 +51,7 @@ static const int firstPropertyNum = 1;
 static const int firstPropertyNum = 0;
 #endif
 
-static const QString MODULENAME = "XML Serializer";
+static const QString MODULENAME = "SerializerXML";
 
 
 Q_DECLARE_METATYPE(QPainterPath)
@@ -59,7 +59,7 @@ Q_DECLARE_METATYPE(QPainterPath)
 using namespace CuteReport;
 
 SerializerXML::SerializerXML(QObject * parent)
-    : SerializerInterface(parent)
+    :SerializerInterface(parent)
 {
 
 }
@@ -71,7 +71,7 @@ SerializerXML::~SerializerXML()
 }
 
 
-SerializerXML * SerializerXML::createInstance(QObject * parent) const
+SerializerInterface *SerializerXML::createInstance(QObject * parent) const
 {
     return new SerializerXML(parent);
 }
@@ -154,10 +154,10 @@ QDomElement SerializerXML::objectProperties(const QObject * object, QDomDocument
     } else {
         /** new method*/
         d = doc->createElement(objectTypeName);
-        d.setAttribute("className", object->metaObject()->className());
+        //d.setAttribute("className", object->metaObject()->className());
         if (dynamic_cast<const CuteReport::ReportPluginInterface*>(object)) {
             const CuteReport::ReportPluginInterface* module = reinterpret_cast<const CuteReport::ReportPluginInterface*>(object);
-            d.setAttribute("moduleName", module->moduleName());
+            d.setAttribute("moduleName", module->moduleFullName());
             d.setAttribute("moduleVersion", module->moduleVersion());
             d.setAttribute("extends", module->extendsModules().join(", "));
         }
@@ -197,7 +197,7 @@ QObject * SerializerXML::objectFromDom( QObject * parent, const QDomElement & do
         obj = report;
         setObjectPropertiesFromDom(obj, dom);
         setObjectChildrenFromDom(obj, dom, report);
-        report->init();
+        //report->init();
     }
 
     if (!obj) {
@@ -228,8 +228,10 @@ QObject * SerializerXML::objectFromDom( QObject * parent, const QDomElement & do
 
     if (obj) {
         ReportInterface * report = qobject_cast<ReportInterface*>(obj);
-        if (report)
+        if (report) {
+            QList<CuteReport::ReportPluginInterface*> modules = this->findChildren<CuteReport::ReportPluginInterface*>();
             report->init();
+        }
     }
     //    else
     //        qWarning() << tr("Can't find plugin for tagname \'%1\'").arg(dom.tagName());
@@ -938,19 +940,19 @@ QObject * SerializerXML::createObject(CuteReport::ReportInterface *report, const
 {
     const ReportPluginInterface * object = 0;
     if ((object = itemPluginByClassName(classname)))
-        return reportCore()->createItemObject(report, object->moduleName(), parent ? parent : report);
+        return reportCore()->createItemObject(report, object->moduleFullName(), parent ? parent : report);
     if (!object && (object = pagePluginByClassName(classname)))
-        return reportCore()->createPageObject(report, object->moduleName());
+        return reportCore()->createPageObject(report, object->moduleFullName());
     if (!object && (object = datasetPluginByClassName(classname)))
-        return reportCore()->createDatasetObject(report, object->moduleName());
+        return reportCore()->createDatasetObject(report, object->moduleFullName());
     if (!object && (object = printerPluginByClassName(classname)))
-        return reportCore()->createPrinterObject(report, object->moduleName());
+        return reportCore()->createPrinterObject(report, object->moduleFullName());
     if (!object && (object = rendererPluginByClassName(classname)))
-        return reportCore()->createRendererObject(report, object->moduleName());
+        return reportCore()->createRendererObject(report, object->moduleFullName());
     if (!object && (object = storagePluginByClassName(classname)))
-        return reportCore()->createStorageObject(report, object->moduleName());
+        return reportCore()->createStorageObject(report, object->moduleFullName());
     if (!object && (object = formPluginByClassName(classname)))
-        reportCore()->createFormObject(report, object->moduleName());
+        reportCore()->createFormObject(report, object->moduleFullName());
     return 0;
 }
 
@@ -1044,6 +1046,10 @@ QObject * SerializerXML::createObject( const QDomElement & dom, QObject * parent
     QString tagName = dom.tagName();
     QString moduleName = dom.attribute("moduleName");
 
+    //compatibility workaround
+    if (!moduleName.contains("::"))
+        moduleName.prepend("Standard::");
+
     // we dont need to process "Report" object here
     if (tagName == "Band") {
         BandInterface * band = dynamic_cast<CuteReport::BandInterface*>(reportCore()->createItemObject(report, moduleName, parent ? parent : report));
@@ -1066,18 +1072,28 @@ QObject * SerializerXML::createObject( const QDomElement & dom, QObject * parent
     }
 
     if (tagName == "Item") {
-        ItemInterface * item = dynamic_cast<CuteReport::ItemInterface*>(reportCore()->createItemObject(report, moduleName, parent ? parent : report));
-        if (!item) {
+        object = reportCore()->createItemObject(report, moduleName, parent ? parent : report);
+        if (!object && !dom.attribute("extends").isEmpty()) {
+            foreach (const QString & baseModule, dom.attribute("extends").split(",", QString::SkipEmptyParts)) {
+                object = reportCore()->createItemObject(report, baseModule);
+                if (object)
+                    break;
+            }
+        }
+        if (!object) {
             DummyItem * dItem = new CuteReport::DummyItem(parent ? parent : report);
             dItem->setOriginalModuleName(moduleName);
 
             if (report)
                 report->setInvalid();
-            item = dItem;
+            object = dItem;
             reportCore()->log(LogError, MODULENAME, QString("Item with name \'%1\' is not found").arg(moduleName));
         }
-        return item;
+        return object;
     } else if (tagName == "Page") {
+        // FIXME: compatibility
+        if (moduleName == "Standard::Standard")
+            moduleName = "Standard::Page";
         object = reportCore()->createPageObject(report, moduleName);
         if (!object && !dom.attribute("extends").isEmpty()) {
             foreach (const QString & baseModule, dom.attribute("extends").split(",", QString::SkipEmptyParts)) {
@@ -1105,6 +1121,9 @@ QObject * SerializerXML::createObject( const QDomElement & dom, QObject * parent
             }
         }
     } else if (tagName == "Renderer") {
+        // FIXME: compatibility
+        if (moduleName == "Standard::Standard")
+            moduleName = "Standard::Renderer";
         object = reportCore()->createRendererObject(report, moduleName);
         if (!object && !dom.attribute("extends").isEmpty()) {
             foreach (const QString & baseModule, dom.attribute("extends").split(",", QString::SkipEmptyParts)) {
@@ -1114,6 +1133,9 @@ QObject * SerializerXML::createObject( const QDomElement & dom, QObject * parent
             }
         }
     } else if (tagName == "Printer") {
+        // FIXME: compatibility
+        if (moduleName == "Standard::Standard")
+            moduleName = "Standard::Printer";
         object = reportCore()->createPrinterObject(report, moduleName);
         if (!object && !dom.attribute("extends").isEmpty()) {
             foreach (const QString & baseModule, dom.attribute("extends").split(",", QString::SkipEmptyParts)) {
@@ -1167,5 +1189,5 @@ QString SerializerXML::objectType(const QObject * object, QList<StringPair> &spe
 }
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(xmlSerializer, SerializerXML)
+Q_EXPORT_PLUGIN2(SerializerXML, SerializerXML)
 #endif

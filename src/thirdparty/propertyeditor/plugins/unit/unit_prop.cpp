@@ -132,4 +132,4 @@ PropertyInterface* UnitProp::createInstance(QObject * object, int property, cons
     return new UnitProp(parent(), object, property, propertyModel);
 }
 
-Q_EXPORT_PLUGIN2(unitProp, UnitProp)
+Q_EXPORT_PLUGIN2(unitProp, UnitProperty)

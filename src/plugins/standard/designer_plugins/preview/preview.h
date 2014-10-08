@@ -47,6 +47,9 @@ class Preview : public CuteDesigner::ModuleInterface
 public:
     explicit Preview(QObject *parent = 0);
     ~Preview();
+
+    virtual void init(CuteDesigner::Core *core);
+
     virtual void reloadSettings();
     virtual void saveSettings();
     virtual void activate();
@@ -65,5 +68,5 @@ private:
     QPointer<CuteReport::ReportPreview> ui;
 };
 
-//} //namespace
+//SUIT_END_NAMESPACE
 #endif // PREVIEW_H

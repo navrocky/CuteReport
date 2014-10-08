@@ -2,17 +2,19 @@ VERSION = 1.0
 REPORT_VERSION=$$VERSION
 
 #DEFINES += SYSTEMINSTALL
+#DEFINES += STATICBUILD
+DEFINES += DEMO
 
 BUILD_DIR = build
-#REPORT_ROOT_PATH = "/usr"
-REPORT_ROOT_PATH = "/home/alex/temp/install/cutereport/"
-
 # path for variables in home dir
 REPORT_VARS_PATH = "temp/cutereport/"
+#local path for devoping version installation
+USER_INSTALL_PATH = "/home/alex/temp/install/cutereport/"
 
 
 contains(DEFINES, SYSTEMINSTALL) {
 
+    REPORT_ROOT_PATH = "/usr"
     #systemwide install: for linux distributions
 
     REPORT_LIBS_PATH =                   $$REPORT_ROOT_PATH/lib/
@@ -25,8 +27,8 @@ contains(DEFINES, SYSTEMINSTALL) {
     REPORT_DESIGNER_PATH =               $$REPORT_ROOT_PATH/bin
     REPORT_DESIGNER_PLUGINS_PATH =       $$REPORT_LIBS_PATH/cutereport/designer_plugins
     REPORT_DESIGNER_LIBS_PATH =          $$REPORT_LIBS_PATH
-    REPORT_DESIGNER_IMAGES_PATH=         $$REPORT_RESOURCES_PATH/designer/images
-    REPORT_DESIGNER_RESOURCES_PATH=      $$REPORT_RESOURCES_PATH/designer/
+    REPORT_DESIGNER_IMAGES_PATH =        $$REPORT_RESOURCES_PATH/designer/images
+    REPORT_DESIGNER_RESOURCES_PATH =     $$REPORT_RESOURCES_PATH/designer/
 
     PROPERTYEDITOR_LIBS_PATH =           $$REPORT_LIBS_PATH
     PROPERTYEDITOR_HEADERS_PATH =        $$REPORT_ROOT_PATH/include/propertyeditor
@@ -36,6 +38,7 @@ contains(DEFINES, SYSTEMINSTALL) {
 
 } else {
 
+    REPORT_ROOT_PATH = $$USER_INSTALL_PATH
     # all in one folder install
 
     REPORT_LIBS_PATH =
@@ -49,7 +52,7 @@ contains(DEFINES, SYSTEMINSTALL) {
     REPORT_DESIGNER_PLUGINS_PATH =       cutereport/designer/plugins
     REPORT_DESIGNER_LIBS_PATH =
     REPORT_DESIGNER_IMAGES_PATH=         cutereport/designer/images
-    REPORT_DESIGNER_RESOURCES_PATH=      cutereport/designer/share
+    REPORT_DESIGNER_RESOURCES_PATH =     cutereport/designer/share
 
     PROPERTYEDITOR_LIBS_PATH =
     PROPERTYEDITOR_HEADERS_PATH =        cutereport/include/propertyeditor
@@ -58,8 +61,6 @@ contains(DEFINES, SYSTEMINSTALL) {
     QTDESIGNER_PLUGINS_PATH =            designer
 }
 
-
-#DEFINES += PROPERTYEDITOR_STATICPLAGINS
 
 # -------------------------------------------------------------
 DEFINES += REPORT_VERSION=\\\"$$REPORT_VERSION\\\"
@@ -94,3 +95,16 @@ lessThan(QT_MAJOR_VERSION, 5) {
 
 CONFIG -= debug_and_release
 
+exists(src/plugins/extended/extended.pro) {
+    DEFINES += EXTENDEDSUITE
+}
+
+contains(DEFINES, STATICBUILD) {
+    DEFINES += STATIC_PROPERTYEDITOR
+    DEFINES += STATICPLUGINS_PROPERTYEDITOR
+    DEFINES += STATIC_DESIGNER
+    DEFINES += STATICPLUGINS_DESIGNER
+    DEFINES += STATIC_CORE
+    DEFINES += STATICPLUGINS_CORE
+    DEFINES += STATIC_WIDGETS
+}

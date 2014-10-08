@@ -9,7 +9,6 @@ TEMPLATE = lib
 
 SOURCES += \
     core.cpp \
-    ../../core/functions_gui.cpp \
     moduleinterface.cpp \
     widgets/objectinspector/objectinspector.cpp \
     widgets/objectinspector/objectmodel.cpp \
@@ -25,11 +24,11 @@ SOURCES += \
     widgets/messagemodel.cpp \
     widgets/messagedelegate.cpp \
     widgets/renamedialog.cpp \
-    optionsdialogrendererpage.cpp
+    optionsdialogrendererpage.cpp \
+    designeriteminterfaceobject.cpp
 
 HEADERS  += globals.h \
     core.h \
-    ../../core/functions_gui.h \
     moduleinterface.h \
     widgets/objectinspector/objectinspector.h \
     widgets/objectinspector/objectmodel.h \
@@ -46,7 +45,8 @@ HEADERS  += globals.h \
     widgets/messagemodel.h \
     widgets/messagedelegate.h \
     widgets/renamedialog.h \
-    optionsdialogrendererpage.h
+    optionsdialogrendererpage.h \
+    designeriteminterfaceobject.h
 
 RESOURCES += designerCore.qrc
 
@@ -60,6 +60,7 @@ FORMS += mainwindow.ui \
     optionsdialogrendererpage.ui
 
 INCLUDEPATH += ../../core \
+            ../../widgets/widgets \
             ../../_common \
             ../../core/log \
             ../../thirdparty/propertyeditor/lib  \
@@ -74,7 +75,7 @@ win32 {
     TARGET_EXT = .dll
 }
 
-LIBS += -L../../../$$BUILD_DIR -lPropertyEditor -lCuteReport
+LIBS += -L../../../$$BUILD_DIR -lPropertyEditor -lCuteReport -lCuteReportWidgets
 
 contains(DEFINES, SYSTEMINSTALL) {
     DESTDIR = ../../../$$BUILD_DIR
@@ -82,4 +83,11 @@ contains(DEFINES, SYSTEMINSTALL) {
     INSTALLS += target
 } else {
     DESTDIR = ../../../$$BUILD_DIR/$$REPORT_DESIGNER_LIBS_PATH
+}
+
+
+contains(DEFINES, STATIC_DESIGNER) {
+    CONFIG += static
+    #HEADERS += ../../core/designeriteminterface.h
+    #SOURCES += ../../core/designeriteminterface.cpp
 }

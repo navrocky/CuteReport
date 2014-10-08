@@ -28,12 +28,13 @@ namespace Ui {
 class ReportContainer;
 }
 
+class ReportEditor;
 
 class ReportContainer : public QWidget
 {
     Q_OBJECT    
 public:
-    explicit ReportContainer(CuteDesigner::Core * core, QWidget *parent = 0);
+    explicit ReportContainer(ReportEditor * reportEditor, QWidget *parent = 0);
     ~ReportContainer();
 
     void reloadSettings();
@@ -62,9 +63,7 @@ private slots:
 
 private:
     Ui::ReportContainer *ui;
-    CuteDesigner::Core * m_core;
-//    QList<CuteReport::DatasetInterface*> m_datasetPlugins;
-//    QList<CuteReport::DatasetInterface*> m_datasets;
+    ReportEditor * m_reportEditor;
 };
 
 #endif // REPORTEDITORCONTAINER_H

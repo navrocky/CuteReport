@@ -47,4 +47,7 @@ contains(DEFINES, SYSTEMINSTALL) {
     DESTDIR = ../../../../$$BUILD_DIR/$$PROPERTYEDITOR_LIBS_PATH
 }
 
+contains(DEFINES, STATIC_PROPERTYEDITOR) {
+    CONFIG += static
+}
 

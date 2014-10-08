@@ -49,6 +49,9 @@ class RenderedReportInterface;
 class CUTEREPORT_EXPORTS RendererInterface : public ReportPluginInterface
 {
     Q_OBJECT
+    Q_INTERFACES(CuteReport::ReportPluginInterface)
+
+    Q_PROPERTY(int dpi READ dpi WRITE setDpi NOTIFY dpiChanged)
 
     Q_PROPERTY(int _current_property READ _currentProperty WRITE _setCurrentProperty DESIGNABLE false)
     Q_PROPERTY(QString _current_property_description READ _current_property_description DESIGNABLE false)
@@ -75,12 +78,15 @@ public:
     virtual int _currentProperty() { return m_currentProperty; }
     virtual QString _current_property_description() const;
 
+    virtual QAbstractItemModel * functionsModel() {return 0;}
+    virtual QAbstractItemModel * variablesModel() {return 0;}
+
 signals:
-    void changed();
     void started();
     void done(bool errorsFound);
     void cancelled();
     void processingPage(int page, int total);
+    void dpiChanged(int);
 
 protected:
     explicit RendererInterface(const RendererInterface &dd, QObject * parent);
@@ -90,7 +96,7 @@ protected:
     int m_currentProperty;
 };
 
-}
+} //namespace
 
 Q_DECLARE_INTERFACE(CuteReport::RendererInterface, "CuteReport.RendererInterface/1.0")
 

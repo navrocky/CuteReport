@@ -34,8 +34,9 @@ class ItemsToolWidget : public QWidget
 {
     Q_OBJECT
 public:
-    ItemsToolWidget(QWidget * parent);
-    void addItem(const QIcon &icon, const QString &name, const QString &group);
+    ItemsToolWidget(QWidget * parent, const QString &imagePath = QString() );
+    void setImagesPath(const QString & path);
+    void addItem(const QIcon &icon, const QString &name, const QString &suiteName, const QString &group);
 
 private slots:
     void showItems();
@@ -50,6 +51,7 @@ private:
     QHash<QString, Menu*> m_menus;
     Menu * m_menu;
     QTimer m_hideDelay;
+    QString m_imagePath;
 };
 
 

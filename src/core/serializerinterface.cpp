@@ -27,10 +27,22 @@
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
  *   GNU General Public License for more details.                          *
  ****************************************************************************/
-#include "storageinterface.h"
+#include "serializerinterface.h"
 
 namespace CuteReport
 {
+
+SerializerInterface::SerializerInterface(QObject *parent)
+    :ReportPluginInterface(parent)
+{
+
+}
+
+
+SerializerInterface::~SerializerInterface()
+{
+
+}
 
 
 } //namespace

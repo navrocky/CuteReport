@@ -44,6 +44,8 @@ class PrinterHelperInterface;
 class CUTEREPORT_EXPORTS PrinterInterface : public ReportPluginInterface
 {
     Q_OBJECT
+    Q_INTERFACES(CuteReport::ReportPluginInterface)
+
     Q_PROPERTY(QString printerName READ printerName WRITE setPrinterName NOTIFY printerNameChanged)
 
     Q_PROPERTY(int _current_property READ _currentProperty WRITE _setCurrentProperty DESIGNABLE false)
@@ -54,6 +56,8 @@ public:
     virtual ~PrinterInterface();
 
     virtual PrinterHelperInterface * helper() = 0;
+    virtual PrinterInterface * createInstance(QObject * parent = 0) const = 0;
+    virtual PrinterInterface * clone() const = 0;
 
     virtual bool print(CuteReport::ReportInterface * report) = 0;
 
@@ -67,11 +71,11 @@ public:
     virtual QString _current_property_description() const;
 
 signals:
-    void changed();
     void printerNameChanged(const QString &);
 
 protected:
-    virtual PrinterInterface * createInstance( QObject * parent = 0) const = 0;
+    explicit PrinterInterface(const PrinterInterface &dd, QObject * parent);
+
     QString m_printerName;
     int m_currentProperty;
 

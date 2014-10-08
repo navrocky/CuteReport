@@ -50,6 +50,10 @@ class RectF : public PropertyEditor::PropertyInterface
     Q_PROPERTY(qreal y READ y WRITE setY USER true)
     Q_PROPERTY(qreal width READ width WRITE setWidth USER true)
     Q_PROPERTY(qreal height READ height WRITE setHeight USER true)
+
+    Q_PROPERTY(int _current_property READ _currentProperty WRITE _setCurrentProperty DESIGNABLE false)
+    Q_PROPERTY(int _current_property_precision READ _current_property_precision DESIGNABLE false)
+
 public:
     RectF(QObject* parent = 0, QObject* object = 0, int property = -1, const PropertyModel * propertyModel = 0);
     QWidget* createEditor(QWidget * parent, const QModelIndex & index);
@@ -75,6 +79,13 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index);
 
     PropertyInterface* createInstance(QObject * object, int property, const PropertyModel * propertyModel) const;
+
+    void _setCurrentProperty(int num) {m_currentProperty = num;}
+    int _currentProperty() { return m_currentProperty;}
+    int _current_property_precision();
+
+private:
+    int m_currentProperty;
 };
 
 #endif

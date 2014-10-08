@@ -170,4 +170,4 @@ bool ExporSVG::process_(CuteReport::ReportInterface * report, const QString & ou
 }
 
 
-Q_EXPORT_PLUGIN2(exportPDF, ExportPDF)
+Q_EXPORT_PLUGIN2(ExportSVG, ExportSVG)

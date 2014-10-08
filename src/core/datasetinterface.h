@@ -48,6 +48,7 @@ class DatasetHelperInterface;
 class CUTEREPORT_EXPORTS DatasetInterface : public ReportPluginInterface
 {
     Q_OBJECT
+    Q_INTERFACES(CuteReport::ReportPluginInterface)
 
     Q_PROPERTY(QString parentDataset READ parentDataset WRITE setParentDataset)
     Q_PROPERTY(QString filterCondition READ filterCondition WRITE setFilterCondition)
@@ -59,6 +60,7 @@ public:
 
     virtual void init(){}
     virtual DatasetHelperInterface * helper() = 0;
+    virtual DatasetInterface * clone() const;
     Q_INVOKABLE virtual QAbstractItemModel * model();
 
     virtual QIcon icon() = 0;
@@ -76,6 +78,7 @@ public:
     Q_INVOKABLE virtual int currentRow() = 0;
     Q_INVOKABLE virtual bool setCurrentRow(int index) = 0;
     Q_INVOKABLE virtual int rows() = 0;
+    Q_INVOKABLE virtual int columns() = 0;
     Q_INVOKABLE virtual QVariant value(int index) const;
     Q_INVOKABLE virtual QVariant value(const QString & field) const;
     Q_INVOKABLE virtual QVariant lookaheadValue(int index) const;
@@ -83,6 +86,7 @@ public:
     Q_INVOKABLE virtual QVariant lookbackValue(int index) const;
     Q_INVOKABLE virtual QVariant lookbackValue(const QString & field) const;
     Q_INVOKABLE virtual QString fieldName(int column );
+    Q_INVOKABLE virtual QVariant::Type fieldType(int column ) = 0;
     Q_INVOKABLE virtual void setFilter ( const int col, const QString & str, Qt::CaseSensitivity cs = Qt::CaseSensitive );
 
     Q_INVOKABLE QString	parentDataset();
@@ -95,7 +99,6 @@ public:
     virtual QSet<QString> variables() const {return QSet<QString>();}
 
 signals:
-    void changed();
     void beforeNext();
     void afterNext();
     void beforePrevious();
@@ -114,7 +117,7 @@ signals:
 
 protected:
     virtual DatasetInterface * createInstance(QObject* parent = 0) const = 0;
-
+    virtual DatasetInterface * objectClone() const = 0;
 private:
     QString m_parentDataset;
     QString m_filterCondition;

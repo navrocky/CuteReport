@@ -31,6 +31,8 @@
 #define PAGEINTERFACE_H
 
 #include "reportplugininterface.h"
+#include "types.h"
+
 #include <QPointF>
 #include <QRectF>
 #include <QMap>
@@ -38,10 +40,9 @@
 #include <QString>
 #include <QGraphicsRectItem>
 #include <QWidget>
-#include "types.h"
 
 
-static int RenderedPageInterfaceType = QGraphicsItem::UserType + 12789;
+//static int RenderedPageInterfaceType = QGraphicsItem::UserType + 12789;
 //static int PageViewInterfaceType = QGraphicsItem::UserType + 123754;
 
 class QGraphicsView;
@@ -69,6 +70,8 @@ public:
 class CUTEREPORT_EXPORTS PageInterface : public ReportPluginInterface
 {
     Q_OBJECT
+    Q_INTERFACES(CuteReport::ReportPluginInterface)
+
     Q_ENUMS(Unit)
     Q_ENUMS(Orientation)
 
@@ -77,8 +80,15 @@ class CUTEREPORT_EXPORTS PageInterface : public ReportPluginInterface
     Q_PROPERTY(QSizeF paperSize READ paperSize WRITE setPaperSize NOTIFY paperSizeChanged)
     Q_PROPERTY(QString unit READ unitStr WRITE setUnitStr NOTIFY unitChanged)
     Q_PROPERTY(int dpi READ dpi WRITE setDpi NOTIFY dpiChanged)
-    Q_PROPERTY(CuteReport::Margins margins READ margins WRITE setMargins NOTIFY marginsChanged)
+    Q_PROPERTY(qreal marginLeft READ marginLeft WRITE setMarginLeft NOTIFY marginLeftChanged)
+    Q_PROPERTY(qreal marginTop READ marginTop WRITE setMarginTop NOTIFY marginTopChanged)
+    Q_PROPERTY(qreal marginRight READ marginRight WRITE setMarginRight NOTIFY marginRightChanged)
+    Q_PROPERTY(qreal marginBottom READ marginBottom WRITE setMarginBottom NOTIFY marginBottomChanged)
     Q_PROPERTY(QColor background READ background WRITE setBackground NOTIFY backgroundChanged)
+
+    Q_PROPERTY(int _current_property READ _currentProperty WRITE _setCurrentProperty DESIGNABLE false)
+    Q_PROPERTY(QString _current_property_description READ _current_property_description DESIGNABLE false)
+    Q_PROPERTY(int _current_property_precision READ _current_property_precision DESIGNABLE false)
 
 public:
     enum Orientation { Portrait = 0, Landscape = 1 };
@@ -91,8 +101,11 @@ public:
     virtual void init(){} // work after restoring
     
     virtual QList <BaseItemInterface*> items() const = 0;
+    virtual BaseItemInterface* item(const QString & objectName) const = 0;
 
     virtual QWidget * createHelper() = 0;
+    virtual PageInterface * createInstance( QObject * parent=0) const = 0;
+    virtual PageInterface * clone(bool withChildren = true, bool init = true) const;
 
     virtual bool canContain(const QObject * object) = 0;
 
@@ -104,8 +117,16 @@ public:
     virtual QSizeF paperSize(Unit unit = UnitNotDefined) const = 0; // if NotDefined = use current page format
     virtual void setPaperSize(const QSizeF & size, CuteReport::Unit unit = CuteReport::UnitNotDefined) = 0;   // for custom formats
     virtual QRectF pageRect(CuteReport::Unit unit = UnitNotDefined) = 0;
-    virtual CuteReport::Margins margins(CuteReport::Unit unit = CuteReport::UnitNotDefined) const = 0;
-    virtual void setMargins(const CuteReport::Margins & margins, CuteReport::Unit unit = CuteReport::UnitNotDefined) = 0;
+    virtual qreal marginLeft(CuteReport::Unit unit = CuteReport::UnitNotDefined) const = 0;
+    virtual qreal marginTop(CuteReport::Unit unit = CuteReport::UnitNotDefined) const = 0;
+    virtual qreal marginRight(CuteReport::Unit unit = CuteReport::UnitNotDefined) const = 0;
+    virtual qreal marginBottom(CuteReport::Unit unit = CuteReport::UnitNotDefined) const = 0;
+    virtual void setMarginLeft(qreal margin, CuteReport::Unit unit = CuteReport::UnitNotDefined) = 0;
+    virtual void setMarginTop(qreal margin, CuteReport::Unit unit = CuteReport::UnitNotDefined) = 0;
+    virtual void setMarginRight(qreal margin, CuteReport::Unit unit = CuteReport::UnitNotDefined) = 0;
+    virtual void setMarginBottom(qreal margin, CuteReport::Unit unit = CuteReport::UnitNotDefined) = 0;
+//    virtual CuteReport::Margins margins(CuteReport::Unit unit = CuteReport::UnitNotDefined) const = 0;
+    Q_SCRIPTABLE virtual void setMargins(qreal left, qreal top, qreal right, qreal bottom, CuteReport::Unit unit = CuteReport::UnitNotDefined) = 0;
     virtual CuteReport::Unit unit() const = 0;
     virtual void setUnit(const CuteReport::Unit &) = 0;
     virtual QString unitStr() const = 0;
@@ -116,8 +137,10 @@ public:
     virtual void setBackground(const QColor & background) = 0;
 
     virtual bool addItem(BaseItemInterface * item, QPointF pagePos, QString * error = 0) = 0;
+    virtual bool addItem(BaseItemInterface * item) = 0;
     virtual bool addItem(const QString & className, QPointF pagePos, QString * error = 0) = 0;
     virtual void deleteItem(BaseItemInterface * item) = 0;
+    virtual void deleteItem(const QString & itemName) = 0;
 
     /// Renderer
     virtual void renderInit(){}
@@ -148,13 +171,18 @@ public:
 //    virtual QRect mapToPixel(QRectF rect, int customDPI = 0) = 0;
 //    virtual QPoint mapToPixel(QPointF point, int customDPI = 0) = 0;
 
+    virtual void _setCurrentProperty(int num) {m_currentProperty = num;}
+    virtual int _currentProperty() { return m_currentProperty;}
+    virtual QString _current_property_description() const;
+    virtual int _current_property_precision() const;
+
 signals:
     //GUI methods
     void activeObjectChanged(QObject * object);
-    void beforeNewItemAdded(CuteReport::BaseItemInterface * item, QPointF pagePos, bool * cancel);
-    void afterNewItemAdded(CuteReport::BaseItemInterface * item, QPointF pagePos);
+    void beforeNewItemAdded(CuteReport::BaseItemInterface * item, bool * cancel);
+    void afterNewItemAdded(CuteReport::BaseItemInterface * item);
     void beforeItemRemoved(CuteReport::BaseItemInterface* item, bool * cancel);
-    void afterItemRemoved(CuteReport::BaseItemInterface* item);
+    void afterItemRemoved(CuteReport::BaseItemInterface* item, QString itemName, bool directDeletion);
     void itemGeometryChanged(BaseItemInterface * item, QRectF oldGeometry, QRectF newGeometry);
     void viewCreated(PageViewInterface *);
 
@@ -166,12 +194,18 @@ signals:
     void unitChanged(CuteReport::Unit newUnit);
     void unitChanged(QString newUnit);
     void dpiChanged(int newDpi);
-    void marginsChanged(CuteReport::Margins margins);
+    void marginLeftChanged(qreal margin);
+    void marginTopChanged(qreal margin);
+    void marginRightChanged(qreal margin);
+    void marginBottomChanged(qreal margin);
+    void marginChanged();
     void backgroundChanged(QColor);
 
 protected:
     PageInterface(const PageInterface &dd, QObject * parent);
-    virtual PageInterface * createInstance( QObject * parent=0) const = 0;
+    virtual PageInterface * objectClone() const = 0;
+
+    int m_currentProperty;
 
     friend class ReportCore;
 };
@@ -201,6 +235,7 @@ public:
 class CUTEREPORT_EXPORTS RenderedPageInterface: public QObject, public QGraphicsRectItem
 {
 public:
+    enum {Type = QGraphicsItem::UserType + 12789};
     enum ShowFlag { ShowNothing =          0x00,
                     ShowBackground =       0x01,
                     ShowPaperBorder =      0x04,
@@ -217,7 +252,7 @@ public:
     virtual ShowFlags showFlags() {return m_showFlags;}
 
     virtual CuteReport::PageInterface::Orientation orientation() const = 0;
-    virtual CuteReport::Margins margins(CuteReport::Unit unit) const = 0;
+    //virtual CuteReport::Margins margins(CuteReport::Unit unit) const = 0;
     virtual QRectF paperRect(CuteReport::Unit unit) const = 0;
     virtual QSizeF paperSize(CuteReport::Unit unit) const = 0;
     virtual QRectF pageRect(CuteReport::Unit unit) const = 0;
@@ -227,7 +262,7 @@ public:
 
     virtual void redraw() = 0;
 
-    virtual int type() const { return RenderedPageInterfaceType; }
+    virtual int type() const { return Type; }
 
 protected:
     ShowFlags m_showFlags;

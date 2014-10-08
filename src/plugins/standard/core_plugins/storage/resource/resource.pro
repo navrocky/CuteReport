@@ -17,4 +17,4 @@ FORMS += \
     resourcestoragehelper.ui \
 
 RESOURCES += \
-    ResourceStorageResources.qrc
+    resource_storage.qrc

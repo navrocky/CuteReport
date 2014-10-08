@@ -99,24 +99,24 @@ static const QMetaObject *qtscript_Qt_metaObject()
 
 /** ======================= Frame =========================== */
 
-static const BaseItemInterface::Frame qtscript_BaseItemInterface_Frame_values[] = {
+static const BaseItemInterface::Frame qtscript_Image_Frame_values[] = {
     BaseItemInterface::DrawLeft,
     BaseItemInterface::DrawRight,
     BaseItemInterface::DrawTop,
     BaseItemInterface::DrawBottom
 };
 
-static const char * const qtscript_BaseItemInterface_Frame_keys[] = {
+static const char * const qtscript_Image_Frame_keys[] = {
     "DrawLeft",
     "DrawRight",
     "DrawTop",
     "DrawBottom"
 };
 
-static int BaseItemInterface_Frame_num = 4;
+static int Image_Frame_num = 4;
 
 
-static QString qtscript_BaseItemInterface_Frame_toStringHelper(BaseItemInterface::Frame value)
+static QString qtscript_Image_Frame_toStringHelper(BaseItemInterface::Frame value)
 {
     const QMetaObject meta = BaseItemInterface::staticMetaObject;
     int idx = meta.indexOfEnumerator("Frame");
@@ -126,20 +126,20 @@ static QString qtscript_BaseItemInterface_Frame_toStringHelper(BaseItemInterface
 }
 
 
-static QScriptValue qtscript_BaseItemInterface_Frame_toScriptValue(QScriptEngine *engine, const BaseItemInterface::Frame &value)
+static QScriptValue qtscript_Image_Frame_toScriptValue(QScriptEngine *engine, const BaseItemInterface::Frame &value)
 {
     QScriptValue clazz = engine->globalObject().property(QString::fromLatin1("Image"));
-    return clazz.property(qtscript_BaseItemInterface_Frame_toStringHelper(value));
+    return clazz.property(qtscript_Image_Frame_toStringHelper(value));
 }
 
 
-static void qtscript_BaseItemInterface_Frame_fromScriptValue(const QScriptValue &value, BaseItemInterface::Frame &out)
+static void qtscript_Image_Frame_fromScriptValue(const QScriptValue &value, BaseItemInterface::Frame &out)
 {
     out = qvariant_cast<BaseItemInterface::Frame>(value.toVariant());
 }
 
 
-static QScriptValue qtscript_construct_BaseItemInterface_Frame(QScriptContext *context, QScriptEngine *engine)
+static QScriptValue qtscript_construct_Image_Frame(QScriptContext *context, QScriptEngine *engine)
 {
     int arg = context->argument(0).toInt32();
     const QMetaObject *meta = qtscript_Qt_metaObject();
@@ -152,32 +152,32 @@ static QScriptValue qtscript_construct_BaseItemInterface_Frame(QScriptContext *c
 }
 
 
-static QScriptValue qtscript_BaseItemInterface_Frame_valueOf(QScriptContext *context, QScriptEngine *engine)
+static QScriptValue qtscript_Image_Frame_valueOf(QScriptContext *context, QScriptEngine *engine)
 {
     BaseItemInterface::Frame value = qscriptvalue_cast<BaseItemInterface::Frame>(context->thisObject());
     return QScriptValue(engine, static_cast<int>(value));
 }
 
 
-static QScriptValue qtscript_BaseItemInterface_Frame_toString(QScriptContext *context, QScriptEngine *engine)
+static QScriptValue qtscript_Image_Frame_toString(QScriptContext *context, QScriptEngine *engine)
 {
     BaseItemInterface::Frame value = qscriptvalue_cast<BaseItemInterface::Frame>(context->thisObject());
-    return QScriptValue(engine, qtscript_BaseItemInterface_Frame_toStringHelper(value));
+    return QScriptValue(engine, qtscript_Image_Frame_toStringHelper(value));
 }
 
 
-static QScriptValue qtscript_create_BaseItemInterface_Frame_class(QScriptEngine *engine, QScriptValue &clazz)
+static QScriptValue qtscript_create_Image_Frame_class(QScriptEngine *engine, QScriptValue &clazz)
 {
     QScriptValue ctor = qtscript_create_enum_class_helper(
-                            engine, qtscript_construct_BaseItemInterface_Frame,
-                            qtscript_BaseItemInterface_Frame_valueOf, qtscript_BaseItemInterface_Frame_toString);
+                            engine, qtscript_construct_Image_Frame,
+                            qtscript_Image_Frame_valueOf, qtscript_Image_Frame_toString);
 
-    qScriptRegisterMetaType<BaseItemInterface::Frame>(engine, qtscript_BaseItemInterface_Frame_toScriptValue,
-                                                   qtscript_BaseItemInterface_Frame_fromScriptValue, ctor.property(QString::fromLatin1("prototype")));
+    qScriptRegisterMetaType<BaseItemInterface::Frame>(engine, qtscript_Image_Frame_toScriptValue,
+                                                   qtscript_Image_Frame_fromScriptValue, ctor.property(QString::fromLatin1("prototype")));
 
-    for (int i = 0; i < BaseItemInterface_Frame_num; ++i) {
-        clazz.setProperty(QString::fromLatin1(qtscript_BaseItemInterface_Frame_keys[i]),
-                          engine->newVariant(qVariantFromValue(qtscript_BaseItemInterface_Frame_values[i])),
+    for (int i = 0; i < Image_Frame_num; ++i) {
+        clazz.setProperty(QString::fromLatin1(qtscript_Image_Frame_keys[i]),
+                          engine->newVariant(qVariantFromValue(qtscript_Image_Frame_values[i])),
                           QScriptValue::ReadOnly | QScriptValue::Undeletable);
     }
 
@@ -185,31 +185,31 @@ static QScriptValue qtscript_create_BaseItemInterface_Frame_class(QScriptEngine 
 }
 
 
-QString BaseItemInterface_Frame_toString(BaseItemInterface::Frame value)
+QString Image_Frame_toString(BaseItemInterface::Frame value)
 {
     int idx = -1;
-    for (int i = 0; i < BaseItemInterface_Frame_num; ++i) {
-        if (qtscript_BaseItemInterface_Frame_values[i] == value) {
+    for (int i = 0; i < Image_Frame_num; ++i) {
+        if (qtscript_Image_Frame_values[i] == value) {
             idx = i;
             break;
         }
     }
 
     if (idx == -1) {
-        CuteReport::ReportCore::log(LogError, "BaseItemInterface", "BaseItemInterface_Frame_toString", QString("Value \'%1\' is not within range").arg((int)value));
+        CuteReport::ReportCore::log(LogError, "BaseItemInterface", "Image_Frame_toString", QString("Value \'%1\' is not within range").arg((int)value));
         return QString();
     }
 
-    return QString(qtscript_BaseItemInterface_Frame_keys[idx]);
+    return QString(qtscript_Image_Frame_keys[idx]);
 }
 
 
-BaseItemInterface::Frame BaseItemInterface_Frame_fromString(const QString &value, bool *ok)
+BaseItemInterface::Frame Image_Frame_fromString(const QString &value, bool *ok)
 {
     QString strIn = value.toLower();
     int idx = -1;
-    for (int i = 0; i < BaseItemInterface_Frame_num; ++i) {
-        QString str(qtscript_BaseItemInterface_Frame_keys[i]);
+    for (int i = 0; i < Image_Frame_num; ++i) {
+        QString str(qtscript_Image_Frame_keys[i]);
         if (strIn == str.toLower()) {
             idx = i;
             break;
@@ -217,18 +217,18 @@ BaseItemInterface::Frame BaseItemInterface_Frame_fromString(const QString &value
     }
 
     if (idx == -1) {
-        CuteReport::ReportCore::log(LogError, "BaseItemInterface", "BaseItemInterface_Frame_fromString", QString("Value \'%1\' is not within range").arg(value));
+        CuteReport::ReportCore::log(LogError, "BaseItemInterface", "Image_Frame_fromString", QString("Value \'%1\' is not within range").arg(value));
         if (ok)
             *ok = false;
     }
 
-    return BaseItemInterface::Frame(qtscript_BaseItemInterface_Frame_values[idx]);
+    return BaseItemInterface::Frame(qtscript_Image_Frame_values[idx]);
 }
 
 
 /** ======================= ResizeFlags =========================== */
 
-static const BaseItemInterface::ResizeFlags qtscript_BaseItemInterface_ResizeFlags_values[] = {
+static const BaseItemInterface::ResizeFlags qtscript_Image_ResizeFlags_values[] = {
     BaseItemInterface::Fixed,
     BaseItemInterface::ResizeLeft,
     BaseItemInterface::ResizeRight,
@@ -237,7 +237,7 @@ static const BaseItemInterface::ResizeFlags qtscript_BaseItemInterface_ResizeFla
     BaseItemInterface::FixedPos
 };
 
-static const char * const qtscript_BaseItemInterface_ResizeFlags_keys[] = {
+static const char * const qtscript_Image_ResizeFlags_keys[] = {
     "Fixed",
     "ResizeLeft",
     "ResizeRight",
@@ -246,10 +246,10 @@ static const char * const qtscript_BaseItemInterface_ResizeFlags_keys[] = {
     "FixedPos"
 };
 
-static int BaseItemInterface_ResizeFlags_num = 6;
+static int Image_ResizeFlags_num = 6;
 
 
-static QString qtscript_BaseItemInterface_ResizeFlags_toStringHelper(BaseItemInterface::ResizeFlags value)
+static QString qtscript_Image_ResizeFlags_toStringHelper(BaseItemInterface::ResizeFlags value)
 {
     const QMetaObject meta = BaseItemInterface::staticMetaObject;
     int idx = meta.indexOfEnumerator("ResizeFlags");
@@ -259,20 +259,20 @@ static QString qtscript_BaseItemInterface_ResizeFlags_toStringHelper(BaseItemInt
 }
 
 
-static QScriptValue qtscript_BaseItemInterface_ResizeFlags_toScriptValue(QScriptEngine *engine, const BaseItemInterface::ResizeFlags &value)
+static QScriptValue qtscript_Image_ResizeFlags_toScriptValue(QScriptEngine *engine, const BaseItemInterface::ResizeFlags &value)
 {
     QScriptValue clazz = engine->globalObject().property(QString::fromLatin1("Image"));
-    return clazz.property(qtscript_BaseItemInterface_ResizeFlags_toStringHelper(value));
+    return clazz.property(qtscript_Image_ResizeFlags_toStringHelper(value));
 }
 
 
-static void qtscript_BaseItemInterface_ResizeFlags_fromScriptValue(const QScriptValue &value, BaseItemInterface::ResizeFlags &out)
+static void qtscript_Image_ResizeFlags_fromScriptValue(const QScriptValue &value, BaseItemInterface::ResizeFlags &out)
 {
     out = qvariant_cast<BaseItemInterface::ResizeFlags>(value.toVariant());
 }
 
 
-static QScriptValue qtscript_construct_BaseItemInterface_ResizeFlags(QScriptContext *context, QScriptEngine *engine)
+static QScriptValue qtscript_construct_Image_ResizeFlags(QScriptContext *context, QScriptEngine *engine)
 {
     int arg = context->argument(0).toInt32();
     const QMetaObject *meta = qtscript_Qt_metaObject();
@@ -285,32 +285,32 @@ static QScriptValue qtscript_construct_BaseItemInterface_ResizeFlags(QScriptCont
 }
 
 
-static QScriptValue qtscript_BaseItemInterface_ResizeFlags_valueOf(QScriptContext *context, QScriptEngine *engine)
+static QScriptValue qtscript_Image_ResizeFlags_valueOf(QScriptContext *context, QScriptEngine *engine)
 {
     BaseItemInterface::ResizeFlags value = qscriptvalue_cast<BaseItemInterface::ResizeFlags>(context->thisObject());
     return QScriptValue(engine, static_cast<int>(value));
 }
 
 
-static QScriptValue qtscript_BaseItemInterface_ResizeFlags_toString(QScriptContext *context, QScriptEngine *engine)
+static QScriptValue qtscript_Image_ResizeFlags_toString(QScriptContext *context, QScriptEngine *engine)
 {
     BaseItemInterface::ResizeFlags value = qscriptvalue_cast<BaseItemInterface::ResizeFlags>(context->thisObject());
-    return QScriptValue(engine, qtscript_BaseItemInterface_ResizeFlags_toStringHelper(value));
+    return QScriptValue(engine, qtscript_Image_ResizeFlags_toStringHelper(value));
 }
 
 
-static QScriptValue qtscript_create_BaseItemInterface_ResizeFlags_class(QScriptEngine *engine, QScriptValue &clazz)
+static QScriptValue qtscript_create_Image_ResizeFlags_class(QScriptEngine *engine, QScriptValue &clazz)
 {
     QScriptValue ctor = qtscript_create_enum_class_helper(
-                            engine, qtscript_construct_BaseItemInterface_ResizeFlags,
-                            qtscript_BaseItemInterface_ResizeFlags_valueOf, qtscript_BaseItemInterface_ResizeFlags_toString);
+                            engine, qtscript_construct_Image_ResizeFlags,
+                            qtscript_Image_ResizeFlags_valueOf, qtscript_Image_ResizeFlags_toString);
 
-    qScriptRegisterMetaType<BaseItemInterface::ResizeFlags>(engine, qtscript_BaseItemInterface_ResizeFlags_toScriptValue,
-                                                   qtscript_BaseItemInterface_ResizeFlags_fromScriptValue, ctor.property(QString::fromLatin1("prototype")));
+    qScriptRegisterMetaType<BaseItemInterface::ResizeFlags>(engine, qtscript_Image_ResizeFlags_toScriptValue,
+                                                   qtscript_Image_ResizeFlags_fromScriptValue, ctor.property(QString::fromLatin1("prototype")));
 
-    for (int i = 0; i < BaseItemInterface_ResizeFlags_num; ++i) {
-        clazz.setProperty(QString::fromLatin1(qtscript_BaseItemInterface_ResizeFlags_keys[i]),
-                          engine->newVariant(qVariantFromValue(qtscript_BaseItemInterface_ResizeFlags_values[i])),
+    for (int i = 0; i < Image_ResizeFlags_num; ++i) {
+        clazz.setProperty(QString::fromLatin1(qtscript_Image_ResizeFlags_keys[i]),
+                          engine->newVariant(qVariantFromValue(qtscript_Image_ResizeFlags_values[i])),
                           QScriptValue::ReadOnly | QScriptValue::Undeletable);
     }
 
@@ -318,31 +318,31 @@ static QScriptValue qtscript_create_BaseItemInterface_ResizeFlags_class(QScriptE
 }
 
 
-QString BaseItemInterface_ResizeFlags_toString(BaseItemInterface::ResizeFlags value)
+QString Image_ResizeFlags_toString(BaseItemInterface::ResizeFlags value)
 {
     int idx = -1;
-    for (int i = 0; i < BaseItemInterface_ResizeFlags_num; ++i) {
-        if (qtscript_BaseItemInterface_ResizeFlags_values[i] == value) {
+    for (int i = 0; i < Image_ResizeFlags_num; ++i) {
+        if (qtscript_Image_ResizeFlags_values[i] == value) {
             idx = i;
             break;
         }
     }
 
     if (idx == -1) {
-        CuteReport::ReportCore::log(LogError, "BaseItemInterface", "BaseItemInterface_ResizeFlags_toString", QString("Value \'%1\' is not within range").arg((int)value));
+        CuteReport::ReportCore::log(LogError, "BaseItemInterface", "Image_ResizeFlags_toString", QString("Value \'%1\' is not within range").arg((int)value));
         return QString();
     }
 
-    return QString(qtscript_BaseItemInterface_ResizeFlags_keys[idx]);
+    return QString(qtscript_Image_ResizeFlags_keys[idx]);
 }
 
 
-BaseItemInterface::ResizeFlags BaseItemInterface_ResizeFlags_fromString(const QString &value, bool *ok)
+BaseItemInterface::ResizeFlags Image_ResizeFlags_fromString(const QString &value, bool *ok)
 {
     QString strIn = value.toLower();
     int idx = -1;
-    for (int i = 0; i < BaseItemInterface_ResizeFlags_num; ++i) {
-        QString str(qtscript_BaseItemInterface_ResizeFlags_keys[i]);
+    for (int i = 0; i < Image_ResizeFlags_num; ++i) {
+        QString str(qtscript_Image_ResizeFlags_keys[i]);
         if (strIn == str.toLower()) {
             idx = i;
             break;
@@ -350,33 +350,33 @@ BaseItemInterface::ResizeFlags BaseItemInterface_ResizeFlags_fromString(const QS
     }
 
     if (idx == -1) {
-        CuteReport::ReportCore::log(LogError, "BaseItemInterface", "BaseItemInterface_ResizeFlags_fromString", QString("Value \'%1\' is not within range").arg(value));
+        CuteReport::ReportCore::log(LogError, "BaseItemInterface", "Image_ResizeFlags_fromString", QString("Value \'%1\' is not within range").arg(value));
         if (ok)
             *ok = false;
     }
 
-    return BaseItemInterface::ResizeFlags(qtscript_BaseItemInterface_ResizeFlags_values[idx]);
+    return BaseItemInterface::ResizeFlags(qtscript_Image_ResizeFlags_values[idx]);
 }
 
 
 /** ======================= ShiftMode =========================== */
 
-static const ItemInterface::ShiftMode qtscript_ItemInterface_ShiftMode_values[] = {
+static const ItemInterface::ShiftMode qtscript_Image_ShiftMode_values[] = {
     ItemInterface::AlwaysShift,
     ItemInterface::DontShift,
     ItemInterface::ShiftWhenOverlapped
 };
 
-static const char * const qtscript_ItemInterface_ShiftMode_keys[] = {
+static const char * const qtscript_Image_ShiftMode_keys[] = {
     "AlwaysShift",
     "DontShift",
     "ShiftWhenOverlapped"
 };
 
-static int ItemInterface_ShiftMode_num = 3;
+static int Image_ShiftMode_num = 3;
 
 
-static QString qtscript_ItemInterface_ShiftMode_toStringHelper(ItemInterface::ShiftMode value)
+static QString qtscript_Image_ShiftMode_toStringHelper(ItemInterface::ShiftMode value)
 {
     const QMetaObject meta = ItemInterface::staticMetaObject;
     int idx = meta.indexOfEnumerator("ShiftMode");
@@ -386,20 +386,20 @@ static QString qtscript_ItemInterface_ShiftMode_toStringHelper(ItemInterface::Sh
 }
 
 
-static QScriptValue qtscript_ItemInterface_ShiftMode_toScriptValue(QScriptEngine *engine, const ItemInterface::ShiftMode &value)
+static QScriptValue qtscript_Image_ShiftMode_toScriptValue(QScriptEngine *engine, const ItemInterface::ShiftMode &value)
 {
     QScriptValue clazz = engine->globalObject().property(QString::fromLatin1("Image"));
-    return clazz.property(qtscript_ItemInterface_ShiftMode_toStringHelper(value));
+    return clazz.property(qtscript_Image_ShiftMode_toStringHelper(value));
 }
 
 
-static void qtscript_ItemInterface_ShiftMode_fromScriptValue(const QScriptValue &value, ItemInterface::ShiftMode &out)
+static void qtscript_Image_ShiftMode_fromScriptValue(const QScriptValue &value, ItemInterface::ShiftMode &out)
 {
     out = qvariant_cast<ItemInterface::ShiftMode>(value.toVariant());
 }
 
 
-static QScriptValue qtscript_construct_ItemInterface_ShiftMode(QScriptContext *context, QScriptEngine *engine)
+static QScriptValue qtscript_construct_Image_ShiftMode(QScriptContext *context, QScriptEngine *engine)
 {
     int arg = context->argument(0).toInt32();
     const QMetaObject *meta = qtscript_Qt_metaObject();
@@ -412,32 +412,32 @@ static QScriptValue qtscript_construct_ItemInterface_ShiftMode(QScriptContext *c
 }
 
 
-static QScriptValue qtscript_ItemInterface_ShiftMode_valueOf(QScriptContext *context, QScriptEngine *engine)
+static QScriptValue qtscript_Image_ShiftMode_valueOf(QScriptContext *context, QScriptEngine *engine)
 {
     ItemInterface::ShiftMode value = qscriptvalue_cast<ItemInterface::ShiftMode>(context->thisObject());
     return QScriptValue(engine, static_cast<int>(value));
 }
 
 
-static QScriptValue qtscript_ItemInterface_ShiftMode_toString(QScriptContext *context, QScriptEngine *engine)
+static QScriptValue qtscript_Image_ShiftMode_toString(QScriptContext *context, QScriptEngine *engine)
 {
     ItemInterface::ShiftMode value = qscriptvalue_cast<ItemInterface::ShiftMode>(context->thisObject());
-    return QScriptValue(engine, qtscript_ItemInterface_ShiftMode_toStringHelper(value));
+    return QScriptValue(engine, qtscript_Image_ShiftMode_toStringHelper(value));
 }
 
 
-static QScriptValue qtscript_create_ItemInterface_ShiftMode_class(QScriptEngine *engine, QScriptValue &clazz)
+static QScriptValue qtscript_create_Image_ShiftMode_class(QScriptEngine *engine, QScriptValue &clazz)
 {
     QScriptValue ctor = qtscript_create_enum_class_helper(
-                            engine, qtscript_construct_ItemInterface_ShiftMode,
-                            qtscript_ItemInterface_ShiftMode_valueOf, qtscript_ItemInterface_ShiftMode_toString);
+                            engine, qtscript_construct_Image_ShiftMode,
+                            qtscript_Image_ShiftMode_valueOf, qtscript_Image_ShiftMode_toString);
 
-    qScriptRegisterMetaType<ItemInterface::ShiftMode>(engine, qtscript_ItemInterface_ShiftMode_toScriptValue,
-                                                   qtscript_ItemInterface_ShiftMode_fromScriptValue, ctor.property(QString::fromLatin1("prototype")));
+    qScriptRegisterMetaType<ItemInterface::ShiftMode>(engine, qtscript_Image_ShiftMode_toScriptValue,
+                                                   qtscript_Image_ShiftMode_fromScriptValue, ctor.property(QString::fromLatin1("prototype")));
 
-    for (int i = 0; i < ItemInterface_ShiftMode_num; ++i) {
-        clazz.setProperty(QString::fromLatin1(qtscript_ItemInterface_ShiftMode_keys[i]),
-                          engine->newVariant(qVariantFromValue(qtscript_ItemInterface_ShiftMode_values[i])),
+    for (int i = 0; i < Image_ShiftMode_num; ++i) {
+        clazz.setProperty(QString::fromLatin1(qtscript_Image_ShiftMode_keys[i]),
+                          engine->newVariant(qVariantFromValue(qtscript_Image_ShiftMode_values[i])),
                           QScriptValue::ReadOnly | QScriptValue::Undeletable);
     }
 
@@ -445,31 +445,31 @@ static QScriptValue qtscript_create_ItemInterface_ShiftMode_class(QScriptEngine 
 }
 
 
-QString ItemInterface_ShiftMode_toString(ItemInterface::ShiftMode value)
+QString Image_ShiftMode_toString(ItemInterface::ShiftMode value)
 {
     int idx = -1;
-    for (int i = 0; i < ItemInterface_ShiftMode_num; ++i) {
-        if (qtscript_ItemInterface_ShiftMode_values[i] == value) {
+    for (int i = 0; i < Image_ShiftMode_num; ++i) {
+        if (qtscript_Image_ShiftMode_values[i] == value) {
             idx = i;
             break;
         }
     }
 
     if (idx == -1) {
-        CuteReport::ReportCore::log(LogError, "ItemInterface", "ItemInterface_ShiftMode_toString", QString("Value \'%1\' is not within range").arg((int)value));
+        CuteReport::ReportCore::log(LogError, "ItemInterface", "Image_ShiftMode_toString", QString("Value \'%1\' is not within range").arg((int)value));
         return QString();
     }
 
-    return QString(qtscript_ItemInterface_ShiftMode_keys[idx]);
+    return QString(qtscript_Image_ShiftMode_keys[idx]);
 }
 
 
-ItemInterface::ShiftMode ItemInterface_ShiftMode_fromString(const QString &value, bool *ok)
+ItemInterface::ShiftMode Image_ShiftMode_fromString(const QString &value, bool *ok)
 {
     QString strIn = value.toLower();
     int idx = -1;
-    for (int i = 0; i < ItemInterface_ShiftMode_num; ++i) {
-        QString str(qtscript_ItemInterface_ShiftMode_keys[i]);
+    for (int i = 0; i < Image_ShiftMode_num; ++i) {
+        QString str(qtscript_Image_ShiftMode_keys[i]);
         if (strIn == str.toLower()) {
             idx = i;
             break;
@@ -477,27 +477,27 @@ ItemInterface::ShiftMode ItemInterface_ShiftMode_fromString(const QString &value
     }
 
     if (idx == -1) {
-        CuteReport::ReportCore::log(LogError, "ItemInterface", "ItemInterface_ShiftMode_fromString", QString("Value \'%1\' is not within range").arg(value));
+        CuteReport::ReportCore::log(LogError, "ItemInterface", "Image_ShiftMode_fromString", QString("Value \'%1\' is not within range").arg(value));
         if (ok)
             *ok = false;
     }
 
-    return ItemInterface::ShiftMode(qtscript_ItemInterface_ShiftMode_values[idx]);
+    return ItemInterface::ShiftMode(qtscript_Image_ShiftMode_values[idx]);
 }
 
 
 /** ======================= SourceType =========================== */
 
 static const ImageItem::SourceType qtscript_ImageItem_SourceType_values[] = {
-    ImageItem::Script,
-    ImageItem::Dataset,
-    ImageItem::Static
+    ImageItem::Static,
+    ImageItem::Storage,
+    ImageItem::Dataset
 };
 
 static const char * const qtscript_ImageItem_SourceType_keys[] = {
-    "Script",
-    "Dataset",
-    "Static"
+    "Static",
+    "Storage",
+    "Dataset"
 };
 
 static int ImageItem_SourceType_num = 3;
@@ -622,89 +622,85 @@ QStringList ImageItem_SourceType_variants()
     return list;
 }
 
-/** ======================= PaintType =========================== */
+/** ======================= ScaleType =========================== */
 
-static const ImageItem::PaintType qtscript_ImageItem_PaintType_values[] = {
-    ImageItem::PaintTypeNotDefined,
-    ImageItem::ResizeItemToImage,
-    ImageItem::CenterImageToItem,
-    ImageItem::ResizeImageToItem_keepAspectRatio,
-    ImageItem::ResizeImageToItem_ignoreAspectRatio
+static const ImageItem::ScaleType qtscript_ImageItem_ScaleType_values[] = {
+    ImageItem::NoScale,
+    ImageItem::ScaleImage,
+    ImageItem::ScaleFrame,
 };
 
-static const char * const qtscript_ImageItem_PaintType_keys[] = {
-    "PaintTypeNotDefined",
-    "ResizeItemToImage",
-    "CenterImageToItem",
-    "ResizeImageToItem_keepAspectRatio",
-    "ResizeImageToItem_ignoreAspectRatio"
+static const char * const qtscript_ImageItem_ScaleType_keys[] = {
+    "NoScale",
+    "ScaleImage",
+    "ScaleFrame",
 };
 
-static int ImageItem_PaintType_num = 5;
+static int ImageItem_ScaleType_num = 3;
 
 
-static QString qtscript_ImageItem_PaintType_toStringHelper(ImageItem::PaintType value)
+static QString qtscript_ImageItem_ScaleType_toStringHelper(ImageItem::ScaleType value)
 {
     const QMetaObject meta = ImageItem::staticMetaObject;
-    int idx = meta.indexOfEnumerator("PaintType");
+    int idx = meta.indexOfEnumerator("scaleType");
     Q_ASSERT(idx != -1);
     QMetaEnum menum = meta.enumerator(idx);
     return QString::fromLatin1(menum.valueToKey(value));
 }
 
 
-static QScriptValue qtscript_ImageItem_PaintType_toScriptValue(QScriptEngine *engine, const ImageItem::PaintType &value)
+static QScriptValue qtscript_ImageItem_ScaleType_toScriptValue(QScriptEngine *engine, const ImageItem::ScaleType &value)
 {
     QScriptValue clazz = engine->globalObject().property(QString::fromLatin1("Image"));
-    return clazz.property(qtscript_ImageItem_PaintType_toStringHelper(value));
+    return clazz.property(qtscript_ImageItem_ScaleType_toStringHelper(value));
 }
 
 
-static void qtscript_ImageItem_PaintType_fromScriptValue(const QScriptValue &value, ImageItem::PaintType &out)
+static void qtscript_ImageItem_ScaleType_fromScriptValue(const QScriptValue &value, ImageItem::ScaleType &out)
 {
-    out = qvariant_cast<ImageItem::PaintType>(value.toVariant());
+    out = qvariant_cast<ImageItem::ScaleType>(value.toVariant());
 }
 
 
-static QScriptValue qtscript_construct_ImageItem_PaintType(QScriptContext *context, QScriptEngine *engine)
+static QScriptValue qtscript_construct_ImageItem_ScaleType(QScriptContext *context, QScriptEngine *engine)
 {
     int arg = context->argument(0).toInt32();
     const QMetaObject *meta = qtscript_Qt_metaObject();
-    int idx = meta->indexOfEnumerator("PaintType");
+    int idx = meta->indexOfEnumerator("ScaleType");
     Q_ASSERT(idx != -1);
     QMetaEnum menum = meta->enumerator(idx);
     if (menum.valueToKey(arg) != 0)
-        return qScriptValueFromValue(engine,  static_cast<ImageItem::PaintType>(arg));
-    return context->throwError(QString::fromLatin1("PaintType(): invalid enum value (%0)").arg(arg));
+        return qScriptValueFromValue(engine,  static_cast<ImageItem::ScaleType>(arg));
+    return context->throwError(QString::fromLatin1("ScaleType(): invalid enum value (%0)").arg(arg));
 }
 
 
-static QScriptValue qtscript_ImageItem_PaintType_valueOf(QScriptContext *context, QScriptEngine *engine)
+static QScriptValue qtscript_ImageItem_ScaleType_valueOf(QScriptContext *context, QScriptEngine *engine)
 {
-    ImageItem::PaintType value = qscriptvalue_cast<ImageItem::PaintType>(context->thisObject());
+    ImageItem::ScaleType value = qscriptvalue_cast<ImageItem::ScaleType>(context->thisObject());
     return QScriptValue(engine, static_cast<int>(value));
 }
 
 
-static QScriptValue qtscript_ImageItem_PaintType_toString(QScriptContext *context, QScriptEngine *engine)
+static QScriptValue qtscript_ImageItem_ScaleType_toString(QScriptContext *context, QScriptEngine *engine)
 {
-    ImageItem::PaintType value = qscriptvalue_cast<ImageItem::PaintType>(context->thisObject());
-    return QScriptValue(engine, qtscript_ImageItem_PaintType_toStringHelper(value));
+    ImageItem::ScaleType value = qscriptvalue_cast<ImageItem::ScaleType>(context->thisObject());
+    return QScriptValue(engine, qtscript_ImageItem_ScaleType_toStringHelper(value));
 }
 
 
-static QScriptValue qtscript_create_ImageItem_PaintType_class(QScriptEngine *engine, QScriptValue &clazz)
+static QScriptValue qtscript_create_ImageItem_ScaleType_class(QScriptEngine *engine, QScriptValue &clazz)
 {
     QScriptValue ctor = qtscript_create_enum_class_helper(
-                            engine, qtscript_construct_ImageItem_PaintType,
-                            qtscript_ImageItem_PaintType_valueOf, qtscript_ImageItem_PaintType_toString);
+                            engine, qtscript_construct_ImageItem_ScaleType,
+                            qtscript_ImageItem_ScaleType_valueOf, qtscript_ImageItem_ScaleType_toString);
 
-    qScriptRegisterMetaType<ImageItem::PaintType>(engine, qtscript_ImageItem_PaintType_toScriptValue,
-                                                   qtscript_ImageItem_PaintType_fromScriptValue, ctor.property(QString::fromLatin1("prototype")));
+    qScriptRegisterMetaType<ImageItem::ScaleType>(engine, qtscript_ImageItem_ScaleType_toScriptValue,
+                                                   qtscript_ImageItem_ScaleType_fromScriptValue, ctor.property(QString::fromLatin1("prototype")));
 
-    for (int i = 0; i < ImageItem_PaintType_num; ++i) {
-        clazz.setProperty(QString::fromLatin1(qtscript_ImageItem_PaintType_keys[i]),
-                          engine->newVariant(qVariantFromValue(qtscript_ImageItem_PaintType_values[i])),
+    for (int i = 0; i < ImageItem_ScaleType_num; ++i) {
+        clazz.setProperty(QString::fromLatin1(qtscript_ImageItem_ScaleType_keys[i]),
+                          engine->newVariant(qVariantFromValue(qtscript_ImageItem_ScaleType_values[i])),
                           QScriptValue::ReadOnly | QScriptValue::Undeletable);
     }
 
@@ -712,31 +708,31 @@ static QScriptValue qtscript_create_ImageItem_PaintType_class(QScriptEngine *eng
 }
 
 
-QString ImageItem_PaintType_toString(ImageItem::PaintType value)
+QString ImageItem_ScaleType_toString(ImageItem::ScaleType value)
 {
     int idx = -1;
-    for (int i = 0; i < ImageItem_PaintType_num; ++i) {
-        if (qtscript_ImageItem_PaintType_values[i] == value) {
+    for (int i = 0; i < ImageItem_ScaleType_num; ++i) {
+        if (qtscript_ImageItem_ScaleType_values[i] == value) {
             idx = i;
             break;
         }
     }
 
     if (idx == -1) {
-        CuteReport::ReportCore::log(LogError, "ImageItem", "ImageItem_PaintType_toString", QString("Value \'%1\' is not within range").arg((int)value));
+        CuteReport::ReportCore::log(LogError, "ImageItem", "ImageItem_ScaleType_toString", QString("Value \'%1\' is not within range").arg((int)value));
         return QString();
     }
 
-    return QString(qtscript_ImageItem_PaintType_keys[idx]);
+    return QString(qtscript_ImageItem_ScaleType_keys[idx]);
 }
 
 
-ImageItem::PaintType ImageItem_PaintType_fromString(const QString &value, bool *ok)
+ImageItem::ScaleType ImageItem_ScaleType_fromString(const QString &value, bool *ok)
 {
     QString strIn = value.toLower();
     int idx = -1;
-    for (int i = 0; i < ImageItem_PaintType_num; ++i) {
-        QString str(qtscript_ImageItem_PaintType_keys[i]);
+    for (int i = 0; i < ImageItem_ScaleType_num; ++i) {
+        QString str(qtscript_ImageItem_ScaleType_keys[i]);
         if (strIn == str.toLower()) {
             idx = i;
             break;
@@ -744,163 +740,25 @@ ImageItem::PaintType ImageItem_PaintType_fromString(const QString &value, bool *
     }
 
     if (idx == -1) {
-        CuteReport::ReportCore::log(LogError, "ImageItem", "ImageItem_PaintType_fromString", QString("Value \'%1\' is not within range").arg(value));
+        CuteReport::ReportCore::log(LogError, "ImageItem", "ImageItem_ScaleType_fromString", QString("Value \'%1\' is not within range").arg(value));
         if (ok)
             *ok = false;
     }
 
-    return ImageItem::PaintType(qtscript_ImageItem_PaintType_values[idx]);
+    return ImageItem::ScaleType(qtscript_ImageItem_ScaleType_values[idx]);
 }
 
 
-QStringList ImageItem_PaintType_variants()
+QStringList ImageItem_ScaleType_variants()
 {
     QStringList list;
-    for (int i = 0; i < ImageItem_PaintType_num; ++i) {
-        list << QString(qtscript_ImageItem_PaintType_keys[i]);
+    for (int i = 0; i < ImageItem_ScaleType_num; ++i) {
+        list << QString(qtscript_ImageItem_ScaleType_keys[i]);
     }
     return list;
 }
 
-/** ======================= TextPosition =========================== */
 
-static const ImageItem::TextPosition qtscript_ImageItem_TextPosition_values[] = {
-    ImageItem::NoText,
-    ImageItem::TextTop,
-    ImageItem::TextBottom,
-    ImageItem::TextAbove,
-    ImageItem::TextBelow
-};
-
-static const char * const qtscript_ImageItem_TextPosition_keys[] = {
-    "NoText",
-    "TextTop",
-    "TextBottom",
-    "TextAbove",
-    "TextBelow"
-};
-
-static int ImageItem_TextPosition_num = 5;
-
-
-static QString qtscript_ImageItem_TextPosition_toStringHelper(ImageItem::TextPosition value)
-{
-    const QMetaObject meta = ImageItem::staticMetaObject;
-    int idx = meta.indexOfEnumerator("TextPosition");
-    Q_ASSERT(idx != -1);
-    QMetaEnum menum = meta.enumerator(idx);
-    return QString::fromLatin1(menum.valueToKey(value));
-}
-
-
-static QScriptValue qtscript_ImageItem_TextPosition_toScriptValue(QScriptEngine *engine, const ImageItem::TextPosition &value)
-{
-    QScriptValue clazz = engine->globalObject().property(QString::fromLatin1("Image"));
-    return clazz.property(qtscript_ImageItem_TextPosition_toStringHelper(value));
-}
-
-
-static void qtscript_ImageItem_TextPosition_fromScriptValue(const QScriptValue &value, ImageItem::TextPosition &out)
-{
-    out = qvariant_cast<ImageItem::TextPosition>(value.toVariant());
-}
-
-
-static QScriptValue qtscript_construct_ImageItem_TextPosition(QScriptContext *context, QScriptEngine *engine)
-{
-    int arg = context->argument(0).toInt32();
-    const QMetaObject *meta = qtscript_Qt_metaObject();
-    int idx = meta->indexOfEnumerator("TextPosition");
-    Q_ASSERT(idx != -1);
-    QMetaEnum menum = meta->enumerator(idx);
-    if (menum.valueToKey(arg) != 0)
-        return qScriptValueFromValue(engine,  static_cast<ImageItem::TextPosition>(arg));
-    return context->throwError(QString::fromLatin1("TextPosition(): invalid enum value (%0)").arg(arg));
-}
-
-
-static QScriptValue qtscript_ImageItem_TextPosition_valueOf(QScriptContext *context, QScriptEngine *engine)
-{
-    ImageItem::TextPosition value = qscriptvalue_cast<ImageItem::TextPosition>(context->thisObject());
-    return QScriptValue(engine, static_cast<int>(value));
-}
-
-
-static QScriptValue qtscript_ImageItem_TextPosition_toString(QScriptContext *context, QScriptEngine *engine)
-{
-    ImageItem::TextPosition value = qscriptvalue_cast<ImageItem::TextPosition>(context->thisObject());
-    return QScriptValue(engine, qtscript_ImageItem_TextPosition_toStringHelper(value));
-}
-
-
-static QScriptValue qtscript_create_ImageItem_TextPosition_class(QScriptEngine *engine, QScriptValue &clazz)
-{
-    QScriptValue ctor = qtscript_create_enum_class_helper(
-                            engine, qtscript_construct_ImageItem_TextPosition,
-                            qtscript_ImageItem_TextPosition_valueOf, qtscript_ImageItem_TextPosition_toString);
-
-    qScriptRegisterMetaType<ImageItem::TextPosition>(engine, qtscript_ImageItem_TextPosition_toScriptValue,
-                                                   qtscript_ImageItem_TextPosition_fromScriptValue, ctor.property(QString::fromLatin1("prototype")));
-
-    for (int i = 0; i < ImageItem_TextPosition_num; ++i) {
-        clazz.setProperty(QString::fromLatin1(qtscript_ImageItem_TextPosition_keys[i]),
-                          engine->newVariant(qVariantFromValue(qtscript_ImageItem_TextPosition_values[i])),
-                          QScriptValue::ReadOnly | QScriptValue::Undeletable);
-    }
-
-    return ctor;
-}
-
-
-QString ImageItem_TextPosition_toString(ImageItem::TextPosition value)
-{
-    int idx = -1;
-    for (int i = 0; i < ImageItem_TextPosition_num; ++i) {
-        if (qtscript_ImageItem_TextPosition_values[i] == value) {
-            idx = i;
-            break;
-        }
-    }
-
-    if (idx == -1) {
-        CuteReport::ReportCore::log(LogError, "ImageItem", "ImageItem_TextPosition_toString", QString("Value \'%1\' is not within range").arg((int)value));
-        return QString();
-    }
-
-    return QString(qtscript_ImageItem_TextPosition_keys[idx]);
-}
-
-
-ImageItem::TextPosition ImageItem_TextPosition_fromString(const QString &value, bool *ok)
-{
-    QString strIn = value.toLower();
-    int idx = -1;
-    for (int i = 0; i < ImageItem_TextPosition_num; ++i) {
-        QString str(qtscript_ImageItem_TextPosition_keys[i]);
-        if (strIn == str.toLower()) {
-            idx = i;
-            break;
-        }
-    }
-
-    if (idx == -1) {
-        CuteReport::ReportCore::log(LogError, "ImageItem", "ImageItem_TextPosition_fromString", QString("Value \'%1\' is not within range").arg(value));
-        if (ok)
-            *ok = false;
-    }
-
-    return ImageItem::TextPosition(qtscript_ImageItem_TextPosition_values[idx]);
-}
-
-
-QStringList ImageItem_TextPosition_variants()
-{
-    QStringList list;
-    for (int i = 0; i < ImageItem_TextPosition_num; ++i) {
-        list << QString(qtscript_ImageItem_TextPosition_keys[i]);
-    }
-    return list;
-}
 /** ============================================================================================================= */
 
 
@@ -935,11 +793,10 @@ QScriptValue qtscript_create_ImageItem_class(QScriptEngine *engine)
     ctor.setData(QScriptValue(engine, uint(0xBABE0000 + 0)));
 
     ctor.setProperty(QString::fromLatin1("SourceType"), qtscript_create_ImageItem_SourceType_class(engine, ctor));
-    ctor.setProperty(QString::fromLatin1("PaintType"), qtscript_create_ImageItem_PaintType_class(engine, ctor));
-    ctor.setProperty(QString::fromLatin1("TextPosition"), qtscript_create_ImageItem_TextPosition_class(engine, ctor));
-    ctor.setProperty(QString::fromLatin1("Frame"), qtscript_create_BaseItemInterface_Frame_class(engine, ctor));
-    ctor.setProperty(QString::fromLatin1("ResizeFlags"), qtscript_create_BaseItemInterface_ResizeFlags_class(engine, ctor));
-    ctor.setProperty(QString::fromLatin1("ShiftMode"), qtscript_create_ItemInterface_ShiftMode_class(engine, ctor));
+    ctor.setProperty(QString::fromLatin1("ScaleType"), qtscript_create_ImageItem_ScaleType_class(engine, ctor));
+    ctor.setProperty(QString::fromLatin1("Frame"), qtscript_create_Image_Frame_class(engine, ctor));
+    ctor.setProperty(QString::fromLatin1("ResizeFlags"), qtscript_create_Image_ResizeFlags_class(engine, ctor));
+    ctor.setProperty(QString::fromLatin1("ShiftMode"), qtscript_create_Image_ShiftMode_class(engine, ctor));
 
     return ctor;
 }

@@ -34,34 +34,42 @@
 #include "globals.h"
 #include "types.h"
 
-static int RenderedItemInterfaceType = QGraphicsItem::UserType + 17778;
+//static int RenderedItemInterfaceType = QGraphicsItem::UserType + 17778;
 
 namespace CuteReport {
 
 class BaseItemInterface;
 class BaseItemInterfacePrivate;
+class RenderedPageInterface;
 
 class CUTEREPORT_EXPORTS RenderedItemInterface : public QGraphicsRectItem
 {
 
 public:
+    enum { Type = QGraphicsItem::UserType + 17778 };
     explicit RenderedItemInterface(BaseItemInterface * item, CuteReport::BaseItemInterfacePrivate *itemPrivateData);
     virtual ~RenderedItemInterface();
 
-    BaseItemInterface * coreItem(){return m_item;}
+    //BaseItemInterface * coreItem(){return m_item;}
+
+    quint32 id() const;
+    void setId(quint32 id);
+
+    //void setParentRenderedItem(RenderedItemInterface * parentItem);
 
     virtual void paint(QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0);
     virtual void redraw(bool withChildren = true);
 
     virtual QRectF absoluteGeometry(Unit unit = UnitNotDefined) const;
-    virtual void setAbsoluteGeometry(const QRectF & geometry, Unit unit = UnitNotDefined);
+    virtual void setAbsoluteGeometry(const QRectF & geometry, CuteReport::Unit unit = CuteReport::UnitNotDefined);
 
     virtual QPointF absolutePixelPos() const;
+    virtual QRectF absoluteBoundingRect(Unit unit = UnitNotDefined) const;
 
     virtual int dpi();
     virtual void setDpi(int dpi, bool withChildren = true);
 
-    virtual int type() const { return RenderedItemInterfaceType; }
+    int type() const { return Type; }
 
 protected:
     BaseItemInterfacePrivate * const d_ptr;
@@ -70,7 +78,9 @@ protected:
 
 private:
     Q_DECLARE_PRIVATE(BaseItemInterface)
-    BaseItemInterface * m_item;
+
+    quint32 m_id;
+    //BaseItemInterface * m_item;
 };
 
 }

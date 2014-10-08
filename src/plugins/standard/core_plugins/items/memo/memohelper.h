@@ -30,30 +30,56 @@
 #ifndef MEMOHELPER_H
 #define MEMOHELPER_H
 
-#include <iteminterface.h>
+#include "iteminterface.h"
+#include "plugins_common.h"
 
 namespace Ui {
     class MemoHelper;
 }
 
-class MemoItem;
+class Highlighter;
 
+SUIT_BEGIN_NAMESPACE
+class MemoItem;
+class MemoHelper;
+SUIT_END_NAMESPACE
+
+USING_SUIT_NAMESPACE
+
+SUIT_BEGIN_NAMESPACE
 class MemoHelper : public CuteReport::BaseItemHelperInterface
 {
     Q_OBJECT
 public:
+    enum State {Text, Expr};
     MemoHelper(MemoItem *item);
     ~MemoHelper();
 
-    void sync();
+    virtual void sync();
+    virtual bool screenBack(bool accept = true);
+
+
+private slots:
+    void slotExpressionClicked();
+    void slotAggregateClicked();
+    void slotFormattingClicked();
+
+    void slotCurrentTextTabChange(int index);
 
 protected:
     void changeEvent(QEvent *e);
 
 private:
+    void setState(MemoHelper::State state);
+    bool setToolWidget(const QString  & moduleName);
+
     Ui::MemoHelper *m_ui;
     MemoItem * m_item;
+    QWidget * m_currentToolWidget;
+    State m_currentState;
+    Highlighter *m_highlighter;
 };
 
+SUIT_END_NAMESPACE
 
 #endif // MEMOHELPER_H

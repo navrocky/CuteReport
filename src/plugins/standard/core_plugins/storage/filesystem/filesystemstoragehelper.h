@@ -45,15 +45,17 @@ public:
     explicit FileSystemStorageHelper(StorageFileSystem * storage, VisibleOptions visibleOptions = AllOptions);
     ~FileSystemStorageHelper();
 
+public slots:
+    virtual void load();
     virtual void save();
-    virtual void load(){}
     
 private slots:
-    void objectsRootChanged();
-    void askOverwriteStateChanged(bool b);
     void objectsFolderChooseClicked();
 
 private:
+    void connectObject();
+    void disconnectObject();
+
     Ui::FileSystemStorageHelper *ui;
     StorageFileSystem * m_storage;
 };

@@ -55,8 +55,9 @@ public:
     PageFooter(QObject * parent = 0);
     ~PageFooter();
 
+    virtual void moduleInit();
+
     virtual CuteReport::BaseItemInterface * createInstance(QObject * parent) const;
-    virtual BaseItemInterface * clone();
     virtual QByteArray serialize();
     virtual void deserialize(QByteArray &data);
     virtual bool canContain(QObject * object);
@@ -66,7 +67,8 @@ public:
     BandInterface::AccomodationType accommodationType() const {return AccomodationEveryPage;}
 
     virtual QIcon itemIcon() const;
-    virtual QString moduleName() const;
+    virtual QString moduleShortName() const;
+    virtual QString suitName() const { return "Standard"; }
     virtual QString itemGroup() const;
 
     virtual bool printOnFirstPage() const;
@@ -78,8 +80,9 @@ public:
 
     virtual void renderInit(CuteReport::RendererPublicInterface * renderer);
     virtual void renderReset();
-    virtual CuteReport::RenderedItemInterface * render(int customDPI = 0);
-    virtual CuteReport::RenderedItemInterface * renderNewPage(int customDPI = 0);
+    virtual bool renderPrepare();
+    virtual bool renderNewPage();
+    virtual CuteReport::RenderedItemInterface * renderView();
 
     virtual QString _current_property_description() const;
     QStringList _hiddenProperties() const;
@@ -88,12 +91,13 @@ signals:
     void printOnLastPageChanged();
     void printOnceChanged();
 
-protected:
-    PageFooter(PageFooterPrivate &dd, QObject * parent);
-
 private:
     Q_DECLARE_PRIVATE(PageFooter)
-     CuteReport::RendererPublicInterface * m_renderer;
+
+    PageFooter(PageFooterPrivate *dd, QObject * parent);
+    virtual BaseItemInterface * itemClone() const;
+
+    CuteReport::RendererPublicInterface * m_renderer;
 };
 
 

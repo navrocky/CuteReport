@@ -150,5 +150,5 @@ PropertyInterface* Enums::createInstance(QObject * object, int property, const P
 }
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(enums, Enums)
+Q_EXPORT_PLUGIN2(EnumsProperty, Enums)
 #endif

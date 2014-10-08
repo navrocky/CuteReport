@@ -97,5 +97,5 @@ PropertyInterface* Font::createInstance(QObject * object, int property, const Pr
 }
 
 #ifndef STATICTYPES
-Q_EXPORT_PLUGIN2(font, Font);
+Q_EXPORT_PLUGIN2(font, FontProperty);
 #endif

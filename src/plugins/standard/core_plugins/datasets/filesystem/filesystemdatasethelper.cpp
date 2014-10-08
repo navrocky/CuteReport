@@ -123,7 +123,7 @@ void FileSystemDatasetHelper::save()
 void FileSystemDatasetHelper::on_bBrowse_clicked()
 {
     QString dir = QFileDialog::getExistingDirectory(this, tr("Select Directory"),
-                                                    "/home",
+                                                    m_ui->leDir->text(),
                                                     QFileDialog::ShowDirsOnly
                                                     | QFileDialog::DontResolveSymlinks);
 

@@ -36,6 +36,15 @@ PrinterInterface::PrinterInterface(QObject *parent) :
 {
 }
 
+
+PrinterInterface::PrinterInterface(const PrinterInterface &dd, QObject *parent) :
+    ReportPluginInterface(dd, parent),
+    m_printerName(dd.m_printerName),
+    m_currentProperty(dd.m_currentProperty)
+{
+}
+
+
 PrinterInterface::~PrinterInterface()
 {
 

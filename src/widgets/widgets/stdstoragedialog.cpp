@@ -69,17 +69,6 @@ StdStorageDialog::StdStorageDialog(ReportCore * reportCore, QWidget *parent, con
 }
 
 
-//StdStorageDialog::StdStorageDialog(ReportInterface * report, QWidget *parent, const QString &windowTitle)
-//    : QDialog(parent),
-//      ui(new Ui::StdStorageDialog),
-//      m_report(report)
-//{
-//    m_reportCore = report->reportCore();
-//    initMe();
-//    setViewOptions(ShowAll);
-//    setWindowTitle(windowTitle.isEmpty() ? defaultTitle : windowTitle);
-//}
-
 StdStorageDialog::~StdStorageDialog()
 {
     delete ui;
@@ -107,7 +96,17 @@ void StdStorageDialog::initMe()
     int width = geometry().width() - 12;   // 12 is left + rigth layout spacing
     ui->splitter->setSizes(QList<int>() << width*0.6 << width*0.4);
 
-    ui->cbStorage->addItems(m_reportCore->moduleNames(StorageModule));
+    if (m_report) {
+        foreach (StorageInterface * storage, m_report->storages())
+            ui->cbStorage->addItem(QString ("%1 (%2)").arg(storage->objectName(), storage->moduleFullName()), storage->objectName());
+    }
+
+    foreach (StorageInterface * storage, m_reportCore->storageModules()) {
+        if (ui->cbStorage->findData(storage->objectName()) != -1)
+            continue;
+        ui->cbStorage->addItem(QString ("%1 (%2)").arg(storage->objectName(), storage->moduleFullName()), storage->objectName());
+    }
+
 //    ui->cbFilter->addItem(filterAllFiles);
     ui->labelNameFilter->hide();
     ui->cbFilter->hide();
@@ -126,45 +125,45 @@ void StdStorageDialog::initMe()
 
 
     if (m_report)
-        m_storage = m_reportCore->getStorageByModuleName("",m_report);
+        m_storage = m_reportCore->getStorageByName("",m_report);
     else
         m_storage = m_reportCore->defaultStorage();
     if (m_storage)
-        ui->cbStorage->setCurrentIndex( ui->cbStorage->findText(m_storage->moduleName() ) );
+        ui->cbStorage->setCurrentIndex( ui->cbStorage->findData(m_storage->objectName() ) );
 }
 
 
-void StdStorageDialog::setCurrentStorage(const QString & moduleName, bool exclusive)
+void StdStorageDialog::setCurrentStorage(const QString & storageName, bool exclusive)
 {
-    if (m_report)
-        m_storage = m_reportCore->getStorageByModuleName(moduleName, m_report);
-    else
-        m_storage = m_reportCore->storageModule(moduleName);
+//    if (m_report)
+        m_storage = m_reportCore->getStorageByName(storageName, m_report);
+//    else
+//        m_storage = m_reportCore->storageModule(moduleName);
 
     if (m_storage) {
-        ui->cbStorage->setCurrentIndex( ui->cbStorage->findText(m_storage->moduleName() ) );
+        ui->cbStorage->setCurrentIndex( ui->cbStorage->findData(m_storage->objectName() ) );
         ui->cbStorage->setDisabled(exclusive);
     }
 }
 
 
-void StdStorageDialog::setCurrentStorageByScheme(const QString & storageScheme, bool exclusive)
-{
-    if (m_report)
-        m_storage = m_reportCore->getStorageByScheme(storageScheme, m_report);
-    else
-        m_storage = m_reportCore->storageModuleByScheme(storageScheme);
+//void StdStorageDialog::setCurrentStorageByName(const QString & storageScheme, bool exclusive)
+//{
+//    if (m_report)
+//        m_storage = m_reportCore->getStorageByScheme(storageScheme, m_report);
+//    else
+//        m_storage = m_reportCore->storageModuleByScheme(storageScheme);
 
-    if (m_storage) {
-        ui->cbStorage->setCurrentIndex( ui->cbStorage->findText(m_storage->moduleName() ) );
-        ui->cbStorage->setDisabled(exclusive);
-    }
-}
+//    if (m_storage) {
+//        ui->cbStorage->setCurrentIndex( ui->cbStorage->findText(m_storage->moduleFullName() ) );
+//        ui->cbStorage->setDisabled(exclusive);
+//    }
+//}
 
 
 QString StdStorageDialog::currentStorageName()
 {
-    return m_storage ? m_storage->moduleName() : "";
+    return m_storage ? m_storage->moduleFullName() : "";
 }
 
 
@@ -391,7 +390,7 @@ void StdStorageDialog::currentItemChanged ( QTreeWidgetItem * current, QTreeWidg
 void StdStorageDialog::currentStoragetIndexChanged(int index)
 {
     Q_UNUSED(index);
-    m_storage = m_reportCore->storageModule(ui->cbStorage->currentText());
+    m_storage = m_reportCore->getStorageByName(ui->cbStorage->itemData(ui->cbStorage->currentIndex()).toString(), m_report);
     populate(m_currentUrl);
 }
 
@@ -441,6 +440,8 @@ void StdStorageDialog::itemActivated (QTreeWidgetItem * item, int column )
 
 void StdStorageDialog::toRootDir()
 {
+    if (!m_storage)
+        return;
     populate(m_storage->rootUrl());
 }
 
@@ -472,6 +473,8 @@ QString StdStorageDialog::currentObjectUrl() const
 
 bool StdStorageDialog::currentObjectExists() const
 {
+    if (!m_storage)
+        return false;
     return m_storage->objectExists(currentObjectUrl());
 }
 

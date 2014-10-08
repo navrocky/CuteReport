@@ -1,7 +1,10 @@
 TEMPLATE = subdirs
 SUBDIRS = standard \
 
+!include( ../../common.pri ) {
+    error( Can not find the common.pri file! )
+}
 
-exists(extended/extended.pro) {
+contains(DEFINES, EXTENDEDSUITE) {
     SUBDIRS += extended
 }

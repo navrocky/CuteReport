@@ -42,73 +42,58 @@
 namespace PropertyEditor
 {
 
-PropertyEditorCore * PropertyEditorCore::m_instance = 0;
+
+//PluginManager * PluginManager::instance()
+//{
+//    if (!m_instance) {
+//        m_instance = new PluginManager();
+//        m_instance->loadPlugins();
+//    }
+
+//    return m_instance;
+//}
 
 
-PropertyEditorCore *PropertyEditorCore::createInstance()
-{
-    if (!m_instance) {
-        m_instance = new PropertyEditorCore();
-    }
-
-    return m_instance;
-}
-
-
-PropertyEditorCore * PropertyEditorCore::instance()
-{
-    if (!m_instance) {
-        m_instance = new PropertyEditorCore();
-        m_instance->loadPlugins();
-    }
-
-    return m_instance;
-}
-
-
-PropertyEditorCore::PropertyEditorCore(QObject *parent) :
+PluginManager::PluginManager(QObject *parent) :
     QObject(parent),
     m_counter(0)
 {
     qDebug() << "PropertyEditorCore CTOR";
-}
-
-
-PropertyEditorCore::~PropertyEditorCore()
-{
-    qDebug() << "PropertyEditorCore DTOR";
-    qDeleteAll(m_plugins);
-}
-
-
-void PropertyEditorCore::init()
-{
     loadPlugins();
 }
 
 
-const QList<PropertyInterface*> & PropertyEditorCore::plugins() const
+PluginManager::~PluginManager()
+{
+//    qDebug() << "PropertyEditorCore DTOR";
+//    foreach (PropertyInterface * plugin, m_plugins) {
+//        qDebug() << plugin->metaObject()->className();
+//        delete plugin;
+//    }
+
+    qDeleteAll(m_plugins);
+    m_plugins.clear();
+}
+
+
+const QList<PropertyInterface*> & PluginManager::plugins() const
 {
     return m_plugins;
 }
 
 
-void PropertyEditorCore::inc()
+void PluginManager::loadPlugins()
 {
-    ++m_counter;
-}
+    // looking for static plugins
+    foreach (QObject *pluginObject, QPluginLoader::staticInstances()) {
+        PropertyInterface *plugin = qobject_cast<PropertyInterface*>(pluginObject);
+        if (plugin) {
+            emit log((int)LogDebug, MODULENAME, QString("Found static plugin: %1").arg(plugin->metaObject()->className()), "");
+            m_plugins.push_back(qobject_cast<PropertyInterface*>(plugin));
+        }
+    }
 
-
-void PropertyEditorCore::dec()
-{
-    --m_counter;
-    if (!m_counter)
-        delete this;
-}
-
-
-void PropertyEditorCore::loadPlugins()
-{
+    // looking for dynamic plugins
     QFileInfoList files;
     QStringList dirs;
     dirs << PROPERTYEDITOR_PLUGINS_PATH;
@@ -117,33 +102,26 @@ void PropertyEditorCore::loadPlugins()
     foreach (const QString & dirName, dirs) {
         QDir pluginsDir(dirName);
         files += pluginsDir.entryInfoList(QDir::Files);
+        emit log((int)LogDebug, MODULENAME, "Plugin dir: " + pluginsDir.absolutePath(), "");
     }
 
-    /*
-    // looking for static plugins
-    foreach (QObject *plugin, QPluginLoader::staticInstances()) {
-        if (plugin && qobject_cast<PropertyInterface*>(plugin))
-            m_plugins.push_back(qobject_cast<PropertyInterface*>(plugin));
-    }
-*/
-
-    // looking for dynamic plugins
+    QPluginLoader loader;
+    loader.setLoadHints(QLibrary::ResolveAllSymbolsHint|QLibrary::ExportExternalSymbolsHint);
     foreach(const QFileInfo & fileName, files)
     {
-        emit log((int)LogDebug, MODULENAME, QString("Loading plugin: %1").arg(fileName.fileName()), "");
-        QPluginLoader loader;
-        loader.setLoadHints(QLibrary::ResolveAllSymbolsHint|QLibrary::ExportExternalSymbolsHint);
         loader.setFileName( fileName.absoluteFilePath());
-        if (!loader.load())
-        {
-            qCritical() << loader.errorString();
+        if (!loader.load()) {
+            emit log((int)LogWarning, MODULENAME, "Error while loading plugin " + fileName.fileName() + ": " + loader.errorString(), "");
             continue;
         }
-        QObject *plugin = loader.instance();
-        if (plugin && qobject_cast<PropertyInterface*>(plugin))
-            m_plugins.push_back(qobject_cast<PropertyInterface*>(plugin));
-        else
-            emit log((int)LogWarning, MODULENAME, QString("It\'s not a PropertyEditor plugin: %1").arg(fileName.fileName()), "");
+        PropertyInterface *plugin = qobject_cast<PropertyInterface*>(loader.instance());
+        if (plugin) {
+            m_plugins.push_back(plugin);
+            emit log((int)LogWarning, MODULENAME, "Loading plugin: " + fileName.baseName(), "");
+        } else {
+            loader.unload();
+            emit log((int)LogWarning, MODULENAME, QString("It\'s not a PropertyEditor plugin: %1").arg(fileName.baseName()), "");
+        }
     }
 }
 

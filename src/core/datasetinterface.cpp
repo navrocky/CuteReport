@@ -41,6 +41,14 @@ DatasetInterface::DatasetInterface(QObject *parent)
 }
 
 
+DatasetInterface *DatasetInterface::clone() const
+{
+    DatasetInterface * newDataset = this->objectClone();
+    newDataset->setReportCore(this->reportCore());
+    return newDataset;
+}
+
+
 QString	DatasetInterface::parentDataset()
 {
     return m_parentDataset;

@@ -37,8 +37,10 @@
 
 using namespace CuteReport;
 
+inline void initMyResource() { Q_INIT_RESOURCE(line); }
+
 LineItem::LineItem(QObject *parent)
-    :ItemInterface(*new LineItemPrivate, parent)
+    :ItemInterface(new LineItemPrivate, parent)
 {
     Q_INIT_RESOURCE(line);
     Q_D(LineItem);
@@ -48,17 +50,23 @@ LineItem::LineItem(QObject *parent)
 }
 
 
-LineItem::LineItem(LineItemPrivate &dd, QObject * parent)
+void LineItem::moduleInit()
+{
+    initMyResource();
+}
+
+
+LineItem::LineItem(LineItemPrivate *dd, QObject * parent)
     :ItemInterface(dd, parent)
 {
     Q_INIT_RESOURCE(line);
 }
 
 
-BaseItemInterface *LineItem::clone()
+BaseItemInterface *LineItem::itemClone() const
 {
-    Q_D(LineItem);
-    return new LineItem(*new LineItemPrivate(*d), parent());
+    Q_D(const LineItem);
+    return new LineItem(new LineItemPrivate(*d), parent());
 }
 
 
@@ -129,7 +137,7 @@ QIcon LineItem::itemIcon() const
 }
 
 
-QString LineItem::moduleName() const
+QString LineItem::moduleShortName() const
 {
     return tr("Line");
 }
@@ -141,25 +149,20 @@ QString LineItem::itemGroup() const
 }
 
 
-CuteReport::RenderedItemInterface * LineItem::render(int customDPI)
+bool LineItem::renderPrepare()
 {
-    Q_UNUSED(customDPI);
+    emit printBefore();
+    setRenderingPointer(new LineItemPrivate(*(reinterpret_cast<LineItemPrivate*>(d_ptr))));
+    emit printDataBefore();
+    emit printDataAfter();
+    return true;
+}
+
+
+RenderedItemInterface *LineItem::renderView()
+{
     Q_D(LineItem);
-
-    emit renderingBefore();
-
-    LineItemPrivate * pCurrent = d;
-    LineItemPrivate * pNew = new LineItemPrivate(*d);
-
-    d_ptr = pNew;
-    emit rendering();
-    d_ptr = pCurrent;
-
-    RenderedLineItem * view = new RenderedLineItem(this, pNew);
-
-    emit rendered(view);
-    emit renderingAfter();
-
+    RenderedLineItem * view = new RenderedLineItem(this, new LineItemPrivate(*d));
     return view;
 }
 
@@ -277,5 +280,5 @@ QString LineItem::_current_property_description() const
 }
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(line, LineItem)
+Q_EXPORT_PLUGIN2(Line, LineItem)
 #endif

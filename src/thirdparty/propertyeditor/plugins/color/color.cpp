@@ -97,5 +97,5 @@ PropertyInterface* Color::createInstance(QObject * object, int property, const P
 }
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(color, Color);
+Q_EXPORT_PLUGIN2(ColorProperty, Color)
 #endif

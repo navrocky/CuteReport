@@ -51,21 +51,24 @@ public:
     DetailFooter(QObject * parent = 0);
     virtual ~DetailFooter();
 
+    virtual void moduleInit();
+
     virtual BaseItemInterface * createInstance(QObject * parent) const;
-    virtual BaseItemInterface * clone();
     virtual QByteArray serialize();
     virtual void deserialize(QByteArray &data);
     virtual bool canContain(QObject * object);
 
     virtual void renderInit(CuteReport::RendererPublicInterface * renderer);
     virtual void renderReset();
-    virtual CuteReport::RenderedItemInterface * render(int customDPI = 0);
+    virtual bool renderPrepare();
+    virtual CuteReport::RenderedItemInterface * renderView();
 
     int layoutPriority() const { return 50;}
     BandInterface::AccomodationType accommodationType() const {return AccomodationEveryPage;}
 
     virtual QIcon itemIcon() const;
-    virtual QString moduleName() const;
+    virtual QString moduleShortName() const;
+    virtual QString suitName() const { return "Standard"; }
     virtual QString itemGroup() const;
 
     QString dataset() const;
@@ -83,12 +86,12 @@ signals:
     void reprintOnNewPageChanged(bool);
     void resetDetailNumberChanged(bool);
 
-
-protected:
-    DetailFooter(DetailFooterPrivate &dd, QObject * parent);
-
 private:
     Q_DECLARE_PRIVATE(DetailFooter)
+
+    DetailFooter(DetailFooterPrivate *dd, QObject * parent);
+    virtual BaseItemInterface * itemClone() const;
+
     CuteReport::RendererPublicInterface * m_renderer;
 };
 

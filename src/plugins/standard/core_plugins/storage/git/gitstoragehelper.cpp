@@ -50,6 +50,16 @@ GitStorageHelper::GitStorageHelper(StorageGit *storage, VisibleOptions visibleOp
     connect(ui->bGitBinary, SIGNAL(clicked()), this, SLOT(slotBinaryBrowse()));
     connect(ui->gitBinaryPath, SIGNAL(returnPressed()), this, SLOT(setGitVersion()));
 
+    // sync signals
+    connect(ui->askOverWrite, SIGNAL(clicked()), this, SLOT(save()));
+    connect(ui->remoteUrl, SIGNAL(editingFinished()), this, SLOT(save()));
+    connect(ui->localPath, SIGNAL(editingFinished()), this, SLOT(save()));
+    connect(ui->login, SIGNAL(editingFinished()), this, SLOT(save()));
+    connect(ui->password, SIGNAL(editingFinished()), this, SLOT(save()));
+    connect(ui->gitBinaryPath, SIGNAL(editingFinished()), this, SLOT(save()));
+
+    connectObject();
+
     QTimer::singleShot(0, this, SLOT(setGitVersion()));
 }
 
@@ -62,23 +72,39 @@ GitStorageHelper::~GitStorageHelper()
 
 void GitStorageHelper::load()
 {
-    ui->askOverWrite->setChecked(m_storage->askForOverwrite());
-    ui->remoteUrl->setText(m_storage->remoteUrl());
-    ui->localPath->setText(m_storage->localPath());
-    ui->password->setText(m_storage->password());
-    ui->login->setText(m_storage->login());
-    ui->gitBinaryPath->setText(m_storage->gitBinaryPath());
+    if (m_storage->askForOverwrite() != ui->askOverWrite->isChecked())
+        ui->askOverWrite->setChecked(m_storage->askForOverwrite());
+    if (m_storage->remoteUrl() != ui->remoteUrl->text())
+        ui->remoteUrl->setText(m_storage->remoteUrl());
+    if (m_storage->localPath() != ui->localPath->text())
+        ui->localPath->setText(m_storage->localPath());
+    if (m_storage->login() != ui->login->text())
+        ui->login->setText(m_storage->login());
+    if (m_storage->password() != ui->password->text())
+        ui->password->setText(m_storage->password());
+    if (m_storage->gitBinaryPath() != ui->gitBinaryPath->text())
+        ui->gitBinaryPath->setText(m_storage->gitBinaryPath());
 }
 
 
 void GitStorageHelper::save()
 {
-    m_storage->setAskForOverwrite(ui->askOverWrite->isChecked());
-    m_storage->setRemoteUrl(ui->remoteUrl->text());
-    m_storage->setLocalPath(ui->localPath->text());
-    m_storage->setLogin(ui->login->text());
-    m_storage->setPassword(ui->password->text());
-    m_storage->setGitBinaryPath(ui->gitBinaryPath->text());
+    disconnectObject();
+
+    if (m_storage->askForOverwrite() != ui->askOverWrite->isChecked())
+        m_storage->setAskForOverwrite(ui->askOverWrite->isChecked());
+    if (m_storage->remoteUrl() != ui->remoteUrl->text())
+        m_storage->setRemoteUrl(ui->remoteUrl->text());
+    if (m_storage->localPath() != ui->localPath->text())
+        m_storage->setLocalPath(ui->localPath->text());
+    if (m_storage->login() != ui->login->text())
+        m_storage->setLogin(ui->login->text());
+    if (m_storage->password() != ui->password->text())
+        m_storage->setPassword(ui->password->text());
+    if (m_storage->gitBinaryPath() != ui->gitBinaryPath->text())
+        m_storage->setGitBinaryPath(ui->gitBinaryPath->text());
+
+    connectObject();
 }
 
 
@@ -104,6 +130,18 @@ bool GitStorageHelper::setGitVersion()
     ui->gitBinaryPath->setPalette(pal);
 
     return result;
+}
+
+
+void GitStorageHelper::connectObject()
+{
+    connect(m_storage, SIGNAL(changed()), this, SLOT(load()));
+}
+
+
+void GitStorageHelper::disconnectObject()
+{
+    disconnect(m_storage, SIGNAL(changed()), this, SLOT(load()));
 }
 
 

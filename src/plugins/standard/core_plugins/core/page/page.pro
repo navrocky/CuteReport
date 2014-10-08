@@ -11,7 +11,9 @@ HEADERS += \
     layoutmanager.h \
     pagemanipulator.h \
     pageitemselection.h \
-    magnets.h
+    magnets.h \
+    scene.h \
+    view.h
 
 
 SOURCES += \
@@ -20,10 +22,9 @@ SOURCES += \
     layoutmanager.cpp \
     pagemanipulator.cpp \
     pageitemselection.cpp \
-    magnets.cpp
+    magnets.cpp \
+    scene.cpp \
+    view.cpp
 
 RESOURCES += page.qrc
 
-#PRIVATE_IMAGES.files = images/*.png
-#PRIVATE_IMAGES.path = $$REPORT_ICON_PATH
-#INSTALLS += PRIVATE_IMAGES

@@ -48,30 +48,31 @@ class  RectangleItem : public CuteReport::ItemInterface
     Q_INTERFACES(CuteReport::ItemInterface)
 
 public:
-    RectangleItem(QObject * parent = 0);
+    explicit RectangleItem(QObject * parent = 0);
 
+    virtual void moduleInit();
     virtual void init_gui();
 
     virtual CuteReport::BaseItemInterface * createInstance(QObject * parent) const;
     virtual CuteReport::BaseItemHelperInterface * helper();
-    virtual BaseItemInterface * clone();
     virtual QByteArray serialize();
     virtual void deserialize(QByteArray &data);
     virtual bool canContain(QObject * object);
 
     virtual QIcon itemIcon() const;
-    virtual QString moduleName() const;
+    virtual QString moduleShortName() const;
+    virtual QString suitName() const { return "Standard"; }
     virtual QString itemGroup() const;
 
-    virtual CuteReport::RenderedItemInterface * render(int customDPI = 0);
+    virtual bool renderPrepare();
+    virtual CuteReport::RenderedItemInterface * renderView();
 
     virtual void initScript(QScriptEngine * scriptEngine);
 
-protected:
-    RectangleItem(RectangleItemPrivate &dd, QObject * parent);
-
 private:
     Q_DECLARE_PRIVATE(RectangleItem)
+    explicit RectangleItem(RectangleItemPrivate *dd, QObject * parent);
+    virtual BaseItemInterface * itemClone() const;
 };
 
 

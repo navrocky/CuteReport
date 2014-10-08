@@ -37,8 +37,10 @@
 
 using namespace CuteReport;
 
+inline void initResource() { Q_INIT_RESOURCE(arc); }
+
 ArcItem::ArcItem(QObject *parent)
-    :ItemInterface(*new ArcItemPrivate, parent)
+    :ItemInterface(new ArcItemPrivate, parent)
 {
     Q_INIT_RESOURCE(arc);
     Q_D(ArcItem);
@@ -48,17 +50,23 @@ ArcItem::ArcItem(QObject *parent)
 }
 
 
-ArcItem::ArcItem(ArcItemPrivate &dd, QObject * parent)
+void ArcItem::moduleInit()
+{
+    initResource();
+}
+
+
+ArcItem::ArcItem(ArcItemPrivate *dd, QObject * parent)
     :ItemInterface(dd, parent)
 {
     Q_INIT_RESOURCE(arc);
 }
 
 
-CuteReport::ItemInterface * ArcItem::clone()
+CuteReport::BaseItemInterface * ArcItem::itemClone() const
 {
-    Q_D(ArcItem);
-    return new ArcItem(*new ArcItemPrivate(*d), parent());
+    Q_D(const ArcItem);
+    return new ArcItem(new ArcItemPrivate(*d), parent());
 }
 
 
@@ -131,7 +139,7 @@ QIcon ArcItem::itemIcon() const
 }
 
 
-QString ArcItem::moduleName() const
+QString ArcItem::moduleShortName() const
 {
     return tr("Arc");
 }
@@ -143,25 +151,20 @@ QString ArcItem::itemGroup() const
 }
 
 
-CuteReport::RenderedItemInterface * ArcItem::render(int customDPI)
+bool ArcItem::renderPrepare()
 {
-    Q_UNUSED(customDPI);
+    emit printBefore();
+    setRenderingPointer(new ArcItemPrivate(*(reinterpret_cast<ArcItemPrivate*>(d_ptr))));
+    emit printDataBefore();
+    emit printDataAfter();
+    return true;
+}
+
+
+RenderedItemInterface *ArcItem::renderView()
+{
     Q_D(ArcItem);
-
-    emit renderingBefore();
-
-    ArcItemPrivate * pCurrent = d;
-    ArcItemPrivate * pNew = new ArcItemPrivate(*d);
-
-    d_ptr = pNew;
-    emit rendering();
-    d_ptr = pCurrent;
-
-    CuteReport::RenderedItemInterface * view = new RenderedArcItem(this, pNew);
-
-    emit rendered(view);
-    emit renderingAfter();
-
+    CuteReport::RenderedItemInterface * view = new RenderedArcItem(this, new ArcItemPrivate(*d));
     return view;
 }
 
@@ -260,5 +263,5 @@ QString ArcItem::_current_property_description() const
 }
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(arc, ArcItem)
+Q_EXPORT_PLUGIN2(Arc, ArcItem)
 #endif

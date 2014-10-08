@@ -55,7 +55,7 @@ MainWindow::MainWindow(CuteDesigner::Core *core) :
     connect(ui->tabs, SIGNAL(CurrentChanged(int)), this, SLOT(slotTabsSwitched(int)));
     connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(slotAbout()));
     connect(ui->actionOptions, SIGNAL(triggered()), this, SLOT(slotOptions()));
-    connect(ui->actionQuit, SIGNAL(triggered()), this, SLOT(close()));
+    connect(ui->actionQuit, SIGNAL(triggered()), this, SIGNAL(closeRequest()));
 
     connect(m_core, SIGNAL(newReport_after(CuteReport::ReportInterface*)), this, SLOT(slotNewReport_after(CuteReport::ReportInterface*)), Qt::QueuedConnection);
     connect(m_core, SIGNAL(newPage_after(CuteReport::PageInterface*)), this, SLOT(slotNewPage_after(CuteReport::PageInterface*)), Qt::QueuedConnection);
@@ -80,10 +80,10 @@ MainWindow::~MainWindow()
 }
 
 
-void MainWindow::closeEvent( QCloseEvent* )
+void MainWindow::closeEvent( QCloseEvent* event)
 {
-//    saveSettings();
-    emit closed();
+    emit closeRequest();
+    event->ignore();
 }
 
 

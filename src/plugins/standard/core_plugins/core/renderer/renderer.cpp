@@ -74,7 +74,6 @@ Renderer::Renderer(const Renderer &dd, QObject * parent)
       m_delay(dd.delay()),
       m_resultReady(dd.m_resultReady)
 {
-
 }
 
 
@@ -86,13 +85,13 @@ RendererInterface *Renderer::createInstance(QObject *parent) const
 
 RendererInterface * Renderer::clone() const
 {
-    return new Renderer(*this, this->parent());
+    return new Renderer(*this, 0);
 }
 
 
-QString Renderer::moduleName() const
+QString Renderer::moduleShortName() const
 {
-    return QString("Standard");
+    return QString("Renderer");
 }
 
 
@@ -306,5 +305,5 @@ QString Renderer::_current_property_description() const
 
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(renderer, Renderer)
+Q_EXPORT_PLUGIN2(Renderer, Renderer)
 #endif

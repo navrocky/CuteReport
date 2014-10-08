@@ -1,5 +1,6 @@
 TEMPLATE = subdirs
-SUBDIRS = page \
+SUBDIRS = \
+        page \
         renderer \
 	printer \
 	form \

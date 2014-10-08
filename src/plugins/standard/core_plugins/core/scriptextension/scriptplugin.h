@@ -45,7 +45,8 @@ public:
     explicit CuteReportScriptPlugin(QObject *parent = 0);
     virtual ~CuteReportScriptPlugin();
 
-    virtual QString moduleName() const;
+    virtual QString moduleShortName() const;
+    virtual QString suitName() const { return "Standard"; }
 
     QStringList keys() const;
     void initialize(const QString &key, QScriptEngine *engine);

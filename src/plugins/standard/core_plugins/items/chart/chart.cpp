@@ -42,8 +42,10 @@
 
 using namespace CuteReport;
 
+inline void initResource() { Q_INIT_RESOURCE(chart); }
+
 ChartItem::ChartItem(QObject *parent)
-    :ItemInterface(*new ChartItemPrivate, parent),
+    :ItemInterface(new ChartItemPrivate, parent),
       m_renderer(0)
 {
     Q_INIT_RESOURCE(chart);
@@ -63,20 +65,21 @@ ChartItem::ChartItem(QObject *parent)
 
 void ChartItem::moduleInit()
 {
+    initResource();
 }
 
 
-ChartItem::ChartItem(ChartItemPrivate &dd, QObject * parent)
+ChartItem::ChartItem(ChartItemPrivate *dd, QObject * parent)
     :ItemInterface(dd, parent)
 {
     Q_INIT_RESOURCE(chart);
 }
 
 
-BaseItemInterface *ChartItem::clone()
+BaseItemInterface *ChartItem::itemClone() const
 {
-    Q_D(ChartItem);
-    return new ChartItem(*new ChartItemPrivate(*d), parent());
+    Q_D(const ChartItem);
+    return new ChartItem(new ChartItemPrivate(*d), parent());
 }
 
 
@@ -180,7 +183,7 @@ QIcon ChartItem::itemIcon() const
 }
 
 
-QString ChartItem::moduleName() const
+QString ChartItem::moduleShortName() const
 {
     return tr("Chart");
 }
@@ -204,25 +207,20 @@ void ChartItem::renderReset()
 }
 
 
-CuteReport::RenderedItemInterface * ChartItem::render(int customDPI)
+bool ChartItem::renderPrepare()
 {
-    Q_UNUSED(customDPI);
+    emit printBefore();
+    setRenderingPointer(new ChartItemPrivate(*(reinterpret_cast<ChartItemPrivate*>(d_ptr))));
+    emit printDataBefore();
+    emit printDataAfter();
+    return true;
+}
+
+
+RenderedItemInterface *ChartItem::renderView()
+{
     Q_D(ChartItem);
-
-    emit renderingBefore();
-
-    ChartItemPrivate * pCurrent = d;
-    ChartItemPrivate * pNew = new ChartItemPrivate(*d);
-
-    d_ptr = pNew;
-    emit rendering();
-    d_ptr = pCurrent;
-
-    RenderedChartItem * view = new RenderedChartItem(this, pNew);
-
-    emit rendered(view);
-    emit renderingAfter();
-
+    RenderedChartItem * view = new RenderedChartItem(this, new ChartItemPrivate(*d));
     return view;
 }
 
@@ -677,5 +675,5 @@ QString ChartItem::_current_property_description() const
 }
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(chart, ChartItem)
+Q_EXPORT_PLUGIN2(Chart, ChartItem)
 #endif

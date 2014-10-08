@@ -20,7 +20,7 @@ SUBDIRS = src
     }
 }
 
-ADDITIONAL_FILES.files = COPYING pkg/cutereport.ico
+ADDITIONAL_FILES.files = COPYING pkg/*.ico
 DATASET_FILES.files = examples/datasets/*
 REPORT_FILES.files = examples/reports/*
 TEMPLATE_FILES.files = examples/templates/*

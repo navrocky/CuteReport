@@ -40,14 +40,12 @@ namespace CuteReport
 class CUTEREPORT_EXPORTS  RenderingStruct
 {
 public:
-    RenderingStruct(){}
-    RenderingStruct(const RenderingStruct & p) :
-          absoluteGeometry(p.absoluteGeometry)
-    {}
+    explicit RenderingStruct(){}
+    explicit RenderingStruct(const RenderingStruct & p) {}
+
+//    virtual qint8 type() const = 0;
 
     virtual ~RenderingStruct(){}
-
-    QRectF absoluteGeometry;  // absolute page geometry in current messure unit
 };
 
 
@@ -64,6 +62,7 @@ public:
         selfRendering(false),
         childrenSelfRendering(false),
         minRectSize(1,1),
+        renderingType(RenderingTemplate),
         r(0)
     {
         frame = BaseItemInterface::DrawLeft | BaseItemInterface::DrawRight | BaseItemInterface::DrawTop | BaseItemInterface::DrawBottom;
@@ -85,6 +84,7 @@ public:
         childrenSelfRendering(p.childrenSelfRendering),
         minRectSize(p.minRectSize),
         resizeFlags(p.resizeFlags),
+        renderingType(p.renderingType),
         r(0)
     {}
 
@@ -109,6 +109,7 @@ public:
     bool childrenSelfRendering;
     QSizeF minRectSize;
     int resizeFlags;
+    RenderingType renderingType;
     RenderingStruct * r;
 };
 

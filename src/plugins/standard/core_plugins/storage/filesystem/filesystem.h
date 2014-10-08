@@ -38,10 +38,10 @@ static const QString ModuleName("FileSystem");
 class StorageFileSystem : public CuteReport::StorageInterface
 {
     Q_OBJECT
+    Q_INTERFACES(CuteReport::StorageInterface)
 #if QT_VERSION >= 0x050000
     Q_PLUGIN_METADATA(IID "CuteReport.StorageInterface/1.0")
 #endif
-    Q_INTERFACES(CuteReport::StorageInterface)
 
     Q_PROPERTY(QString objectsRootPath READ objectsRootPath WRITE setObjectsRootPath NOTIFY objectsRootPathChanged)
     Q_PROPERTY(bool askForOverwrite READ askForOverwrite WRITE setAskForOverwrite NOTIFY askForOverwriteChanged)
@@ -49,6 +49,8 @@ class StorageFileSystem : public CuteReport::StorageInterface
 public:
     explicit StorageFileSystem(QObject * parent = 0);
     ~StorageFileSystem();
+
+    virtual void moduleInit();
 
     virtual StorageFileSystem * createInstance(QObject * parent = 0) const;
     virtual StorageFileSystem * clone();
@@ -71,7 +73,8 @@ public:
     virtual QString lastError() const;
 
     virtual int moduleVersion() const {return 1;}
-    virtual QString moduleName() const {return ModuleName; }
+    virtual QString moduleShortName() const {return ModuleName; }
+    virtual QString suitName() const { return "Standard"; }
 
     // storage must care of deleting helper
     virtual CuteReport::StorageHelperInterface * helper();

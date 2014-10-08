@@ -29,8 +29,6 @@
  ***************************************************************************/
 #include "page.h"
 #include "pagegui.h"
-#include "QtCore"
-#include "QtGui"
 #include "iteminterface.h"
 #include "bandinterface.h"
 #include "renderediteminterface.h"
@@ -40,16 +38,22 @@
 #include "pagemanipulator.h"
 #include "types.h"
 
+#include "QtCore"
+#include "QtGui"
 #include <QApplication>
 #include <QDesktopWidget>
 
-#define MANIPULATOR_ID 1345732212
-#define MODULENAME "StdPage"
+#define MANIPULATOR_ID 17322121
+#define MODULENAME "Page"
+
+inline void initMyResource() { Q_INIT_RESOURCE(page); }
+
+using namespace CuteReport;
+
+SUIT_BEGIN_NAMESPACE
 
 QMap<QString, PageFormat> Page::m_formats;
 QStringList Page::m_formatVariants;
-
-using namespace CuteReport;
 
 Page::Page(QObject * parent):
     PageInterface(parent),
@@ -65,6 +69,7 @@ Page::Page(QObject * parent):
     d->magnetRate = 6;
     d->magnetValue = 0;
     d->background = QColor(Qt::white);
+    d->renderingStage = false;
 
     //    d->grid = new Grid();
 }
@@ -72,7 +77,11 @@ Page::Page(QObject * parent):
 
 Page::Page(const Page & dd, QObject * parent)
     :PageInterface(*reinterpret_cast<const PageInterface*>(&dd), parent),
-      d(new PagePrivateData(*(dd.d.data())))
+      d(new PagePrivateData(*(dd.d.data()))),
+      m_inited(false),
+      m_gui(0),
+      m_itemsConnected(dd.m_itemsConnected),
+      m_currentProperty(dd.m_currentProperty)
 {
 
 }
@@ -80,20 +89,20 @@ Page::Page(const Page & dd, QObject * parent)
 
 Page::~Page()
 {
-    if (m_gui)
-        delete m_gui;
+    delete m_gui;
 }
 
 
 void Page::moduleInit()
 {
+    initMyResource();
     if (m_formats.isEmpty())
         initFormats();
     else
         ReportCore::log(LogDebug, MODULENAME, "Formats are already preloaded");
 
     setFormat("A4");
-    setMargins(Margins(10,10,10,10));
+    setMargins(10, 10, 10, 10);
 }
 
 
@@ -124,8 +133,14 @@ PageInterface * Page::createInstance(QObject *parent) const
 {
     PageInterface * newPage = new Page(parent);
     newPage->setFormat("A4");
-    newPage->setMargins(Margins(10,10,10,10));
+    newPage->setMargins(10, 10, 10, 10);
     return newPage;
+}
+
+
+PageInterface *Page::objectClone() const
+{
+    return new Page(*this, parent());
 }
 
 
@@ -176,6 +191,12 @@ QList<BaseItemInterface *> Page::items() const
 }
 
 
+BaseItemInterface *Page::item(const QString &objectName) const
+{
+    return findChild<CuteReport::BaseItemInterface*>(objectName);
+}
+
+
 PageInterface::Orientation Page::orientation() const
 {
     return d->orientation;
@@ -196,6 +217,7 @@ void Page::setOrientation(const Orientation &orientation)
 
         emit orientationChanged(d->orientation);
         emit paperSizeChanged(paperSize());
+        emit changed();
     }
 }
 
@@ -223,6 +245,7 @@ void Page::setFormat(const QString & formatName)
 
         emit formatChanged(d->format.name);
         emit paperSizeChanged(paperSize());
+        emit changed();
     }
 }
 
@@ -267,6 +290,7 @@ void Page::setPaperSize(const QSizeF &size, CuteReport::Unit unit)
 
         emit formatChanged(d->format.name);
         emit paperSizeChanged(paperSize());
+        emit changed();
     }
 }
 
@@ -333,6 +357,7 @@ void Page::setUnit(const CuteReport::Unit &unit)
 
         emit unitChanged(d->unit);
         emit unitChanged(unitToFullString(d->unit));
+        emit changed();
     } else {
         d->unit = unit;
     }
@@ -369,55 +394,15 @@ void Page::setDpi(int dpi)
         item->setDpi(d->dpi);
 
     emit dpiChanged(dpi);
-}
-
-
-Margins Page::margins(CuteReport::Unit unit) const
-{
-    if (m_inited) {
-        Unit u = (unit == UnitNotDefined) ? d->unit : unit;
-        QPointF p1 = convertUnit(QPointF(d->margins.left(), d->margins.top()), Millimeter, u, d->dpi);
-        QPointF p2 = convertUnit(QPointF(d->margins.right(), d->margins.bottom()), Millimeter, u, d->dpi);
-        return Margins(p1.x(), p1.y(), p2.x(), p2.y());
-    } else {
-        return d->margins;
-    }
-}
-
-
-void Page::setMargins(const Margins &margins, CuteReport::Unit unit)
-{
-    if (!m_inited) {
-        d->margins = margins;
-        return;
-    }
-
-    Unit u = (unit == UnitNotDefined) ? d->unit : unit;
-    QPointF p1 = convertUnit(QPointF(margins.left(), margins.top()), u, Millimeter, d->dpi);
-    QPointF p2 = convertUnit(QPointF(margins.right(), margins.bottom()), u, Millimeter, d->dpi);
-    Margins newMarginMM(p1.x(), p1.y(), p2.x(), p2.y());
-
-    if (d->margins == newMarginMM)
-        return;
-
-    d->margins = margins;
-
-    if (d->margins.left() < 0) d->margins.setLeft(0);
-    if (d->margins.top() < 0) d->margins.setTop(0);
-    if (d->margins.right() < 0) d->margins.setRight(0);
-    if (d->margins.bottom() < 0) d->margins.setBottom(0);
-
-    afterGeometryChanged();
-
-    emit marginsChanged(this->margins(d->unit));
+    emit changed();
 }
 
 
 void Page::afterGeometryChanged()
 {
-    d->pageRect = QRectF(d->margins.left(), d->margins.top(),
-                         qMax(0.0, d->format.sizeMM.width() - d->margins.left() - d->margins.right()),
-                         qMax(0.0, d->format.sizeMM.height() - d->margins.top() - d->margins.bottom()));
+    d->pageRect = QRectF(d->marginLeft, d->marginTop,
+                         qMax(0.0, d->format.sizeMM.width() - d->marginLeft - d->marginRight),
+                         qMax(0.0, d->format.sizeMM.height() - d->marginTop - d->marginBottom));
 
     m_itemsConnected = false;
     LayoutManager::updatePositions(this);
@@ -454,13 +439,13 @@ void Page::setBackground(const QColor & background)
 
     d->background = background;
     emit backgroundChanged(d->background);
+    emit changed();
 }
 
 
 bool Page::addItem(BaseItemInterface * item, QPointF pagePos, QString * error)
 {
     bool cancel = false;
-    emit beforeNewItemAdded(item, pagePos, &cancel);
     if (cancel) {
         if (error)
             *error = "canceled";
@@ -479,12 +464,34 @@ bool Page::addItem(BaseItemInterface * item, QPointF pagePos, QString * error)
     QRectF geometry(convertUnit(pagePos, d->unit, Millimeter, item->dpi()), item->geometry(Millimeter).size());
     item->setAbsoluteGeometry(geometry, Millimeter);
 
+    emit beforeNewItemAdded(item, &cancel);
+
     prepareNewItem(item, true);
 
     if (m_gui)
         m_gui->itemAdded(item);
 
-    emit afterNewItemAdded(item, pagePos);
+    emit afterNewItemAdded(item);
+    emit activeObjectChanged(item);
+
+    return true;
+}
+
+
+bool Page::addItem(BaseItemInterface *item)
+{
+    bool cancel = false;
+    emit beforeNewItemAdded(item, &cancel);
+    if (cancel) {
+        return false;
+    }
+
+    prepareNewItem(item, true);
+
+    if (m_gui)
+        m_gui->itemAdded(item);
+
+    emit afterNewItemAdded(item);
     emit activeObjectChanged(item);
 
     return true;
@@ -524,26 +531,35 @@ void Page::deleteItem(BaseItemInterface *item)
 }
 
 
-void Page::_deleteItem(BaseItemInterface *item, bool emitSignals)
+void Page::deleteItem(const QString &itemName)
 {
-    reportCore()->log(LogDebug, MODULENAME, QString("_deleteItem(%1)").arg(item->objectName()));
+    deleteItem(item(itemName));
+}
+
+
+void Page::_deleteItem(BaseItemInterface *item, bool emitSignals, bool directDeletion)
+{
+    QString itemName = item->objectName();
+    reportCore()->log(LogDebug, MODULENAME, QString("_deleteItem(%1)").arg(itemName));
     bool cancel;
 
-    foreach (BaseItemInterface * child, item->findChildren<BaseItemInterface *>())
-        if (child->parentItem() == item)
-            _deleteItem(child);
 
     if (emitSignals)
         emit beforeItemRemoved(item,&cancel);
 
-    if (m_gui)
-        m_gui->itemBeforeDestroyed(item);
     disconnect(item, SIGNAL(destroyed(QObject*)), this, SLOT(slotItemDestroyed(QObject*)));
 
-    delete item;
+    item->deleteLater();
 
     if (emitSignals)
-        emit afterItemRemoved(item);
+        emit afterItemRemoved(item, itemName, directDeletion);
+
+    foreach (BaseItemInterface * child, item->findChildren<BaseItemInterface *>())
+        if (child->parentItem() == item)
+            _deleteItem(child, emitSignals, false);
+
+    if (m_gui)
+        m_gui->itemBeforeDestroyed(item);
 }
 
 
@@ -558,11 +574,123 @@ QRectF Page::pageRect(CuteReport::Unit unit)
 }
 
 
+qreal Page::marginLeft(CuteReport::Unit unit) const
+{
+    if (!m_inited)
+        return d->marginLeft;
+    CuteReport::Unit u = (unit == UnitNotDefined) ? d->unit : unit;
+    return convertUnit(d->marginLeft, Millimeter, u, d->dpi);
+}
+
+
+qreal Page::marginTop(CuteReport::Unit unit) const
+{
+    if (!m_inited)
+        return d->marginTop;
+    CuteReport::Unit u = (unit == UnitNotDefined) ? d->unit : unit;
+    return convertUnit(d->marginTop, Millimeter, u, d->dpi);
+}
+
+
+qreal Page::marginRight(CuteReport::Unit unit) const
+{
+    if (!m_inited)
+        return d->marginRight;
+    CuteReport::Unit u = (unit == UnitNotDefined) ? d->unit : unit;
+    return convertUnit(d->marginRight, Millimeter, u, d->dpi);
+}
+
+
+qreal Page::marginBottom(CuteReport::Unit unit) const
+{
+    if (!m_inited)
+        return d->marginBottom;
+    CuteReport::Unit u = (unit == UnitNotDefined) ? d->unit : unit;
+    return convertUnit(d->marginBottom, Millimeter, u, d->dpi);
+}
+
+
+void Page::setMarginLeft(qreal margin, CuteReport::Unit unit)
+{
+    _setMargin(d->marginLeft, margin, unit);
+    if (!m_inited)
+        return;
+    emit marginLeftChanged(marginLeft(d->unit));
+    emit marginChanged();
+    emit changed();
+}
+
+
+void Page::setMarginTop(qreal margin, CuteReport::Unit unit)
+{
+    _setMargin(d->marginTop, margin, unit);
+    if (!m_inited)
+        return;
+    emit marginTopChanged(marginTop(d->unit));
+    emit marginChanged();
+    emit changed();
+}
+
+
+void Page::setMarginRight(qreal margin, CuteReport::Unit unit)
+{
+    _setMargin(d->marginRight, margin, unit);
+    if (!m_inited)
+        return;
+    emit marginRightChanged(marginRight(d->unit));
+    emit marginChanged();
+    emit changed();
+}
+
+
+void Page::setMarginBottom(qreal margin, CuteReport::Unit unit)
+{
+    _setMargin(d->marginBottom, margin, unit);
+    if (!m_inited)
+        return;
+    emit marginBottomChanged(marginBottom(d->unit));
+    emit marginChanged();
+    emit changed();
+}
+
+
+void Page::setMargins(qreal left, qreal top, qreal right, qreal bottom, CuteReport::Unit unit)
+{
+    _setMargin(d->marginLeft, left, unit, false);
+    _setMargin(d->marginRight, right, unit, false);
+    _setMargin(d->marginTop, top, unit, false);
+    _setMargin(d->marginBottom, bottom, unit, false);
+    afterGeometryChanged();
+    emit marginChanged();
+    emit changed();
+}
+
+
+void Page::_setMargin(qreal & currentValue, const qreal & newValue, CuteReport::Unit unit, bool processGeometry)
+{
+    if (!m_inited) {
+        currentValue = newValue;
+        return;
+    }
+
+    CuteReport::Unit u = (unit == UnitNotDefined) ? d->unit : unit;
+    qreal newValueMM = convertUnit(newValue, u, Millimeter, d->dpi);
+
+    if (currentValue == newValueMM)
+        return;
+
+    currentValue = qMax(0.0, newValueMM);
+
+    if (processGeometry)
+        afterGeometryChanged();
+}
+
+
 BaseItemInterface * Page::itemAt(QPointF pos)
 {
     QMap<int, BaseItemInterface*> items;
     foreach (BaseItemInterface * const item, findChildren<BaseItemInterface *>()){
-        QRectF itemGeometry = item->absoluteGeometry();
+        QRectF itemGeometry = item->absoluteBoundingRect();
         if (itemGeometry.contains(pos))
             items.insert(item->childLevel(), item);
     }
@@ -587,7 +715,7 @@ QList<BaseItemInterface *> Page::itemsAt(QPointF pos)
     foreach (BaseItemInterface * const item, findChildren<BaseItemInterface *>()){
         if (item->parent() != this)
             continue;
-        QRectF childGeometry = item->absoluteGeometry();
+        QRectF childGeometry = item->absoluteBoundingRect();
         if (childGeometry.contains(pos)) {
             list.append(item);
             list.append(item->childrenAt(item->mapFromPage(pos)));
@@ -607,40 +735,9 @@ int Page::layerLevel(BaseItemInterface * item)
 }
 
 
-/*
-QPointF Page::convertCurrentToMM(const QPointF & point)
-{
-    switch(d->unit) {
-    case UnitNotDefined:
-    case Millimeter:
-        return point;
-    case Inch:
-        return QPointF(point.x()*25.4, point.y()*25.4);
-    case Pixel:
-        return QPointF(pixel2mm(point.x(), d->dpi), pixel2mm(point.y(), d->dpi));
-    }
-    return QPointF();
-}
-
-
-QPointF Page::convertMMtoCurrent(const QPointF & point)
-{
-    switch(d->unit) {
-    case UnitNotDefined:
-    case Millimeter:
-        return point;
-    case Inch:
-        return QPointF(point.x()/25.4, point.y()/25.4);
-    case Pixel:
-        return QPointF(mm2pixel(point.x(), d->dpi), mm2pixel(point.y(), d->dpi));
-    }
-    return QPointF();
-}
-*/
-
 void Page::renderInit()
 {
-
+    d->renderingStage = true;
 }
 
 
@@ -659,7 +756,7 @@ void Page::renderPageCompleted()
 
 void Page::renderReset()
 {
-
+    d->renderingStage = false;
 }
 
 
@@ -716,25 +813,20 @@ QList<PageViewInterface *> Page::views()
 
 PageViewInterface *Page::createView(QWidget *parent)
 {
-    return createSimpleView(parent);
+    checkGUI();
+    PageViewInterface * view = m_gui->createView();
+    emit viewCreated(view);
+    return view;
 }
 
 
 PageViewInterface *Page::createSimpleView(QWidget * parent)
 {
     checkGUI();
-    PageViewInterface * view = m_gui->createView(parent);
+    PageViewInterface * view = m_gui->createSimpleView();
     emit viewCreated(view);
     return view;
 }
-
-
-//bool Page::canViewContainItemAt(PageViewInterface *view, QPoint pixelPos, ItemInterface * item)
-//{
-//    if (!m_gui)
-//        return false;
-//    return m_gui->canViewContainItemAt(static_cast<PageView*>(view), pixelPos, item);
-//}
 
 
 void Page::setBandsIndention(qreal value)
@@ -817,31 +909,30 @@ void Page::setUseGrid(bool b)
 }
 
 
-qreal Page::gridStep()
+qreal Page::gridStep(CuteReport::Unit unit)
 {
-    QHash<CuteReport::Unit,qreal>::const_iterator it = d->gridSteps.find(d->unit);
+    CuteReport::Unit u = (unit == UnitNotDefined) ? d->unit : unit;
+    QHash<CuteReport::Unit,qreal>::const_iterator it = d->gridSteps.find(u);
     if (it == d->gridSteps.end()) { // inser default step
-        switch (d->unit) {
-        case Millimeter:    d->gridSteps.insert(Millimeter, 0.5); break;
-        case Inch:          d->gridSteps.insert(Inch, 0.05); break;
-        default:            d->gridSteps.insert(d->unit, 1.0); break;
+        switch (u) {
+            case Millimeter:    d->gridSteps.insert(Millimeter, 0.5); break;
+            case Inch:          d->gridSteps.insert(Inch, 0.05); break;
+            default:            d->gridSteps.insert(UnitNotDefined, 1.0); break;
         }
     }
-    return d->gridSteps.value(d->unit);
+    return d->gridSteps.value(u);
 }
 
 
-void Page::setGridStep(qreal value)
+void Page::setGridStep(qreal value, CuteReport::Unit unit)
 {
     if (!m_inited)
         return;
-
-    QHash<CuteReport::Unit,qreal>::iterator it = d->gridSteps.find(d->unit);
-    if (it.value() == value)
+    CuteReport::Unit u = (unit == UnitNotDefined) ? d->unit : unit;
+    if (d->gridSteps.value(u) == value)
         return;
-
-    it.value() = value;
-    emit gridStepChanged(it.value());
+    d->gridSteps.insert(u, value);
+    emit gridStepChanged(value, u);
 }
 
 
@@ -872,79 +963,6 @@ QGraphicsItem *Page::pageItem()
 {
     return m_gui ? m_gui->pageItem() : 0;
 }
-
-
-//QRectF Page::mapFromPixel(QRectF rect, int customDPI)
-//{
-//    Q_UNUSED(customDPI);
-//    switch (d->unit) {
-//    case UnitNotDefined:
-//    case Millimeter:
-//        return QRectF(pixel2mm(rect.x(), d->dpi), pixel2mm(rect.y(), d->dpi), pixel2mm(rect.width(),d->dpi), pixel2mm(rect.height(), d->dpi));
-//    case Inch:
-//        return QRectF(pixel2inch(rect.x(), d->dpi), pixel2inch(rect.y(), d->dpi), pixel2inch(rect.width(),d->dpi), pixel2inch(rect.height(), d->dpi));
-//    case Pixel:
-//        return rect;
-//    default:
-//        return QRectF();
-//    }
-//    return QRectF() ;
-//}
-
-
-//QPointF Page::mapFromPixel(QPointF point, int customDPI)
-//{
-//    Q_UNUSED(customDPI);
-//    switch (d->unit) {
-//    case UnitNotDefined:
-//    case Millimeter:
-//        return QPointF(pixel2mm(point.x(), d->dpi), pixel2mm(point.y(), d->dpi));
-//    case Inch:
-//        return QPointF(pixel2inch(point.x(), d->dpi), pixel2inch(point.y(), d->dpi));
-//    case Pixel:
-//        return point;
-//    }
-//    return QPointF() ;
-//}
-
-
-//QRect Page::mapToPixel(QRectF rect, int customDPI)
-//{
-//    Q_UNUSED(customDPI);
-//    QRect newRect;
-//    switch (d->unit) {
-//    case UnitNotDefined:
-//    case Millimeter:
-//        newRect.setTopLeft(QPoint(mm2pixel_trunc(rect.x(), d->dpi), mm2pixel_trunc(rect.y(), d->dpi)));
-//        newRect.setBottomRight(QPoint(mm2pixel_trunc(rect.right(),d->dpi), mm2pixel_trunc(rect.bottom(), d->dpi)));
-//        break;
-//    case Inch:
-//        newRect.setTopLeft(QPoint(mm2pixel_trunc(rect.x()*25.4, d->dpi), mm2pixel_trunc(rect.y()*25.4, d->dpi)));
-//        newRect.setBottomRight(QPoint(mm2pixel_trunc(rect.right()*25.4, d->dpi), mm2pixel_trunc(rect.bottom()*25.4, d->dpi)));
-//        break;
-//    case Pixel:
-//        newRect = rect.toRect();
-//        break;
-//    }
-//    return newRect ;
-//}
-
-
-//QPoint Page::mapToPixel(QPointF point, int customDPI)
-//{
-//    Q_UNUSED(customDPI);
-//    switch (d->unit) {
-//    case Millimeter:
-//        return QPoint(mm2pixel_trunc(point.x(), d->dpi), mm2pixel_trunc(point.y(), d->dpi));
-//    case Inch:
-//        return QPoint(mm2pixel_trunc(point.x()*25.4, d->dpi), mm2pixel_trunc(point.y()*25.4, d->dpi));
-//    case Pixel:
-//        return point.toPoint();
-//    default:
-//        break;
-//    }
-//    return QPoint() ;
-//}
 
 
 ///========================= private ===============================
@@ -1008,12 +1026,13 @@ void Page::initGUI()
 void Page::updateMeassure()
 {
     d->format.sizeMM = convertUnit(d->format.sizeMM, d->unit, Millimeter, d->dpi);
-    QPointF p1 = convertUnit(QPointF(d->margins.left(), d->margins.top()), d->unit, Millimeter, d->dpi);
-    QPointF p2 = convertUnit(QPointF(d->margins.right(), d->margins.bottom()), d->unit, Millimeter, d->dpi);
-    d->margins = Margins(p1.x(), p1.y(), p2.x(), p2.y());
-    d->pageRect = QRectF(d->margins.left(), d->margins.top(),
-                         d->format.sizeMM.width() - d->margins.left() - d->margins.right(),
-                         d->format.sizeMM.height() - d->margins.top() - d->margins.bottom());
+    d->marginLeft = convertUnit(d->marginLeft, d->unit, Millimeter, d->dpi);
+    d->marginRight = convertUnit(d->marginRight, d->unit, Millimeter, d->dpi);
+    d->marginTop = convertUnit(d->marginTop, d->unit, Millimeter, d->dpi);
+    d->marginBottom = convertUnit(d->marginBottom, d->unit, Millimeter, d->dpi);
+    d->pageRect = QRectF(d->marginLeft, d->marginTop,
+                         d->format.sizeMM.width() - d->marginLeft - d->marginRight,
+                         d->format.sizeMM.height() - d->marginTop - d->marginBottom);
 }
 
 
@@ -1022,7 +1041,7 @@ void Page::slotItemDestroyed(QObject* object)
     if (!m_itemsConnected)
         return;
 
-    qCritical() << QString("direct item \'%1\' deleting is not allowed! Use Page::itemDelete(ItemInterface*) instead.").arg(object->objectName());
+    qCritical() << QString("direct item \'%1\' deleting is not allowed! Use Extended::Page::itemDelete(ItemInterface*) instead.").arg(object->objectName());
     /*
     ItemInterface * item = static_cast<ItemInterface*>(object);
 //    BandInterface * band = dynamic_cast<BandInterface*>(item);
@@ -1039,7 +1058,7 @@ void Page::slotItemDestroyed(QObject* object)
 void Page::slotItemGeometryChanged(QRectF newGeometry)
 {
     Q_UNUSED(newGeometry)
-    if (!m_itemsConnected)
+    if (!m_itemsConnected || d->renderingStage)
         return;
 
     BaseItemInterface * item = qobject_cast<BaseItemInterface*>(sender());
@@ -1055,7 +1074,7 @@ void Page::slotItemOrderChanged(int order)
 {  
     Q_UNUSED(order);
 
-    if (!m_itemsConnected)
+    if (!m_itemsConnected || d->renderingStage)
         return;
     BaseItemInterface * item = qobject_cast<BaseItemInterface*>(sender());
     Q_ASSERT (item);
@@ -1095,7 +1114,10 @@ RenderedPage::RenderedPage(Page *page)
 {
     m_orientation = page->orientation();
     m_paperSizeMM = page->paperSize(CuteReport::Millimeter);
-    m_marginsMM = page->margins(CuteReport::Millimeter);
+    m_marginLeft = page->marginLeft(CuteReport::Millimeter);
+    m_marginRight = page->marginRight(CuteReport::Millimeter);
+    m_marginTop = page->marginTop(CuteReport::Millimeter);
+    m_marginBottom =  page->marginBottom(CuteReport::Millimeter);
     m_dpi = page->dpi();
 
     setBrush(QBrush(page->background()));
@@ -1119,12 +1141,12 @@ void RenderedPage::paintBegin ( QPainter * painter, const QStyleOptionGraphicsIt
 }
 
 
-CuteReport::Margins RenderedPage::margins(CuteReport::Unit unit) const
-{
-    QPointF p1 = convertUnit(QPointF(m_marginsMM.left(), m_marginsMM.top()), Millimeter, unit, m_dpi);
-    QPointF p2 = convertUnit(QPointF(m_marginsMM.right(), m_marginsMM.bottom()), Millimeter, unit, m_dpi);
-    return Margins(p1.x(), p1.y(), p2.x(), p2.y());
-}
+//CuteReport::Margins RenderedPage::margins(CuteReport::Unit unit) const
+//{
+//    QPointF p1 = convertUnit(QPointF(marginsLeft, m_marginsMM.top()), Millimeter, unit, m_dpi);
+//    QPointF p2 = convertUnit(QPointF(m_marginsMM.right(), m_marginsMM.bottom()), Millimeter, unit, m_dpi);
+//    return Margins(p1.x(), p1.y(), p2.x(), p2.y());
+//}
 
 
 QRectF RenderedPage::paperRect(CuteReport::Unit unit) const
@@ -1142,7 +1164,7 @@ QSizeF RenderedPage::paperSize(CuteReport::Unit unit) const
 QRectF RenderedPage::pageRect(CuteReport::Unit unit) const
 {
     QRectF rect(QPointF(0,0), m_paperSizeMM);
-    rect.adjust(m_marginsMM.left(), m_marginsMM.top(), -m_marginsMM.right(), -m_marginsMM.bottom());
+    rect.adjust(m_marginLeft, m_marginTop, -m_marginRight, -m_marginBottom);
     return convertUnit(rect, CuteReport::Millimeter, unit, m_dpi);
 }
 
@@ -1150,7 +1172,7 @@ QRectF RenderedPage::pageRect(CuteReport::Unit unit) const
 QSizeF RenderedPage::pageSize(Unit unit) const
 {
     QRectF rect(QPointF(0,0), m_paperSizeMM);
-    rect.adjust(m_marginsMM.left(), m_marginsMM.top(), -m_marginsMM.right(), -m_marginsMM.bottom());
+    rect.adjust(m_marginLeft, m_marginTop, -m_marginRight, -m_marginBottom);
     return convertUnit(rect.size(), CuteReport::Millimeter, unit, m_dpi);
 }
 
@@ -1167,7 +1189,7 @@ void RenderedPage::setDpi(int dpi)
 
     QList<QGraphicsItem *> list = childItems();
     foreach (QGraphicsItem * child, list) {
-        if (child->type() == RenderedItemInterfaceType) {
+        if (child->type() == RenderedItemInterface::Type) {
             RenderedItemInterface * item = static_cast<RenderedItemInterface *>(child);
             item->setDpi(m_dpi);
         }
@@ -1185,7 +1207,7 @@ void RenderedPage::redraw()
     if (scene()) {
         QList<QGraphicsItem *> list = childItems();
         foreach (QGraphicsItem * child, list) {
-            if (child->type() == RenderedItemInterfaceType && child->parentItem() == this) {
+            if (child->type() == RenderedItemInterface::Type && child->parentItem() == this) {
                 RenderedItemInterface * item = static_cast<RenderedItemInterface *>(child);
                 item->redraw(true);
             }
@@ -1193,7 +1215,9 @@ void RenderedPage::redraw()
     }
 }
 
+SUIT_END_NAMESPACE
+
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(page, Page)
+Q_EXPORT_PLUGIN2(Page, SUIT_NAMESPACE::Page)
 #endif
 

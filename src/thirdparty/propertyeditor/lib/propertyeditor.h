@@ -40,7 +40,6 @@ namespace Ui {
 class propertyeditor;
 }
 
-
 namespace PropertyEditor
 {
 
@@ -48,14 +47,16 @@ class PropertyInterface;
 class PropertyModel;
 class PropertyDelegate;
 class PropertyValidator;
+class PluginManager;
 
-class PROPERTYEDITOR_EXPORTS PropertyEditor : public QWidget
+class PROPERTYEDITOR_EXPORTS EditorWidget : public QWidget
 {
 	Q_OBJECT
 
 public:
-    PropertyEditor(QWidget *parent = 0);
-	~PropertyEditor();
+    explicit EditorWidget(QWidget *parent = 0);
+    explicit EditorWidget(PluginManager * pluginManager, QWidget *parent = 0);
+    ~EditorWidget();
 
 	QObject *object() const;
 	void setValidator(QVariant::Type type, PropertyValidator * validator);
@@ -63,24 +64,31 @@ public:
 	void clearValidators();
     void setSizeHint(int s);
 
+    PluginManager *pluginManager() const;
+    void setPluginManager(PluginManager *pluginManager);
+
+
 public slots:
-	void setObject(QObject * object);
-	void resetProperties();
+    void setObject(QObject * object);
+    void resetProperties();
 
 private slots:
     void currentRowChanged(const QModelIndex &current, const QModelIndex &);
 
+signals:
+    void propertyChanged(QObject * obj, const QString & propertyName, const QVariant & old_value, const QVariant & new_value);
+    void objectChanged(QObject * obj);
+
 private:
+    void init();
+    PropertyModel *model();
+
+    PluginManager * m_pluginManager;
     Ui::propertyeditor *ui;
 	QObject *m_object;
 	PropertyModel* m_model;
 	PropertyDelegate* m_delegate;
     QMap<int, PropertyValidator*> m_validators;
-
-signals:
-	void propertyChanged(QObject * obj, const QString & propertyName, const QVariant & old_value, const QVariant & new_value);
-	void objectChanged(QObject * obj);
-
 };
 
 }

@@ -35,17 +35,23 @@
 #include "renderediteminterface.h"
 #include "globals.h"
 #include "types.h"
+#include "plugins_common.h"
 
+SUIT_BEGIN_NAMESPACE
 class MemoItemPrivate;
+class MemoItem;
+SUIT_END_NAMESPACE
 
+USING_SUIT_NAMESPACE
+
+SUIT_BEGIN_NAMESPACE
 class MemoItem : public CuteReport::ItemInterface
 {
 	Q_OBJECT
+    Q_INTERFACES(CuteReport::ItemInterface)
 #if QT_VERSION >= 0x050000
     Q_PLUGIN_METADATA(IID "CuteReport.ItemInterface/1.0")
 #endif
-
-    Q_INTERFACES(CuteReport::ItemInterface)
 
     Q_FLAGS(TextFlags)
     Q_ENUMS(StretchMode TextFlag)
@@ -54,6 +60,7 @@ class MemoItem : public CuteReport::ItemInterface
     Q_PROPERTY(QString stretchMode READ stretchModeStr WRITE setStretchModeStr NOTIFY stretchModeChanged)
     Q_PROPERTY(bool showStretchability READ showStretchability WRITE setShowStretchability NOTIFY showStretchabilityChanged)
     Q_PROPERTY(bool allowHTML READ allowHTML WRITE setAllowHTML NOTIFY allowHTMLChanged)
+    Q_PROPERTY(bool allowExpressions READ allowExpressions WRITE setAllowExpressions NOTIFY allowExpressionsChanged)
     Q_PROPERTY(QString text READ text WRITE setText NOTIFY textChanged)
     Q_PROPERTY(QColor textColor READ textColor WRITE setTextColor NOTIFY textColorChaged)
     Q_PROPERTY(qreal textMargin READ textMargin WRITE setTextMargin NOTIFY textMarginChaged)
@@ -88,29 +95,30 @@ public:
 
     enum StretchMode
 	{
-        ActualHeight = 0,
-        DontStretch = 1,
+        DontStretch = 0,
+        ActualHeight = 1,
         MaxHeight = 2
 	};
 
 public:
-    MemoItem(QObject * parent = 0);
-    ~MemoItem();
+    explicit MemoItem(QObject * parent = 0);
+    virtual ~MemoItem();
 
     virtual void moduleInit();
+    virtual void init();
 
     virtual void init_gui();
     virtual void update_gui();
 
     virtual CuteReport::BaseItemInterface * createInstance(QObject * parent) const;
     virtual CuteReport::BaseItemHelperInterface * helper();
-    virtual BaseItemInterface * clone();
     virtual QByteArray serialize();
     virtual void deserialize(QByteArray &data);
     virtual bool canContain(QObject * object);
 
     virtual QIcon itemIcon() const;
-    virtual QString moduleName() const;
+    virtual QString moduleShortName() const { return "Memo"; }
+    virtual QString suitName() const { return SUIT_NAMESPACE_STR; }
     virtual QString itemGroup() const;
 
     virtual void setGeometry(const QRectF & rect, CuteReport::Unit unit = CuteReport::UnitNotDefined);
@@ -126,6 +134,9 @@ public:
 
     bool allowHTML() const;
     void setAllowHTML(bool value);
+
+    bool allowExpressions() const;
+    void setAllowExpressions(bool value);
 
     qreal textMargin() const;
     void setTextMargin(qreal value);
@@ -148,10 +159,13 @@ public:
     QString delimiters() const;
     void setDelimiters(const QString & delimiters);
 
+    QString flowTo() const;
+    void setFlowTo(const QString & name);
+
     virtual void renderInit(CuteReport::RendererPublicInterface * renderer);
     void renderReset();
-    virtual CuteReport::RenderedItemInterface * render(int customDPI = 0);
-//    virtual bool selfRendering() { return true; }
+    virtual bool renderPrepare();
+    CuteReport::RenderedItemInterface * renderView();
 
     static void paint(QPainter * painter, const QStyleOptionGraphicsItem *option, const CuteReport::BaseItemInterfacePrivate * data, const QRectF &boundingRect, CuteReport::RenderingType type = CuteReport::RenderingTemplate);
 
@@ -173,15 +187,21 @@ signals:
     void delimitersChanged(QString);
     void stretchFontChanged(bool);
     void allowHTMLChanged(bool);
+    void allowExpressionsChanged(bool);
     void textMarginChaged(int);
     void showStretchabilityChanged(bool);
-
-protected:
-    MemoItem(MemoItemPrivate &dd, QObject * parent);
-    static void adjust(MemoItemPrivate * d, const QPointF & posDeltaMM, CuteReport::RenderingType type = CuteReport::RenderingTemplate);
+    void textWidthWasReset();
+    void adjusted();
 
 private:
     Q_DECLARE_PRIVATE(MemoItem)
+    Q_DISABLE_COPY(MemoItem)
+    explicit MemoItem(MemoItemPrivate *dd, QObject * parent);
+    virtual BaseItemInterface * itemClone() const;
+    void adjust();
+    static void adjust(MemoItemPrivate * d, const QPointF & posDeltaMM);
+    void resetDocumentWidth();
+
     QPointer<CuteReport::BaseItemHelperInterface> m_helper;
     CuteReport::RendererPublicInterface * m_renderer;
 
@@ -189,22 +209,10 @@ private:
 };
 
 
-class  MemoItemView : public CuteReport::ItemInterfaceView
-{
-    Q_INTERFACES(CuteReport::ItemInterfaceView)
-public:
-    MemoItemView(CuteReport::BaseItemInterface * item):
-        CuteReport::ItemInterfaceView(item){}
+SUIT_END_NAMESPACE
 
-    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0)
-    {
-        Q_UNUSED(widget)
-        MemoItem::paint(painter, option, ptr(), boundingRect(), CuteReport::RenderingTemplate);
-    }
-};
-
-Q_DECLARE_METATYPE(MemoItem::TextFlag)
-Q_DECLARE_METATYPE(MemoItem::StretchMode)
-Q_DECLARE_OPERATORS_FOR_FLAGS(MemoItem::TextFlags)
+Q_DECLARE_METATYPE(SUIT_NAMESPACE::MemoItem::TextFlag)
+Q_DECLARE_METATYPE(SUIT_NAMESPACE::MemoItem::StretchMode)
+Q_DECLARE_OPERATORS_FOR_FLAGS(SUIT_NAMESPACE::MemoItem::TextFlags)
 
 #endif

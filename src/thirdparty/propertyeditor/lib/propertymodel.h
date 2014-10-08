@@ -45,7 +45,7 @@ class PropertyModel : public QAbstractItemModel
 	Q_OBJECT
 
 public:
-    PropertyModel(QObject* parent = 0, QObject* object = 0, const QList<PropertyInterface *> *plugins = 0);
+    PropertyModel(const QList<PropertyInterface *> *plugins, QObject* parent = 0);
 
 	~PropertyModel();
 

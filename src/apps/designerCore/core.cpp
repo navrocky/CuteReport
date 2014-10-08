@@ -30,6 +30,8 @@
 #include "storageinterface.h"
 #include "rendererinterface.h"
 #include "propertyeditorcore.h"
+#include "designeriteminterfaceobject.h"
+#include "propertyeditor.h"
 
 #include "QSettings"
 #include "QApplication"
@@ -38,6 +40,8 @@
 #include <QMessageBox>
 
 using namespace CuteReport;
+
+inline void initMyResource() { Q_INIT_RESOURCE(designerCore); }
 
 namespace CuteDesigner {
 
@@ -56,25 +60,74 @@ Core::Core(QObject *parent) :
     m_currentDataset(0),
     m_currentForm(0)
 {
-    m_settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "ExaroLogic", "Cute Report", this);
+    initMyResource();
+    static QString orgName = "ExaroLogic";
+    static QString appName = "CuteReport";
+    m_settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, orgName, appName, this);
     if (m_settings->value("Core/VersionMajor").toInt() < 1) {
         QString fileName = m_settings->fileName();
         delete m_settings;
         QFile::remove(fileName);
-        m_settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "ExaroLogic", "Cute Report", this);
+        m_settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, orgName, appName, this);
     }
 
     m_reportCore = new ReportCore(m_settings, true);
     connect(m_reportCore, SIGNAL(metricUpdated(CuteReport::MetricType,QVariant)), this, SLOT(showMetric(CuteReport::MetricType, QVariant)));
     connect(m_reportCore, SIGNAL(rendererDone(CuteReport::ReportInterface*,bool)), this, SLOT(_rendererDone(CuteReport::ReportInterface*,bool)));
 
+    setSettingValue("Core/VersionMajor", m_reportCore->versionMajor());
+    setSettingValue("Core/VersionMinor", m_reportCore->versionMinor());
 
-    connect(PropertyEditor::PropertyEditorCore::createInstance(), SIGNAL(log(int,QString,QString,QString)), this, SLOT(propertyEditorLog(int,QString,QString,QString)));
-    PropertyEditor::PropertyEditorCore::instance()->inc();
-    PropertyEditor::PropertyEditorCore::instance()->init();
+    m_designerItemObject = new DesignerItemInterfaceObject(this);
+    m_reportCore->registerDesignerInterface(m_designerItemObject);
+
+    m_propertyManager = new PropertyEditor::PluginManager();
+    connect(m_propertyManager, SIGNAL(log(int,QString,QString,QString)), this, SLOT(propertyEditorLog(int,QString,QString,QString)));
 
     StyleHelper::setBaseColor(QApplication::palette().color(QPalette::Highlight).darker());
 
+    QTimer::singleShot(0, this, SLOT(slotInit()));
+}
+
+
+Core::~Core()
+{
+    qDeleteAll(m_modules);
+    delete m_mainWindow;
+    delete m_designerItemObject;
+    delete m_propertyManager;
+    delete m_reportCore;
+}
+
+
+void Core::saveSettings()
+{
+    m_mainWindow->saveSettings();
+
+    foreach (ModuleInterface * module , m_modules)
+        module->saveSettings();
+
+    //setSettingValue("Designer/LastReportURL", m_currentReport ? m_currentReport->filePath() : "");
+    setSettingValue("CuteReport/PrimaryStorage", m_reportCore->defaultStorage()->moduleFullName());
+    setSettingValue("CuteReport/PrimaryRenderer", m_reportCore->defaultRenderer()->moduleFullName());
+    m_settings->setValue( QString("CuteReport/Storage_%1_options").arg(m_reportCore->defaultStorage()->moduleFullName().replace("::","_")),
+                          m_reportCore->moduleOptionsStr(m_reportCore->defaultStorage()));
+    m_settings->setValue( QString("CuteReport/Renderer_%1_options").arg(m_reportCore->defaultRenderer()->moduleFullName().replace("::","_")),
+                          m_reportCore->moduleOptionsStr(m_reportCore->defaultRenderer()));
+
+    setSettingValue("CuteReport/PrimaryRenderer", m_reportCore->defaultRenderer()->moduleFullName());
+}
+
+
+
+void Core::restoreSettings()
+{
+    m_mainWindow->reloadSettings();
+}
+
+
+void Core::slotInit()
+{
     setupMainWindow();
 
     initModules();
@@ -83,65 +136,17 @@ Core::Core(QObject *parent) :
         m_mainWindow->addTab(module->view(), module->icon(), module->name());
     }
 
-    foreach (ModuleInterface * module , m_guiModules)
+    foreach (ModuleInterface * module , m_modules) {
+        qDebug() << "test: " << module;
         module->reloadSettings();
-
-    foreach (ModuleInterface * module , m_nonGuiModules)
-        module->reloadSettings();
+    }
 
     m_mainWindow->reloadSettings();
 
     appendMenus();
 
-    setSettingValue("Core/VersionMajor", m_reportCore->versionMajor());
-    setSettingValue("Core/VersionMinor", m_reportCore->versionMinor());
-
-    QTimer::singleShot(0, this, SLOT(slotInitDone()));
-}
-
-
-Core::~Core()
-{
-    PropertyEditor::PropertyEditorCore::instance()->dec();
-    saveSettings();
-}
-
-
-void Core::saveSettings()
-{
-    m_mainWindow->saveSettings();
-
-    foreach (ModuleInterface * module , m_guiModules)
-        module->saveSettings();
-
-    setSettingValue("Designer/LastReportURL", m_currentReport ? m_currentReport->filePath() : "");
-    setSettingValue("Designer/PrimaryStorage", m_reportCore->defaultStorage()->moduleName());
-    setSettingValue("Designer/PrimaryRenderer", m_reportCore->defaultRenderer()->moduleName());
-    m_settings->setValue( QString("Designer/Storage_%1_options").arg(m_reportCore->defaultStorage()->moduleName()), m_reportCore->moduleOptionsStr(m_reportCore->defaultStorage()));
-    m_settings->setValue( QString("Designer/Renderer_%1_options").arg(m_reportCore->defaultRenderer()->moduleName()), m_reportCore->moduleOptionsStr(m_reportCore->defaultRenderer()));
-
-    setSettingValue("Designer/PrimaryRenderer", m_reportCore->defaultRenderer()->moduleName());
-
-    delete m_reportCore;
-}
-
-
-
-void Core::restoreSettings()
-{
-    m_mainWindow->reloadSettings();
-
-    m_reportCore->setDefaultStorage( getSettingValue("Designer/PrimaryStorage").toString() );
-    m_reportCore->setDefaultRenderer( getSettingValue("Designer/PrimaryRenderer").toString() );
-    m_reportCore->setModuleOptionsStr(m_reportCore->defaultStorage(), getSettingValue("Designer/Storage_%1_options").toString() );
-    m_reportCore->setModuleOptionsStr(m_reportCore->defaultRenderer(), getSettingValue("Designer/Renderer_%1_options").toString() );
-}
-
-
-void Core::slotInitDone()
-{
     StorageInterface * storage = 0;
-    QString storageName = getSettingValue("Designer/PrimaryStorage").toString();
+    QString storageName = getSettingValue("CuteReport/PrimaryStorage").toString();
     if (!storageName.isEmpty()) {
         storage = m_reportCore->storageModule(storageName);
     }
@@ -153,21 +158,31 @@ void Core::slotInitDone()
         }
     }
 
-    restoreSettings();
-
     m_mainWindow->show();
 
-    emit initDone();
+    foreach (ModuleInterface * module , m_modules) {
+        if (!m_guiModules.contains(module))
+            module->activate();
+    }
 
-    QString reportURL = getSettingValue("Designer/LastReportURL").toString();
-    if (!reportURL.isEmpty())
-        emit requestForReport(reportURL);
+    emit initDone();
 }
 
 
 void Core::initModules()
 {
-    ModuleInterface::setCore(this);
+    QList<CuteDesigner::ModuleInterface*> pluginList;
+
+    foreach (QObject *plugin, QPluginLoader::staticInstances()) {
+        if (plugin && qobject_cast<CuteDesigner::ModuleInterface*>(plugin)) {
+            m_reportCore->log(LogDebug, MODULENAME, QString("Found static plugin: %1").arg(plugin->metaObject()->className()), "");
+            pluginList.push_back(qobject_cast<CuteDesigner::ModuleInterface*>(plugin));
+        }
+    }
+
+    foreach (ModuleInterface * module , m_modules) {
+        qDebug() << "test: " << module;
+    }
 
     QFileInfoList files;
     QStringList dirs;
@@ -178,36 +193,34 @@ void Core::initModules()
         m_reportCore->log(CuteReport::LogDebug, MODULENAME, "Designer plugin dir: " + dir.absolutePath() );
         files += dir.entryInfoList(QDir::Files);
     }
-
     QPluginLoader loader;
-    //    loader.setLoadHints(QLibrary::ResolveAllSymbolsHint|QLibrary::ExportExternalSymbolsHint);
-    QObject *plugin;
+    //loader.setLoadHints(QLibrary::ResolveAllSymbolsHint|QLibrary::ExportExternalSymbolsHint);
 
     foreach(const QFileInfo & fileName, files) {
         m_reportCore->log(CuteReport::LogDebug, MODULENAME, "Loading plugins: " + fileName.fileName());
-
-
         loader.setFileName(fileName.absoluteFilePath());
         if (!loader.load()) {
             m_reportCore->log(LogWarning, MODULENAME, QString("Error while loading plugin \'%1\': %2 ").arg(fileName.fileName()).arg(loader.errorString()));
             continue;
         }
-
-        plugin = loader.instance();
-
+        CuteDesigner::ModuleInterface* plugin = qobject_cast<CuteDesigner::ModuleInterface*>(loader.instance());
         if (plugin) {
-            plugin->setParent(this);
-            CuteDesigner::ModuleInterface* module = qobject_cast<CuteDesigner::ModuleInterface*>(plugin);
-            qDebug() << module->name();
-            if (module) {
-                if (module->view())
-                    m_guiModules.append(module);
-                else
-                    m_nonGuiModules.append(module);
-            } else
-                m_reportCore->log(LogWarning, MODULENAME, QString("Error while loading plugin \'%1\': it's not a CuteDesigner::ModuleInterface' ").arg(fileName.fileName()));
-        } else
+            pluginList.push_back(plugin);
+        } else {
             m_reportCore->log(LogWarning, MODULENAME, QString("Error while creating instance of plugin \'%1\': %2 ").arg(fileName.fileName()).arg(loader.errorString()));
+            loader.unload();
+        }
+    }
+
+    foreach(CuteDesigner::ModuleInterface* plugin, pluginList) {
+        plugin->setParent(this);
+        plugin->init(this);
+        CuteDesigner::ModuleInterface* module = qobject_cast<CuteDesigner::ModuleInterface*>(plugin);
+        if (module) {
+            if (module->view())
+                m_guiModules.append(module);
+            m_modules.append(module);
+        }
     }
 
     qSort(m_guiModules.begin(), m_guiModules.end(), modulePriorityLessThan);
@@ -220,7 +233,7 @@ void Core::setupMainWindow()
 {
     m_mainWindow = new MainWindow(this);
     m_mainWindow->setWindowTitle("CuteReport");
-    connect(m_mainWindow, SIGNAL(closed()), this, SLOT(slotMainWindowClosed()));
+    connect(m_mainWindow, SIGNAL(closeRequest()), this, SLOT(slotMainWindowCloseRequest()));
 }
 
 
@@ -248,21 +261,21 @@ void Core::appendMenus()
         menu->menu = action->menu();
         menu->mainPriority = priority;
         menu->subPriority = 100;
-//        menubar->removeAction(action);
+        //        menubar->removeAction(action);
         menuTitles.insertMulti(action->text(), menu);
         priority -= 100;
     }
 
     menubar->clear();
 
-    // add Modules' actions
-    foreach (ModuleInterface * module , m_guiModules) {
-        QList<CuteDesigner::DesignerMenu*> menus = module->mainMenu();
-        foreach (CuteDesigner::DesignerMenu * menu,  menus) {
-            menuTitles.insertMulti(menu->menu->title(), menu);
-        }
-    }
-    foreach (ModuleInterface * module , m_nonGuiModules) {
+    //    // add Modules' actions
+    //    foreach (ModuleInterface * module , m_guiModules) {
+    //        QList<CuteDesigner::DesignerMenu*> menus = module->mainMenu();
+    //        foreach (CuteDesigner::DesignerMenu * menu,  menus) {
+    //            menuTitles.insertMulti(menu->menu->title(), menu);
+    //        }
+    //    }
+    foreach (ModuleInterface * module , m_modules) {
         QList<CuteDesigner::DesignerMenu*> menus = module->mainMenu();
         foreach (CuteDesigner::DesignerMenu * menu,  menus) {
             menuTitles.insertMulti(menu->menu->title(), menu);
@@ -397,10 +410,10 @@ CuteReport::ReportInterface* Core::currentReport() const
 
 void Core::setCurrentReport(CuteReport::ReportInterface * report)
 {
-    if (report == m_currentReport)
+    if (m_currentReport == report)
         return;
 
-    m_reportCore->log(CuteReport::LogDebug, MODULENAME, "setCurrentReport: " + (report ? report->objectName() : "not defined"));
+    m_reportCore->log(CuteReport::LogDebug, MODULENAME, tr("setCurrentReport: %1").arg(report ? report->objectName() : tr("not defined")));
     m_currentReport = report;
 
     emit currentReportChanged(m_currentReport);
@@ -542,11 +555,22 @@ void Core::_afterItemRemoved(BaseItemInterface *item)
 }
 
 
-void Core::slotMainWindowClosed()
+void Core::slotMainWindowCloseRequest()
 {
-    //    m_mainWindow->saveSettings();
-    //    foreach (ModuleInterface * module , m_modules)
-    //        module->saveSettings();
+    sync();
+
+    emit appIsAboutToClose();
+
+    foreach (ModuleInterface * module , m_modules)
+        module->deactivate();
+
+    saveSettings();
+
+    qDeleteAll(m_modules);
+    m_modules.clear();
+
+    delete m_mainWindow;
+    m_mainWindow = 0;
 }
 
 
@@ -565,6 +589,62 @@ void Core::_rendererDone(ReportInterface * report, bool successful)
                               tr("Errors found while generating report.\n"
                                  "Press log button on the bottom left corner for detailed information."));
     }
+}
+
+
+QList<CuteDesigner::ModuleInterface *> Core::guiModules() const
+{
+    return m_guiModules;
+}
+
+
+PropertyEditor::EditorWidget *Core::createPropertyEditor(QWidget * parent)
+{
+    return new PropertyEditor::EditorWidget(m_propertyManager, parent);
+}
+
+
+void Core::emitNewReportBefore()
+{
+    sync();
+    emit newReport_before();
+}
+
+
+void Core::emitNewReportAfter(ReportInterface *report)
+{
+    emit newReport_after(report);
+}
+
+
+void Core::emitLoadReportBefore(QString url)
+{
+    sync();
+    emit loadReport_before(url);
+}
+
+
+void Core::emitLoadReportAfter(ReportInterface *report)
+{
+    emit loadReport_after(report);
+}
+
+
+void Core::emitDeleteReportBefore(ReportInterface *report)
+{
+    emit deleteReport_before(report);
+}
+
+
+void Core::emitDeleteReportAfter(ReportInterface *report)
+{
+    emit deleteReport_after(report);
+}
+
+
+QList<CuteDesigner::ModuleInterface *> Core::modules() const
+{
+    return m_modules;
 }
 
 

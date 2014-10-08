@@ -62,8 +62,9 @@ public:
     inline void initMe();
 
     virtual void init_gui();
-    virtual CuteReport::RenderedItemInterface * render(int /*customDPI*/ = 0);
-    virtual CuteReport::RenderedItemInterface * renderNewPage(int /*customDPI*/ = 0) {return 0;}
+    virtual bool renderPrepare() {return false;}
+    virtual bool renderNewPage() {return false;}
+//    virtual CuteReport::RenderedItemInterface * renderView();
 
     virtual LayoutType layoutType() const;
     virtual int layoutPriority() const;
@@ -100,7 +101,7 @@ private slots:
     void childGeometryChanged(QRectF geometry);
 
 protected:
-    BandInterface(BandInterfacePrivate &dd, QObject * parent);
+    explicit BandInterface(BandInterfacePrivate *dd, QObject * parent);
 
     virtual void childAdded(BaseItemInterface * item);
     virtual void childRemoved(BaseItemInterface * item);

@@ -23,13 +23,15 @@
 #include "datasetinterface.h"
 #include "fancytabs.h"
 #include "core.h"
+#include "dataseteditor.h"
+
 #include <QDebug>
 #include <QMessageBox>
 
-DatasetContainer::DatasetContainer(CuteDesigner::Core * core, QWidget *parent) :
+DatasetContainer::DatasetContainer(DatasetEditor * datasetEditor, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::DatasetContainer),
-    m_core(core)
+    m_datasetEditor(datasetEditor)
 {
     ui->setupUi(this);
     ui->cbDatasets->clear();
@@ -56,36 +58,36 @@ DatasetContainer::~DatasetContainer()
 
 void DatasetContainer::saveSettings()
 {
-    m_core->setSettingValue("DatasetEditor/splitterState", ui->splitter->saveState());
-    m_core->setSettingValue("DatasetEditor/splitter2State", ui->splitterTestPage->saveState());
-    m_core->setSettingValue("DatasetEditor/tabMode", ui->tabs->mode());
-    m_core->setSettingValue("DatasetEditor/propertiesShown", ui->bProperties->isChecked());
+    m_datasetEditor->core()->setSettingValue("DatasetEditor/splitterState", ui->splitter->saveState());
+    m_datasetEditor->core()->setSettingValue("DatasetEditor/splitter2State", ui->splitterTestPage->saveState());
+    m_datasetEditor->core()->setSettingValue("DatasetEditor/tabMode", ui->tabs->mode());
+    m_datasetEditor->core()->setSettingValue("DatasetEditor/propertiesShown", ui->bProperties->isChecked());
 }
 
 
 void DatasetContainer::reloadSettings()
 {
     QVariant value;
-    if ((value =  m_core->getSettingValue("DatasetEditor/splitterState")).isNull())
+    if ((value =  m_datasetEditor->core()->getSettingValue("DatasetEditor/splitterState")).isNull())
         ui->splitter->setSizes( QList<int>() << width()*1 << width()*0 );
     else
         ui->splitter->restoreState(value.toByteArray());
 
-    if ((value =  m_core->getSettingValue("DatasetEditor/splitter2State")).isNull())
+    if ((value =  m_datasetEditor->core()->getSettingValue("DatasetEditor/splitter2State")).isNull())
          ui->splitterTestPage->setSizes( QList<int>() << width()*0.8 << width()*0.2 );
     else
         ui->splitterTestPage->restoreState(value.toByteArray());
 
-    ui->bProperties->setChecked(m_core->getSettingValue("DatasetEditor/propertiesShown", false).toBool());
+    ui->bProperties->setChecked(m_datasetEditor->core()->getSettingValue("DatasetEditor/propertiesShown", false).toBool());
     FancyTabWidget::Mode default_mode = FancyTabWidget::Mode_LargeSidebar;
-    ui->tabs->SetMode(FancyTabWidget::Mode(m_core->getSettingValue("DatasetEditor/tabMode", default_mode).toInt()));
+    ui->tabs->SetMode(FancyTabWidget::Mode(m_datasetEditor->core()->getSettingValue("DatasetEditor/tabMode", default_mode).toInt()));
 }
 
 
 void DatasetContainer::addDatasetPlugins(QList<CuteReport::DatasetInterface*> datasets)
 {
     foreach(CuteReport::DatasetInterface * ds, datasets) {
-        ui->cbDatasets->addItem(ds->moduleName());
+        ui->cbDatasets->addItem(ds->moduleFullName());
     }
 }
 

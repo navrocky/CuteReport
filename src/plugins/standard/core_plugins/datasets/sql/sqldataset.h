@@ -58,33 +58,34 @@ public:
     virtual ~SqlDataset();
 
     virtual QIcon icon();
-//    QString name() {return QString(DATASET_NAME);}
 
-    DatasetInterface * createInstance(QObject* parent = 0) const;
-    CuteReport::DatasetHelperInterface * helper();
-    QAbstractItemModel * model();
+    virtual DatasetInterface * createInstance(QObject* parent = 0) const;
+    virtual CuteReport::DatasetHelperInterface * helper();
+    virtual QAbstractItemModel * model();
 
-	QString lastError();
+    virtual QString lastError();
 
-    bool populate();
-    bool isPopulated();
-    void setPopulated(bool b);
-    void reset();
-    void resetCursor();
-    bool firstRow();
-    bool lastRow();
-    bool nextRow();
-    bool previousRow();
-    int  currentRow();
-    bool setCurrentRow(int index);
-    int rows();
-	QVariant value(int index) const;
-	QVariant value(const QString & field) const;
-	QVariant lookaheadValue(int index) const;
-	QVariant lookaheadValue(const QString & field) const;
-	QVariant lookbackValue(int index) const;
-	QVariant lookbackValue(const QString & field) const;
-	QString fieldName(int column );
+    virtual bool populate();
+    virtual bool isPopulated();
+    virtual void setPopulated(bool b);
+    virtual void reset();
+    virtual void resetCursor();
+    virtual bool firstRow();
+    virtual bool lastRow();
+    virtual bool nextRow();
+    virtual bool previousRow();
+    virtual int  currentRow();
+    virtual bool setCurrentRow(int index);
+    virtual int rows();
+    virtual int columns();
+    virtual QVariant value(int index) const;
+    virtual QVariant value(const QString & field) const;
+    virtual QVariant lookaheadValue(int index) const;
+    virtual QVariant lookaheadValue(const QString & field) const;
+    virtual QVariant lookbackValue(int index) const;
+    virtual QVariant lookbackValue(const QString & field) const;
+    virtual QString fieldName(int column );
+    virtual QVariant::Type fieldType(int column);
 
     QString	    query() const;
     void	    setQuery(const QString &str);
@@ -102,7 +103,8 @@ public:
     QString dbpasswd() const;
     void setdbpasswd(QString passwd);
 
-    virtual QString moduleName() const {return QString("SQL dataset");}
+    virtual QString moduleShortName() const {return QString("SQL");}
+    virtual QString suitName() const { return "Standard"; }
 
 signals:
     void queryChanged(QString);
@@ -113,6 +115,8 @@ signals:
     void driverChanged(QString);
 
 private:
+    explicit SqlDataset(const SqlDataset &dd, QObject * parent);
+    virtual DatasetInterface * objectClone() const;
 
 	int m_currentRow;
 	bool m_isPopulated;

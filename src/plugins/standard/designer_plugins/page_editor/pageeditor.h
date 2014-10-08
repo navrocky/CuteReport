@@ -27,7 +27,7 @@
 #include <QHash>
 
 namespace PropertyEditor {
-class PropertyEditor;
+class EditorWidget;
 }
 
 namespace CuteReport {
@@ -40,11 +40,8 @@ class PageAction;
 class PageEditorContainer;
 class ObjectInspector;
 
-namespace CuteDesigner
-{
 
-
-class PageEditor : public ModuleInterface
+class PageEditor : public CuteDesigner::ModuleInterface
 {
     Q_OBJECT
 #if QT_VERSION >= 0x050000
@@ -54,6 +51,9 @@ class PageEditor : public ModuleInterface
 public:
     explicit PageEditor(QObject *parent = 0);
     ~PageEditor();
+
+    virtual void init(CuteDesigner::Core *core);
+
     virtual void reloadSettings();
     virtual void saveSettings();
     virtual void activate();
@@ -66,31 +66,34 @@ public:
 
     virtual QList<CuteDesigner::DesignerMenu*> mainMenu();
 
-signals:
-    
-public slots:
-
 private slots:
     void slotActiveObjectChanged(QObject * object);
     void slotSelectionChanged();
     void slotUpdateObjectInspector();
     void slotReportChanged(CuteReport::ReportInterface * report);
     void slotRequestForCreatePage(QString moduleName);
+    void slotPageCreatedOutside(CuteReport::PageInterface* page);
     void slotRequestForDeletePage(QString pageName);
+    void slotPageDeletedOutside(CuteReport::PageInterface* page);
     void slotRequestForClonePage(QString pageName);
     void slotCurrentPageChangedByGUI(QString pageName);
     void slotCurrentPageChangedByCore(CuteReport::PageInterface* page);
     void slotChangeCurrentPage(CuteReport::PageInterface* page);
     void slotRequestForRenamePage(QString pageName);
+    void slotPageNameChangedOutside(const QString &newName);
     void slotNewPage();
     void slotDeletePage();
+//    void slotReportCreated(CuteReport::ReportInterface*report);
 
 private:
+    void _processNewPage(CuteReport::PageInterface* page);
+
     QPointer<PageEditorContainer> ui;
-    PropertyEditor::PropertyEditor *m_propertyEditor;
+    PropertyEditor::EditorWidget *m_propertyEditor;
     ObjectInspector * m_objectInspector;
 
-    QHash<CuteReport::PageInterface*, QString> m_pages;
+    QList<QPointer<CuteReport::PageInterface> > m_pages;
+    QList<QString> m_pageNames;
     QPointer<CuteReport::PageInterface> m_currentPage;
     QPointer<QObject> m_activeObject;
     CuteReport::PageManipulatorInterface * m_currentManipulator;
@@ -99,5 +102,4 @@ private:
     bool m_isActive;
 };
 
-} //namespace
 #endif // PAGEEDITOR_H

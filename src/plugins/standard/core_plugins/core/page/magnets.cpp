@@ -33,8 +33,13 @@
 #include "iteminterface.h"
 #include "iteminterfaceview.h"
 #include "limits"
+#include "scene.h"
+
 
 using namespace CuteReport;
+
+
+SUIT_BEGIN_NAMESPACE
 
 Magnets::Magnets(PageGUI *pageGUI) :
     QObject(pageGUI),
@@ -74,7 +79,13 @@ int Magnets::magnetRate() const
 void Magnets::setMagnetRate(int rate)
 {
     m_page->setMagnetRate(rate);
-    m_magnetRange = rate * m_page->gridStep();
+    m_magnetRangeMM = rate * m_page->gridStep();
+}
+
+
+qreal Magnets::magnetRangeMM() const
+{
+    return m_magnetRangeMM;
 }
 
 
@@ -157,10 +168,10 @@ void Magnets::clear()
 }
 
 // TODO: speed optimization
-QPointF Magnets::delta(const QList<QPointF> & pointList, const QList<CuteReport::BaseItemInterface*> & excludeItems, MagnetDirection direction)
+QPointF Magnets::delta(const QList<QPointF> & pointListMM, const QList<CuteReport::BaseItemInterface*> & checkingItems, MagnetDirection direction)
 {
     PageGUI * page = static_cast<PageGUI*>(parent());
-    QGraphicsScene * scene = page->m_scene;
+    Scene * scene = page->m_scene;
 
     qreal nearestX = std::numeric_limits<qreal>::max();
     qreal nearestY = std::numeric_limits<qreal>::max();
@@ -177,54 +188,52 @@ QPointF Magnets::delta(const QList<QPointF> & pointList, const QList<CuteReport:
     p.setColor(Qt::red);
     p.setStyle(Qt::DotLine);
 
-    foreach(BaseItemInterface * item, page->m_page->items())  {
+    foreach(BaseItemInterface * item, checkingItems)  {
 
-        if (excludeItems.contains(item))
-            continue;
+        QRectF itemGeometry = item->absoluteGeometry(Millimeter);
 
-        QRectF itemGeometry = item->absoluteGeometry();
-
-        foreach (const QPointF & point, pointList) {
+        foreach (const QPointF & point, pointListMM) {
 
             nearestXtemp = std::numeric_limits<qreal>::max();
             nearestYtemp = std::numeric_limits<qreal>::max();
 
             if (direction == HDirection || direction == HVDirection) {
-                if (m_page->magnetValue()&Left && fabs( (nearestXtemp = itemGeometry.left() - point.x()) ) <= m_magnetRange && fabs(nearestXtemp) < fabs(nearestX)) {
+                if (m_page->magnetValue()&Left && fabs( (nearestXtemp = itemGeometry.left() - point.x()) ) <= m_magnetRangeMM && fabs(nearestXtemp) < fabs(nearestX)) {
                     nearestX = nearestXtemp;
                     QRectF r = item->view()->mapRectToScene(item->view()->boundingRect());
                     delete tempHGuideLine;
                     tempHGuideLine = scene->addLine(r.left(), r.top(), r.left(), r.bottom(), p);
-                } else
-                    if (m_page->magnetValue()&Right && fabs( (nearestXtemp = itemGeometry.right() - point.x()) ) <= m_magnetRange && fabs(nearestXtemp) < fabs(nearestX)) {
-                        nearestX = nearestXtemp;
-                        QRectF r = item->view()->mapRectToScene(item->view()->boundingRect());
-                        delete tempHGuideLine;
-                        tempHGuideLine = scene->addLine(r.right(), r.top(), r.right(), r.bottom(), p);
-                    }
+                } else if (m_page->magnetValue()&Right && fabs( (nearestXtemp = itemGeometry.right() - point.x()) ) <= m_magnetRangeMM && fabs(nearestXtemp) < fabs(nearestX)) {
+                    nearestX = nearestXtemp;
+                    QRectF r = item->view()->mapRectToScene(item->view()->boundingRect());
+                    delete tempHGuideLine;
+                    tempHGuideLine = scene->addLine(r.right(), r.top(), r.right(), r.bottom(), p);
+                }
             }
 
             if (direction == VDirection || direction == HVDirection) {
-                if (m_page->magnetValue()&Top && fabs( (nearestYtemp = itemGeometry.top() - point.y()) ) <= m_magnetRange && fabs(nearestYtemp) < fabs(nearestY)) {
+                if (m_page->magnetValue()&Top && fabs( (nearestYtemp = itemGeometry.top() - point.y()) ) <= m_magnetRangeMM && fabs(nearestYtemp) < fabs(nearestY)) {
                     nearestY = nearestYtemp;
                     QRectF r = item->view()->mapRectToScene(item->view()->boundingRect());
                     delete tempVGuideLine;
                     tempVGuideLine = scene->addLine(r.left(), r.top(), r.right(), r.top(), p);
-                } else
-                    if (m_page->magnetValue()&Bottom && fabs( (nearestYtemp = itemGeometry.bottom() - point.y()) ) <= m_magnetRange && nearestYtemp < nearestY) {
-                        nearestY = nearestYtemp;
-                        QRectF r = item->view()->mapRectToScene(item->view()->boundingRect());
-                        delete tempVGuideLine;
-                        tempVGuideLine = scene->addLine(r.left(), r.bottom(), r.right(), r.bottom(), p);
-                    }
+                } else if (m_page->magnetValue()&Bottom && fabs( (nearestYtemp = itemGeometry.bottom() - point.y()) ) <= m_magnetRangeMM && nearestYtemp < nearestY) {
+                    nearestY = nearestYtemp;
+                    QRectF r = item->view()->mapRectToScene(item->view()->boundingRect());
+                    delete tempVGuideLine;
+                    tempVGuideLine = scene->addLine(r.left(), r.bottom(), r.right(), r.bottom(), p);
+                }
             }
         }
     }
 
     m_gideLines << tempVGuideLine << tempHGuideLine;
 
-    return QPointF( nearestX == std::numeric_limits<qreal>::max() ? 0 : nearestX,
+    QPointF result( nearestX == std::numeric_limits<qreal>::max() ? 0 : nearestX,
                     nearestY == std::numeric_limits<qreal>::max() ? 0 : nearestY);
 
+    return result;
 }
+
+SUIT_END_NAMESPACE
 

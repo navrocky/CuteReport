@@ -36,13 +36,15 @@
 #include "detailfooter.h"
 #include "detailfooter_p.h"
 #include "detailfooterscripting.h"
+#include "item_common/simplerendereditem.h"
 
 using namespace CuteReport;
 
+inline void initMyResource() { Q_INIT_RESOURCE(detailFooter); }
 
 DetailFooter::DetailFooter(QObject * parent):
-    CuteReport::BandInterface(*new DetailFooterPrivate, parent)
-   ,m_renderer(0)
+    CuteReport::BandInterface(new DetailFooterPrivate, parent)
+  ,m_renderer(0)
 {
     Q_D(DetailFooter);
     d->rect = QRectF(0,0,50,20);
@@ -50,7 +52,7 @@ DetailFooter::DetailFooter(QObject * parent):
 }
 
 
-DetailFooter::DetailFooter(DetailFooterPrivate &dd, QObject * parent)
+DetailFooter::DetailFooter(DetailFooterPrivate *dd, QObject * parent)
     :CuteReport::BandInterface(dd, parent)
     ,m_renderer(0)
 {
@@ -62,10 +64,16 @@ DetailFooter::~DetailFooter()
 }
 
 
-BaseItemInterface *DetailFooter::clone()
+void DetailFooter::moduleInit()
 {
-    Q_D(DetailFooter);
-    return new DetailFooter(*d, parent());
+    initMyResource();
+}
+
+
+BaseItemInterface *DetailFooter::itemClone() const
+{
+    Q_D(const DetailFooter);
+    return new DetailFooter(new DetailFooterPrivate(*d), parent());
 }
 
 
@@ -120,7 +128,7 @@ QIcon DetailFooter::itemIcon() const
 }
 
 
-QString DetailFooter::moduleName() const
+QString DetailFooter::moduleShortName() const
 {
     return tr("Detail Footer");
 }
@@ -174,6 +182,7 @@ void DetailFooter::renderInit(RendererPublicInterface * renderer)
 {
     Q_D(DetailFooter);
     m_renderer = renderer;
+    d->lastConditionResult = QString();
     if (!d->dataset.isEmpty()) {
         m_renderer->registerBandToDatasetIteration(d->dataset, this);
     } else {
@@ -184,57 +193,51 @@ void DetailFooter::renderInit(RendererPublicInterface * renderer)
 
 void DetailFooter::renderReset()
 {
+    Q_D(DetailFooter);
     m_renderer = 0;
+    d->lastConditionResult = QString();
 }
 
 
-CuteReport::RenderedItemInterface * DetailFooter::render(int customDPI)
+bool DetailFooter::renderPrepare()
 {
-    Q_UNUSED(customDPI)
+    emit printBefore();
+    setRenderingPointer(new DetailFooterPrivate(*(reinterpret_cast<DetailFooterPrivate*>(d_ptr))));
     Q_D(DetailFooter);
+    emit printDataBefore();
 
-    emit renderingBefore();
-
-    DetailFooterPrivate * pCurrent = d;
-    DetailFooterPrivate * pNew = new DetailFooterPrivate(*d);
-
-    d_ptr = pNew;
-    emit rendering();
-    d_ptr = pCurrent;
-
+    DetailFooterPrivate * d_orig = reinterpret_cast<DetailFooterPrivate*>(orig_ptr);
     bool needRendering = false;
 
-    // do not make overhead if makes no sence
-    if (!pNew->dataset.isEmpty()) {
-
-        QString currentCondition = d->lastConditionResult.isEmpty() ? m_renderer->processString(pNew->condition, this) : d->lastConditionResult;
-
-        CuteReport::DatasetInterface * dataset = m_renderer->dataset(pNew->dataset);
-
+    if (!d->dataset.isEmpty()) {
+        QString currentCondition = d->lastConditionResult.isEmpty() ? m_renderer->processString(d->condition, this) : d->lastConditionResult;
+        CuteReport::DatasetInterface * dataset = m_renderer->dataset(d->dataset);
         if (dataset)
             dataset->nextRow();     // looking ahead
-
         QString nextCondition = m_renderer->processString(d->condition, this);
-
         if (dataset)
             dataset->previousRow(); // setting row back
-
         if (currentCondition != nextCondition) {
             needRendering = true;
-            d->lastConditionResult = "";
+            d_orig->lastConditionResult = "";
         } else
-            d->lastConditionResult = nextCondition;
+            d_orig->lastConditionResult = nextCondition;
     }
 
     if (needRendering)
         m_renderer->resetAggregateFunctions(this);
 
-     CuteReport::RenderedItemInterface * view = needRendering ? BandInterface::render(customDPI) : 0;
+    emit printDataAfter();
 
-     emit rendered(view);
-     emit renderingAfter();
+    return needRendering;
+}
 
-     return view;
+
+RenderedItemInterface *DetailFooter::renderView()
+{
+    Q_D(DetailFooter);
+    CuteReport::RenderedItemInterface * view = new SimpleRenderedItem(this, new DetailFooterPrivate(*d));
+    return view;
 }
 
 
@@ -251,5 +254,5 @@ QString DetailFooter::_current_property_description() const
 }
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(detailHeader, DetailFooter)
+Q_EXPORT_PLUGIN2(DetailFooter, DetailFooter)
 #endif

@@ -27,6 +27,8 @@
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
  *   GNU General Public License for more details.                          *
  ***************************************************************************/
+#ifndef MEMOSCRIPT_H
+#define MEMOSCRIPT_H
 
 #include <QScriptValue>
 #include <QScriptContext>
@@ -38,6 +40,8 @@
 #include "baseiteminterface.h"
 #include "iteminterface.h"
 using namespace CuteReport;
+
+SUIT_BEGIN_NAMESPACE
 
 static QScriptValue qtscript_Qt_throw_ambiguity_error_helper(
         QScriptContext *context, const char *functionName, const char *signatures)
@@ -645,14 +649,14 @@ QStringList MemoItem_TextFlag_variants()
 /** ======================= StretchMode =========================== */
 
 static const MemoItem::StretchMode qtscript_MemoItem_StretchMode_values[] = {
-    MemoItem::ActualHeight,
     MemoItem::DontStretch,
+    MemoItem::ActualHeight,
     MemoItem::MaxHeight
 };
 
 static const char * const qtscript_MemoItem_StretchMode_keys[] = {
-    "ActualHeight",
     "DontStretch",
+    "ActualHeight",
     "MaxHeight"
 };
 
@@ -828,3 +832,6 @@ void registerMemoItemScriptClass(QScriptEngine *engine)
     extensionObject.setProperty("Memo", qtscript_create_MemoItem_class(engine), QScriptValue::SkipInEnumeration);
 }
 
+SUIT_END_NAMESPACE
+
+#endif   // MEMOSCRIPT_H

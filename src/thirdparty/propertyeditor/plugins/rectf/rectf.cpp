@@ -33,7 +33,9 @@
 
 #include "rectf.h"
 
-RectF::RectF(QObject* parent, QObject* object, int property, const PropertyModel* propertyModel): PropertyInterface(parent, object, property, propertyModel)
+RectF::RectF(QObject* parent, QObject* object, int property, const PropertyModel* propertyModel)
+    : PropertyInterface(parent, object, property, propertyModel),
+      m_currentProperty(-1)
 {
 	refreshPropertis(propertyModel);
 }
@@ -52,8 +54,11 @@ QVariant RectF::data(const QModelIndex & index)
 	{
 		case 0:
 			return object()->metaObject()->property(objectProperty()).name();
-		case 1:
-			return QString("[(%1,%2) %3,%4]").arg(value().toRectF().x()).arg(value().toRectF().y()).arg(value().toRectF().width()).arg(value().toRectF().height());
+        case 1: {
+            int precision = propertyPrecision();
+            return QString("[(%1,%2) %3,%4]").arg(value().toRectF().x(), 0, 'f', precision).arg(value().toRectF().y(), 0, 'f', precision)
+                .arg(value().toRectF().width(), 0, 'f', precision).arg(value().toRectF().height(), 0, 'f', precision);
+            }
 	}
 	return QVariant();
 }
@@ -140,9 +145,16 @@ Qt::ItemFlags RectF::flags(const QModelIndex &/*index*/)
 
 PropertyInterface* RectF::createInstance(QObject * object, int property, const PropertyModel * propertyModel) const
 {
-	return new RectF(parent(), object, property, propertyModel);
+    return new RectF(parent(), object, property, propertyModel);
+}
+
+
+int RectF::_current_property_precision()
+{
+    object()->setProperty("_current_property", objectProperty());
+    return object()->property("_current_property_precision").toInt();
 }
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(rectf, RectF)
+Q_EXPORT_PLUGIN2(RectFProperty, RectF)
 #endif

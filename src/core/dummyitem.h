@@ -56,25 +56,27 @@ public:
 
     virtual CuteReport::BaseItemInterface * createInstance(QObject * parent) const;
     virtual CuteReport::BaseItemHelperInterface * helper();
-    virtual BaseItemInterface * clone();
     virtual QByteArray serialize();
     virtual void deserialize(QByteArray &data);
     virtual bool canContain(QObject * object);
 
     virtual QIcon itemIcon() const;
-    virtual QString moduleName() const;
+    virtual QString moduleShortName() const;
+    virtual QString suitName() const { return "Standard"; }
     virtual QString itemGroup() const;
 
     QString originalModuleName() const;
     void setOriginalModuleName(const QString & name);
 
-    virtual CuteReport::RenderedItemInterface * render(int customDPI = 0);
+    virtual bool renderPrepare();
+    virtual RenderedItemInterface * renderView();
 
     static void paint(QPainter * painter, const QStyleOptionGraphicsItem *option, const BaseItemInterfacePrivate * data, const QRectF &boundingRect, RenderingType type);
 
 
 protected:
-    DummyItem(DummyItemPrivate &dd, QObject * parent);
+    DummyItem(DummyItemPrivate *dd, QObject * parent);
+    virtual BaseItemInterface * itemClone() const;
 
 private:
     Q_DECLARE_PRIVATE(DummyItem)

@@ -37,6 +37,7 @@
 #include "reportcore.h"
 #include "aggregatefunctions.h"
 #include "storageinterface.h"
+#include "renderediteminterface.h"
 
 #include <QVariant>
 #include <QScriptEngine>
@@ -137,6 +138,12 @@ CuteReport::DatasetInterface * RendererItemInterface::dataset(const QString & da
 }
 
 
+void RendererItemInterface::registerEvaluationString(const QString &string, const QString &delimiterBegin, const QString &delimiterEnd, BaseItemInterface *item)
+{
+    m_processor->registerEvaluationString(string, delimiterBegin, delimiterEnd, item);
+}
+
+
 void RendererItemInterface::registerEvaluationString(const QString & string, BaseItemInterface * item)
 {
     m_processor->registerEvaluationString(string, item);
@@ -196,6 +203,12 @@ CuteReport::BandInterface * RendererItemInterface::lastProcessedBand()
 }
 
 
+BandInterface *RendererItemInterface::currentProcessingBand()
+{
+    return m_processor->m_processingBand;
+}
+
+
 void RendererItemInterface::prepareCurrentPage()
 {
     // TODO
@@ -207,9 +220,40 @@ void RendererItemInterface::postprocessCurrentPage()
     // TODO
 }
 
+
+quint32 RendererItemInterface::lastProcessedItemId(const QString &itemName)
+{
+    return m_processor->m_lastIdForItem.value(itemName);
+}
+
+
+RenderedItemInterface * RendererItemInterface::lastProcessedItemPointer(const QString &itemName)
+{
+    if (!m_processor->m_lastIdForItem.contains(itemName))
+        return 0;
+
+    QList<QGraphicsItem *> list = m_processor->m_currentRenderedPage->childItems();
+    qint32 id = m_processor->m_lastIdForItem.value(itemName);
+    while (list.size()) {
+        QGraphicsItem * i = list.takeFirst();
+        RenderedItemInterface * rItem = qgraphicsitem_cast<RenderedItemInterface *>(i);
+        if (rItem && rItem->id() == id)
+            return rItem;
+        list.append(i->childItems());
+    }
+
+//    foreach (QGraphicsItem * grItem, list) {
+//        RenderedItemInterface * rItem = qgraphicsitem_cast<RenderedItemInterface *>(grItem);
+//        if (rItem && rItem->id() == id)
+//            return rItem;
+//    }
+    return 0;
+}
+
+
 QString RendererItemInterface::moduleName()
 {
-    return m_processor->m_data->renderer->moduleName();
+    return m_processor->m_data->renderer->moduleFullName();
 }
 
 

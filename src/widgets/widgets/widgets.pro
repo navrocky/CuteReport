@@ -40,3 +40,13 @@ contains(DEFINES, SYSTEMINSTALL) {
     INSTALLS += target 
 }
 
+HEADERS += \
+    functions_gui.h
+
+SOURCES += \
+    functions_gui.cpp
+
+contains(DEFINES, STATIC_WIDGETS) {
+    CONFIG += static
+    CONFIG += uitools
+}

@@ -29,14 +29,16 @@
  ***************************************************************************/
 #include "overlay.h"
 #include "overlayscripting.h"
+#include "item_common/simplerendereditem.h"
 
 #include <QIcon>
 
 using namespace CuteReport;
 
+inline void initMyResource() { Q_INIT_RESOURCE(overlay); }
 
 Overlay::Overlay(QObject * parent)
-    : CuteReport::BandInterface(*new OverlayPrivate, parent)
+    : CuteReport::BandInterface(new OverlayPrivate, parent)
 {
     Q_D(Overlay);
     setResizeFlags(ResizeBottom | ResizeTop | ResizeLeft | ResizeRight);
@@ -44,7 +46,7 @@ Overlay::Overlay(QObject * parent)
 }
 
 
-Overlay::Overlay(OverlayPrivate &dd, QObject * parent)
+Overlay::Overlay(OverlayPrivate *dd, QObject * parent)
     :CuteReport::BandInterface(dd, parent)
 {
     setResizeFlags(FixedPos | ResizeBottom);
@@ -57,10 +59,16 @@ Overlay::~Overlay()
 }
 
 
-BaseItemInterface *Overlay::clone()
+void Overlay::moduleInit()
 {
-    Q_D(Overlay);
-    return new Overlay(*d, parent());
+    initMyResource();
+}
+
+
+BaseItemInterface *Overlay::itemClone() const
+{
+    Q_D(const Overlay);
+    return new Overlay(new OverlayPrivate(*d), parent());
 }
 
 
@@ -112,7 +120,7 @@ QIcon Overlay::itemIcon() const
 }
 
 
-QString Overlay::moduleName() const
+QString Overlay::moduleShortName() const
 {
     return tr("Overlay");
 }
@@ -120,55 +128,29 @@ QString Overlay::moduleName() const
 
 QString Overlay::itemGroup() const
 {
-	return tr("Bands");
+    return tr("Bands");
 }
 
 
-void Overlay::setOrder(int order)
+bool Overlay::renderPrepare()
 {
+    emit printBefore();
+    setRenderingPointer(new OverlayPrivate(*(reinterpret_cast<OverlayPrivate*>(d_ptr))));
     Q_D(Overlay);
-    int oldOrder = d->order;
-    d->order = order;
-
-    if (d->order != oldOrder) {
-        emit orderChanged(d->order);
-        emit changed();
-    }
+    emit printDataBefore();
+    emit printDataAfter();
+    return true;
 }
 
 
-CuteReport::RenderedItemInterface * Overlay::render(int customDPI)
+RenderedItemInterface *Overlay::renderView()
 {
-    Q_UNUSED(customDPI);
     Q_D(Overlay);
-
-    emit renderingBefore();
-
-    OverlayPrivate * pCurrent = d;
-    OverlayPrivate * pNew = new OverlayPrivate(*d);
-
-    d_ptr = pNew;
-    emit rendering();
-    d_ptr = pCurrent;
-
-    CuteReport::RenderedItemInterface * view =  (d->order >= 0) ? BandInterface::render(customDPI) : 0;
-
-    emit rendered(view);
-    emit renderingAfter();
-
+    CuteReport::RenderedItemInterface * view = new SimpleRenderedItem(this, new OverlayPrivate(*d));
     return view;
 }
 
 
-CuteReport::RenderedItemInterface * Overlay::renderNewPage(int customDPI)
-{
-    Q_D(Overlay);
-    if (d->order < 0)
-       return BandInterface::render(customDPI);
-    else
-        return 0;
-}
-
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(overlay, Overlay)
+Q_EXPORT_PLUGIN2(Overlay, Overlay)
 #endif

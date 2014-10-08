@@ -152,6 +152,7 @@ PropertyInterface* MarginsProp::createInstance(QObject * object, int property, c
     return new MarginsProp(parent(), object, property, propertyModel);
 }
 
+
 #if QT_VERSION < 0x050000
 Q_EXPORT_PLUGIN2(marginsProp, MarginsProp)
 #endif

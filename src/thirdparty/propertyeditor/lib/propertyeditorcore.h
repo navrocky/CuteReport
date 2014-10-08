@@ -50,19 +50,14 @@ enum LogLevel {
 
 class PropertyInterface;
 
-class PROPERTYEDITOR_EXPORTS PropertyEditorCore : public QObject
+class PROPERTYEDITOR_EXPORTS PluginManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit PropertyEditorCore(QObject *parent = 0);
-    ~PropertyEditorCore();
-    void init();
+    explicit PluginManager(QObject *parent = 0);
+    ~PluginManager();
 
-    static PropertyEditorCore *createInstance();
-    static PropertyEditorCore *instance();
     const QList<PropertyInterface *> &plugins() const;
-    void inc();
-    void dec();
     
 signals:
     void log(int, QString, QString, QString);
@@ -70,7 +65,6 @@ signals:
 private:
     void loadPlugins();
 
-    static PropertyEditorCore * m_instance;
     int m_counter;
     QList<PropertyInterface*> m_plugins;
 };

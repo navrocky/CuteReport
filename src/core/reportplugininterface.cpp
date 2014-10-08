@@ -36,15 +36,18 @@ namespace CuteReport
 
 
 ReportPluginInterface::ReportPluginInterface(QObject *parent) :
-    QObject(parent), m_reportCore(0)
+    QObject(parent)
+    ,m_reportCore(0)
 {
     Log::refCounterInc();
 }
 
 
 ReportPluginInterface::ReportPluginInterface(const ReportPluginInterface & dd, QObject * parent)
-    :QObject(parent), m_reportCore(dd.m_reportCore)
+    :QObject(parent)
+    ,m_reportCore(dd.m_reportCore)
 {
+    setObjectName(dd.objectName());
     Log::refCounterInc();
 }
 
@@ -80,6 +83,7 @@ void ReportPluginInterface::setObjectName(const QString &name)
 {
     QObject::setObjectName(name);
     emit objectNameChanged(name);
+    emit changed();
 }
 #endif
 

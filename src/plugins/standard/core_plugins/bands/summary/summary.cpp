@@ -35,12 +35,14 @@
 #include "summary.h"
 #include "reportcore.h"
 #include "summaryscripting.h"
+#include "item_common/simplerendereditem.h"
 
 using namespace CuteReport;
 
+inline void initMyResource() { Q_INIT_RESOURCE(summary); }
 
 Summary::Summary(QObject * parent)
-    : CuteReport::BandInterface(*new SummaryPrivate, parent)
+    : CuteReport::BandInterface(new SummaryPrivate, parent)
 {
     Q_D(Summary);
     setResizeFlags(FixedPos | ResizeBottom);
@@ -48,7 +50,7 @@ Summary::Summary(QObject * parent)
 }
 
 
-Summary::Summary(SummaryPrivate &dd, QObject * parent)
+Summary::Summary(SummaryPrivate *dd, QObject * parent)
     :CuteReport::BandInterface(dd, parent)
 {
 }
@@ -60,16 +62,22 @@ Summary::~Summary()
 }
 
 
+void Summary::moduleInit()
+{
+    initMyResource();
+}
+
+
 CuteReport::BaseItemInterface * Summary::createInstance(QObject * parent) const
 {
     return new Summary(parent);
 }
 
 
-BaseItemInterface *Summary::clone()
+BaseItemInterface *Summary::itemClone() const
 {
-    Q_D(Summary);
-    return new Summary(*d, parent());
+    Q_D(const Summary);
+    return new Summary(new SummaryPrivate(*d), parent());
 }
 
 
@@ -115,7 +123,7 @@ QIcon Summary::itemIcon() const
 }
 
 
-QString Summary::moduleName() const
+QString Summary::moduleShortName() const
 {
     return tr("Summary");
 }
@@ -127,27 +135,26 @@ QString Summary::itemGroup() const
 }
 
 
-CuteReport::RenderedItemInterface * Summary::render(int customDPI)
+bool Summary::renderPrepare()
+{
+    emit printBefore();
+    setRenderingPointer(new SummaryPrivate(*(reinterpret_cast<SummaryPrivate*>(d_ptr))));
+    Q_D(Summary);
+    emit printDataBefore();
+    emit printDataAfter();
+    return true;
+}
+
+
+RenderedItemInterface *Summary::renderView()
 {
     Q_D(Summary);
-
-    emit renderingBefore();
-
-    SummaryPrivate * pCurrent = d;
-    SummaryPrivate * pNew = new SummaryPrivate(*d);
-
-    d_ptr = pNew;
-    emit rendering();
-    d_ptr = pCurrent;
-
-    CuteReport::RenderedItemInterface * view = BandInterface::render(customDPI) ;
-
-    emit rendered(view);
-    emit renderingAfter();
-
+    CuteReport::RenderedItemInterface * view = new SimpleRenderedItem(this, new SummaryPrivate(*d));
     return view;
 }
 
+
+
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(summary, Summary)
+Q_EXPORT_PLUGIN2(Summary, Summary)
 #endif
