@@ -33,7 +33,7 @@
 #include <QObject>
 #include <QMap>
 #include "globals.h"
-#include <types.h>
+#include "types.h"
 
 //#define gCore CuteReport::ReportCore::instance()
 

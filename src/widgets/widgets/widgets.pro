@@ -30,9 +30,13 @@ include (exportdialog.pri)
 
 contains(DEFINES, SYSTEMINSTALL) {
     DESTDIR = ../../../$$BUILD_DIR
+    target.files += $$HEADERS widgets_export.h
     target.path += $$REPORT_LIBS_PATH
-    INSTALLS += target
+    INSTALLS += target 
 } else {
-    DESTDIR = ../../../$$BUILD_DIR/$$REPORT_LIBS_PATH
+    DESTDIR = $$OUT_PWD/../../../../$$BUILD_DIR/$$REPORT_LIBS_PATH
+    target.files += $$HEADERS widgets_export.h
+    target.path += $$OUT_PWD/../../../$$BUILD_DIR/$$REPORT_HEADERS_PATH
+    INSTALLS += target 
 }
 

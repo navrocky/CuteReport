@@ -91,7 +91,7 @@ SOURCES += \
 
 PRIVATE_HEADERS.files = reportcore.h reportinterface.h datasetinterface.h bandinterface.h iteminterface.h baseiteminterface.h \
                         exportinterface.h forminterface.h printerinterface.h rendererinterface.h pageinterface.h storageinterface.h \
-                        serializerinterface.h scriptextensioninterface.h
+                        serializerinterface.h scriptextensioninterface.h types.h globals.h
 INSTALLS += PRIVATE_HEADERS
 
 contains(DEFINES, SYSTEMINSTALL) {
