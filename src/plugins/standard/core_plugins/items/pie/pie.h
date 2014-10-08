@@ -53,22 +53,24 @@ class  PieItem : public CuteReport::ItemInterface
     Q_PROPERTY(int spanAngle READ spanAngle WRITE setSpanAngle NOTIFY spanAngleChanged)
 
 public:
-    PieItem(QObject * parent = 0);
+    explicit PieItem(QObject * parent = 0);
 
+    virtual void moduleInit();
     virtual void init_gui();
 
     virtual CuteReport::BaseItemInterface * createInstance(QObject * parent) const;
     virtual CuteReport::BaseItemHelperInterface * helper();
-    virtual BaseItemInterface * clone();
     virtual QByteArray serialize();
     virtual void deserialize(QByteArray &data);
     virtual bool canContain(QObject * object);
 
     virtual QIcon itemIcon() const;
-    virtual QString moduleName() const;
+    virtual QString moduleShortName() const;
+    virtual QString suitName() const { return "Standard"; }
     virtual QString itemGroup() const;
 
-    virtual CuteReport::RenderedItemInterface * render(int customDPI = 0);
+    virtual bool renderPrepare();
+    virtual CuteReport::RenderedItemInterface * renderView();
 
     static void paint(QPainter * painter, const QStyleOptionGraphicsItem *option, const CuteReport::BaseItemInterfacePrivate * data, const QRectF &boundingRect, CuteReport::RenderingType type = CuteReport::RenderingTemplate);
 
@@ -94,11 +96,11 @@ signals:
     void startAngleChanged(int);
     void spanAngleChanged(int);
 
-protected:
-    PieItem(PieItemPrivate &dd, QObject * parent);
-
 private:
     Q_DECLARE_PRIVATE(PieItem)
+
+    explicit PieItem(PieItemPrivate *dd, QObject * parent);
+    virtual BaseItemInterface * itemClone() const;
 };
 
 

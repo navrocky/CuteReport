@@ -30,7 +30,7 @@ class ReportProperties;
 }
 
 namespace PropertyEditor{
-    class PropertyEditor;
+    class EditorWidget;
 }
 
 namespace CuteReport {
@@ -43,6 +43,8 @@ class StorageHelperInterface;
 class QTreeWidgetItem;
 class QTableWidgetItem;
 
+namespace PropertyEditor{
+
 class ReportProperties : public QWidget
 {
     Q_OBJECT    
@@ -53,16 +55,15 @@ public:
     void reloadSettings();
     void saveSettings();
 
-    void saveAll();
-
-    void addRendererPropertyEditor(PropertyEditor::PropertyEditor * propertyEditor);
-    void addPrinterPropertyEditor(PropertyEditor::PropertyEditor * propertyEditor);
+    void addRendererPropertyEditor(PropertyEditor::EditorWidget * propertyEditor);
+    void addPrinterPropertyEditor(PropertyEditor::EditorWidget * propertyEditor);
 
 public slots:
+    void saveAll();
     void connectReport(CuteReport::ReportInterface * report);
     void disconnectReport();
 
-    void syncData();
+//    void syncData();
 
 signals:
     void requestForNewRenderer( const CuteReport::RendererInterface*);
@@ -74,11 +75,6 @@ signals:
     void requestForDeleteRenderer();
 
 private slots:
-    void setReportName(const QString & reportName);
-    void setReportAuthor(const QString & reportAuthor);
-    void setReportDescription(const QString & reportDescription);
-    void setReportDescription();
-
     void setGUIReportFilePath(const QString & url);
     void setGUIReportName(const QString & reportName);
     void setGUIReportAuthor(const QString & reportAuthor);
@@ -94,8 +90,6 @@ private slots:
     void setNewPrinterModule();
     void setNewStorageModule();
     void deleteCurrentStorage();
-//    void deletePrinter();
-//    void deleteRenderer();
     void setDefaultStorage();
     void clearDefaultStorage();
 
@@ -109,8 +103,9 @@ private:
     CuteDesigner::Core * m_core;
     QPointer<CuteReport::ReportInterface> m_report;
     QPointer<CuteReport::StorageHelperInterface> m_currentStorageHelper;
-    QPointer<PropertyEditor::PropertyEditor> m_rendererPropertyEditor;
-    QPointer<PropertyEditor::PropertyEditor> m_printerPropertyEditor;
+    QPointer<EditorWidget> m_rendererPropertyEditor;
+    QPointer<EditorWidget> m_printerPropertyEditor;
 };
 
+}
 #endif // REPORTPROPERTIES_H

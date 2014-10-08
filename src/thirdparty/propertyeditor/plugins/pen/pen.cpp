@@ -175,5 +175,5 @@ PropertyInterface* Pen::createInstance(QObject * object, int property, const Pro
 }
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(pen, Pen)
+Q_EXPORT_PLUGIN2(PenProperty, Pen)
 #endif

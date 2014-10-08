@@ -48,9 +48,9 @@ CuteReportScriptPlugin::~CuteReportScriptPlugin()
 }
 
 
-QString CuteReportScriptPlugin::moduleName() const
+QString CuteReportScriptPlugin::moduleShortName() const
 {
-    return "Standard";
+    return "Script";
 }
 
 

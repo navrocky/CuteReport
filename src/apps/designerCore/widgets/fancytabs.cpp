@@ -719,12 +719,15 @@ void FancyTabWidget::changeText(const QString & text, int index)
 
 QString FancyTabWidget::tabText(int index)
 {
-    if (FancyTabBar* bar = qobject_cast<FancyTabBar*>(tab_bar_)) {
-        return bar->tabText(index);
-    } else if (QTabBar* bar = qobject_cast<QTabBar*>(tab_bar_)) {
-        return bar->tabText(index);
-    }
-    return QString();
+    if (index<0 && index>=items_.count())
+        return QString();
+    return items_.at(index).tab_label_;
+//    if (FancyTabBar* bar = qobject_cast<FancyTabBar*>(tab_bar_)) {
+//        return bar->tabText(index);
+//    } else if (QTabBar* bar = qobject_cast<QTabBar*>(tab_bar_)) {
+//        return bar->tabText(index);
+//    }
+//    return QString();
 }
 
 

@@ -33,6 +33,8 @@
 
 #include <QtGui>
 
+inline void initMyResource() { Q_INIT_RESOURCE(filesystem); }
+
 using namespace CuteReport;
 
 QMap<QString, QString> StorageFileSystem::m_urlHints;
@@ -60,6 +62,12 @@ StorageFileSystem::StorageFileSystem(QObject * parent)
 StorageFileSystem::~StorageFileSystem()
 {
     delete m_helper;
+}
+
+
+void StorageFileSystem::moduleInit()
+{
+    initMyResource();
 }
 
 
@@ -248,8 +256,13 @@ QString StorageFileSystem::urlToLocal(const QString &url)
     if (!fileInfo.isAbsolute()) {
         if (m_objectsPath.isEmpty())
             absoluteFilePath = m_localDefaultPath + "/" + fileInfo.filePath();
-        else
-            absoluteFilePath = m_objectsPath + "/" + fileInfo.filePath();
+        else {
+            QFileInfo fInfo(m_objectsPath);
+            if (fInfo.isAbsolute())
+                absoluteFilePath = m_objectsPath + "/" + fileInfo.filePath();
+            else
+                absoluteFilePath =  QDir::currentPath() + "/" + m_objectsPath + "/" + fileInfo.filePath();
+        }
     } else
         absoluteFilePath = fileInfo.absoluteFilePath();
 

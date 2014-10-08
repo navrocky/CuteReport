@@ -31,27 +31,36 @@
 #include <QGraphicsDropShadowEffect>
 #include <QProgressDialog>
 
-using namespace CuteDesigner;
+inline void initMyResource() { Q_INIT_RESOURCE(preview); }
 
+using namespace CuteDesigner;
 
 Preview::Preview(QObject *parent) :
     ModuleInterface(parent),
     ui(0)
 {
-    ui = new CuteReport::ReportPreview(core()->reportCore());
 
-    connect(core()->reportCore(), SIGNAL(rendererStarted(CuteReport::ReportInterface*)), this, SLOT(slotRenderingStarted(CuteReport::ReportInterface*)));
-
-    connect(core(), SIGNAL(currentReportChanged(CuteReport::ReportInterface*)),
-            this, SLOT(slotCurrentReportChanged(CuteReport::ReportInterface*)));
-
-    ui->setEnabled(core()->currentReport());
 }
 
 
 Preview::~Preview()
 {
     delete ui;
+}
+
+
+void Preview::init(Core *core)
+{
+    initMyResource();
+    ModuleInterface::init(core);
+
+    ui = new CuteReport::ReportPreview();
+    ui->setEnabled(false);
+    ui->setReportCore(core->reportCore());
+    connect(core->reportCore(), SIGNAL(rendererStarted(CuteReport::ReportInterface*)), this, SLOT(slotRenderingStarted(CuteReport::ReportInterface*)));
+    connect(core, SIGNAL(currentReportChanged(CuteReport::ReportInterface*)),
+            this, SLOT(slotCurrentReportChanged(CuteReport::ReportInterface*)));
+    ui->setEnabled(core->currentReport());
 }
 
 
@@ -87,7 +96,7 @@ void Preview::deactivate()
 
 QIcon Preview::icon()
 {
-    return QIcon(":images/preview_48.png");
+    return QIcon(":/images/preview_48.png");
 }
 
 
@@ -110,8 +119,8 @@ void Preview::slotCurrentReportChanged(CuteReport::ReportInterface *report)
 }
 
 
-//} //namespace
+//suit_end_namespace
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(preview, Preview)
+Q_EXPORT_PLUGIN2(Preview, Preview)
 #endif

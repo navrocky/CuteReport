@@ -137,7 +137,7 @@ public:
         r = new HistogramStruct;
     }
 
-    ChartItemPrivate(ChartItemPrivate & p)
+    ChartItemPrivate(const ChartItemPrivate & p)
         :ItemInterfacePrivate(p),
           chartType(p.chartType),
           legendType(p.legendType),

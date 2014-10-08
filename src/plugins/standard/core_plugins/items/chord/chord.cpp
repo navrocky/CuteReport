@@ -37,8 +37,10 @@
 
 using namespace CuteReport;
 
+inline void initResource() { Q_INIT_RESOURCE(chord); }
+
 ChordItem::ChordItem(QObject *parent)
-    :ItemInterface(*new ChordItemPrivate, parent)
+    :ItemInterface(new ChordItemPrivate, parent)
 {
     Q_INIT_RESOURCE(chord);
     Q_D(ChordItem);
@@ -48,17 +50,23 @@ ChordItem::ChordItem(QObject *parent)
 }
 
 
-ChordItem::ChordItem(ChordItemPrivate &dd, QObject * parent)
+void ChordItem::moduleInit()
+{
+    initResource();
+}
+
+
+ChordItem::ChordItem(ChordItemPrivate *dd, QObject * parent)
     :ItemInterface(dd, parent)
 {
     Q_INIT_RESOURCE(chord);
 }
 
 
-BaseItemInterface *ChordItem::clone()
+BaseItemInterface *ChordItem::itemClone() const
 {
-    Q_D(ChordItem);
-    return new ChordItem(*new ChordItemPrivate(*d), parent());
+    Q_D(const ChordItem);
+    return new ChordItem(new ChordItemPrivate(*d), parent());
 }
 
 
@@ -131,7 +139,7 @@ QIcon ChordItem::itemIcon() const
 }
 
 
-QString ChordItem::moduleName() const
+QString ChordItem::moduleShortName() const
 {
     return tr("Chord");
 }
@@ -143,25 +151,20 @@ QString ChordItem::itemGroup() const
 }
 
 
-CuteReport::RenderedItemInterface * ChordItem::render(int customDPI)
+bool ChordItem::renderPrepare()
 {
-    Q_UNUSED(customDPI);
+    emit printBefore();
+    setRenderingPointer(new ChordItemPrivate(*(reinterpret_cast<ChordItemPrivate*>(d_ptr))));
+    emit printDataBefore();
+    emit printDataAfter();
+    return true;
+}
+
+
+RenderedItemInterface *ChordItem::renderView()
+{
     Q_D(ChordItem);
-
-    emit renderingBefore();
-
-    ChordItemPrivate * pCurrent = d;
-    ChordItemPrivate * pNew = new ChordItemPrivate(*d);
-
-    d_ptr = pNew;
-    emit rendering();
-    d_ptr = pCurrent;
-
-    RenderedChordItem * view = new RenderedChordItem(this, pNew);
-
-    emit rendered(view);
-    emit renderingAfter();
-
+    RenderedChordItem * view = new RenderedChordItem(this, new ChordItemPrivate(*d));
     return view;
 }
 
@@ -281,5 +284,5 @@ QString ChordItem::_current_property_description() const
 }
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(chord, ChordItem)
+Q_EXPORT_PLUGIN2(Chord, ChordItem)
 #endif

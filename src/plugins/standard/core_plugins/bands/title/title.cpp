@@ -29,14 +29,16 @@
  ***************************************************************************/
 #include "title.h"
 #include "titlescripting.h"
+#include "item_common/simplerendereditem.h"
 
 #include <QIcon>
 
 using namespace CuteReport;
 
+inline void initMyResource() { Q_INIT_RESOURCE(title); }
 
 Title::Title(QObject * parent)
-    : CuteReport::BandInterface(*new TitlePrivate, parent)
+    : CuteReport::BandInterface(new TitlePrivate, parent)
 {
     Q_D(Title);
     setResizeFlags(FixedPos | ResizeBottom);
@@ -44,7 +46,7 @@ Title::Title(QObject * parent)
 }
 
 
-Title::Title(TitlePrivate &dd, QObject * parent)
+Title::Title(TitlePrivate *dd, QObject * parent)
     :CuteReport::BandInterface(dd, parent)
 {
     setResizeFlags(FixedPos | ResizeBottom);
@@ -57,10 +59,16 @@ Title::~Title()
 }
 
 
-CuteReport::BaseItemInterface * Title::clone()
+void Title::moduleInit()
 {
-    Q_D(Title);
-    return new Title(*d, parent());
+    initMyResource();
+}
+
+
+CuteReport::BaseItemInterface * Title::itemClone() const
+{
+    Q_D(const Title);
+    return new Title(new TitlePrivate(*d), parent());
 }
 
 
@@ -112,7 +120,7 @@ QIcon Title::itemIcon() const
 }
 
 
-QString Title::moduleName() const
+QString Title::moduleShortName() const
 {
 	return tr("Title");
 }
@@ -124,18 +132,30 @@ QString Title::itemGroup() const
 }
 
 
-CuteReport::RenderedItemInterface * Title::render(int customDPI)
+bool Title::renderPrepare()
 {
-    Q_UNUSED(customDPI);
-    return 0;
+    return false;
 }
 
 
-CuteReport::RenderedItemInterface * Title::renderNewPage(int customDPI)
+bool Title::renderNewPage()
 {
-    return BandInterface::render(customDPI);
+    emit printBefore();
+    setRenderingPointer(new TitlePrivate(*(reinterpret_cast<TitlePrivate*>(d_ptr))));
+    emit printDataBefore();
+    emit printDataAfter();
+    return true;
 }
+
+
+RenderedItemInterface *Title::renderView()
+{
+    Q_D(Title);
+    CuteReport::RenderedItemInterface * view = new SimpleRenderedItem(this, new TitlePrivate(*d));
+    return view;
+}
+
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(title, Title)
+Q_EXPORT_PLUGIN2(Title, Title)
 #endif

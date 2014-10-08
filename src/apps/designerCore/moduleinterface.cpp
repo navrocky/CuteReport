@@ -26,7 +26,6 @@
 
 namespace CuteDesigner {
 
-Core *ModuleInterface::m_core = 0;
 
 ModuleInterface::ModuleInterface(QObject *parent) :
     QObject(parent)
@@ -42,13 +41,13 @@ ModuleInterface::~ModuleInterface()
 
 CuteDesigner::Core * ModuleInterface::core()
 {
-    return ModuleInterface::m_core;
+    return m_core;
 }
 
 
-void ModuleInterface::setCore(CuteDesigner::Core *core)
+void ModuleInterface::init(CuteDesigner::Core *core)
 {
-    ModuleInterface::m_core = core;
+    m_core = core;
 }
 
 
@@ -65,7 +64,7 @@ Core::StdActions ModuleInterface::stdActions()
 
 QAction * ModuleInterface::createAction(const QString & objectName, const QString & text, const QString & iconPath, const QString & keySequence, const char * method)
 {
-    QAction * action = new QAction(0);
+    QAction * action = new QAction(this);
     action->setObjectName(objectName);
     action->setText(text);
     QIcon icon;

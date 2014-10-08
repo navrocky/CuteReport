@@ -64,6 +64,7 @@ class ReportInterface;
 class RenderedReportInterface;
 class ReportPluginInterface;
 class ScriptExtensionInterface;
+class DesignerItemInterface;
 
 enum BaseType {BasedOnTemplate, BasedOnReport};
 enum RenderingDestination { RenderToPreview, RenderToExport, RenderToPrinter};
@@ -147,14 +148,16 @@ public:
     const QList<CuteReport::ExportInterface*> &          exportModules() const;
     const QList<CuteReport::ScriptExtensionInterface*> & scriptExtensionModules() const;
 
+    QList<StorageInterface *> storageObjectList(CuteReport::ReportInterface * report = 0) const;
+
     const BaseItemInterface*                itemModule(const QString & moduleName  = QString()) const;
     const CuteReport::PageInterface*        pageModule(const QString & moduleName  = QString()) const;
     const CuteReport::DatasetInterface*     datasetModule(const QString & moduleName  = QString()) const;
     CuteReport::SerializerInterface*        serializerModule(const QString & moduleName  = QString()) const;
     CuteReport::StorageInterface*           storageModule(const QString & moduleName = QString()) const;
+    CuteReport::StorageInterface*           storageModuleByScheme(const QString & scheme) const;
     CuteReport::RendererInterface*          rendererModule(const QString & moduleName = QString()) const; //default if empty
     CuteReport::PrinterInterface*           printerModule(const QString & moduleName = QString()) const; //default if empty
-    CuteReport::StorageInterface*           storageModuleByScheme(const QString & scheme) const;
     CuteReport::FormInterface*              formModule(const QString & moduleName = QString()) const;
     const CuteReport::ImportInterface*      importModule(const QString & moduleName = QString()) const;
     CuteReport::ExportInterface*            exportModule(const QString & moduleName = QString()) const;
@@ -182,8 +185,8 @@ public:
     QObject *   deserialize(const QByteArray &data, bool *ok = 0, QString * error = 0, const QString & moduleName = QString());
 
     /*! Storage methods */
-    CuteReport::StorageInterface * getStorageByScheme(const QString & urlString, CuteReport::ReportInterface * report) const;
-    CuteReport::StorageInterface * getStorageByModuleName(const QString & moduleName, CuteReport::ReportInterface * report) const;
+    CuteReport::StorageInterface * getStorageByUrl(const QString & urlString, CuteReport::ReportInterface * report) const;
+    CuteReport::StorageInterface * getStorageByName(const QString & storageName, CuteReport::ReportInterface * report) const;
 
     bool saveReport(const QString & urlString, CuteReport::ReportInterface * report, QString * errorText = 0);
 
@@ -235,6 +238,23 @@ public:
     int maxRenderingThreads() const;
     void setMaxRenderingThreads(int maxRenderingThreads);
 
+    //deleting of the interface object is designer's responcibility
+    void registerDesignerInterface(CuteReport::DesignerItemInterface * _interface);
+    CuteReport::DesignerItemInterface * designerInterface() const;
+
+
+    CuteReport::StorageInterface * getStorageModule(const QString & moduleName, QString * errorText = 0) const;
+    CuteReport::RendererInterface * getRenderer(const ReportInterface *report) const;
+
+    QSettings * settings();
+
+    /** always return path without ending slash */
+    QString resourcesPath() const;
+    QString imagesPath() const;
+    QString pluginsPath() const;
+
+    static QString uniqueName(QObject * object, const QString &proposedName, QObject *rootObject);
+
 public slots:
     void sendMetric(CuteReport::MetricType type, const QVariant &value);
 
@@ -268,13 +288,10 @@ private slots:
     void _reportObjectCreated(CuteReport::ReportInterface * report);
 
 private:
-    static bool loadPlugins();
+    static bool loadPlugins(QSettings *settings);
 
-    static QString uniqueName(QObject * object, const QString &proposedName, QObject *rootObject);
     void init(QSettings * settings, bool initLogSystem);
     inline bool checkReportPointer(CuteReport::ReportInterface * report, QString * errorText = 0) const;
-    inline CuteReport::StorageInterface * getStorageModule(const QString & moduleName, QString * errorText = 0) const;
-    inline CuteReport::RendererInterface *getRenderer(const ReportInterface *report) const;
     bool _render(QueueReport *queueReport);
     void _renderDone(QueueReport *queueReport);
     void _export(QueueReport *queueReport);
@@ -284,17 +301,20 @@ private:
 
 private:
     static int m_refCount;
-    static QList<BaseItemInterface*> m_itemPlugins;
-    static QList<PageInterface*> m_pagePlugins;
-    static QList<DatasetInterface*> m_datasetPlugins;
-    static QList<StorageInterface*> m_storagePlugins;
-    static QList<SerializerInterface*> m_serializePlugins;
-    static QList<RendererInterface*> m_rendererPlugins;
-    static QList<PrinterInterface*> m_printerPlugins;
-    static QList<FormInterface*> m_formPlugins;
-    static QList<ImportInterface*> m_importPlugins;
-    static QList<ExportInterface*> m_exportPlugins;
-    static QList<ScriptExtensionInterface*> m_scriptExtensionPlugins;
+
+    // TODO: v2 - change  each list to work with CuteReport::ReportPluginInterface *
+    // and make methods simplier
+    static QList<BaseItemInterface*> * m_itemPlugins;
+    static QList<PageInterface*> * m_pagePlugins;
+    static QList<DatasetInterface*> * m_datasetPlugins;
+    static QList<StorageInterface*> * m_storagePlugins;
+    static QList<SerializerInterface*> * m_serializePlugins;
+    static QList<RendererInterface*> * m_rendererPlugins;
+    static QList<PrinterInterface*> * m_printerPlugins;
+    static QList<FormInterface*> * m_formPlugins;
+    static QList<ImportInterface*> * m_importPlugins;
+    static QList<ExportInterface*> * m_exportPlugins;
+    static QList<ScriptExtensionInterface*> * m_scriptExtensionPlugins;
 
     SerializerInterface*    m_defaultSerializer;
     StorageInterface*       m_defaultStorage;
@@ -315,6 +335,8 @@ private:
     QList<QueueReport*> m_waitingQueue;
     QHash<RendererInterface*, QueueReport*> m_renderingQueue;
     int m_maxRenderingThreads;
+
+    DesignerItemInterface * m_designerInterface;
 };
 
 }

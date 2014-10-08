@@ -19,12 +19,14 @@
  ***************************************************************************/
 #include "reportcontainer.h"
 #include "ui_reportcontainer.h"
+#include "reporteditor.h"
+
 #include <QDebug>
 
-ReportContainer::ReportContainer(CuteDesigner::Core * core, QWidget *parent) :
+ReportContainer::ReportContainer(ReportEditor * reportEditor, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ReportContainer),
-    m_core(core)
+    m_reportEditor(reportEditor)
 {
     ui->setupUi(this);
 //    ui->cbDatasets->clear();
@@ -48,6 +50,7 @@ ReportContainer::ReportContainer(CuteDesigner::Core * core, QWidget *parent) :
     ui->tabs->hide();
 }
 
+
 ReportContainer::~ReportContainer()
 {
     delete ui;
@@ -58,7 +61,7 @@ void ReportContainer::saveSettings()
 {
 //    m_core->setSettingValue("DatasetEditor/splitterState", ui->splitter->saveState());
 //    m_core->setSettingValue("DatasetEditor/splitter2State", ui->splitterTestPage->saveState());
-    m_core->setSettingValue("ReportProperties/tabMode", ui->tabs->mode());
+    m_reportEditor->core()->setSettingValue("ReportProperties/tabMode", ui->tabs->mode());
 //    m_core->setSettingValue("DatasetEditor/propertiesShown", ui->bProperties->isChecked());
 }
 
@@ -71,7 +74,7 @@ void ReportContainer::reloadSettings()
 
 //    ui->tabs->SetCurrentIndex(0);
     FancyTabWidget::Mode default_mode = FancyTabWidget::Mode_LargeSidebar;
-    ui->tabs->SetMode(FancyTabWidget::Mode(m_core->getSettingValue("ReportProperties/tabMode", default_mode).toInt()));
+    ui->tabs->SetMode(FancyTabWidget::Mode(m_reportEditor->core()->getSettingValue("ReportProperties/tabMode", default_mode).toInt()));
 //    ui->stackedWidget->setCurrentIndex(0);
 }
 

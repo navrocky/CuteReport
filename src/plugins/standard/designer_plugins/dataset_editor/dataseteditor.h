@@ -29,7 +29,7 @@
 class DatasetContainer;
 
 namespace PropertyEditor{
-class PropertyEditor;
+class EditorWidget;
 }
 
 namespace CuteReport {
@@ -40,13 +40,16 @@ class ReportInterface;
 class DatasetEditor : public CuteDesigner::ModuleInterface
 {
     Q_OBJECT
+    Q_INTERFACES(CuteDesigner::ModuleInterface)
 #if QT_VERSION >= 0x050000
     Q_PLUGIN_METADATA(IID "CuteDesigner.ModuleInterface/1.0")
 #endif
-    Q_INTERFACES(CuteDesigner::ModuleInterface)
 public:
     explicit DatasetEditor(QObject *parent = 0);
     virtual ~DatasetEditor();
+
+    virtual void init(CuteDesigner::Core *core);
+
     virtual void reloadSettings();
     virtual void saveSettings();
     virtual void activate();
@@ -72,7 +75,7 @@ private:
 
 private:
     QPointer<DatasetContainer> ui;
-    PropertyEditor::PropertyEditor *m_propertyEditor;
+    PropertyEditor::EditorWidget *m_propertyEditor;
     CuteReport::DatasetInterface * m_currentDataset;
     QHash<CuteReport::DatasetInterface*, QString> m_datasets;
     QPointer<CuteReport::ReportInterface> m_currentReport;

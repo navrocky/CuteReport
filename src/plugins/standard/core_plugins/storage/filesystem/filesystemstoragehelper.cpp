@@ -43,12 +43,15 @@ FileSystemStorageHelper::FileSystemStorageHelper(StorageFileSystem *storage, Vis
 
     ui->setupUi(this);
 
-    ui->askOverWrite->setChecked(storage->askForOverwrite());
-    ui->objectsRoot->setText(storage->objectsRootPath());
+    load();
 
-    connect(ui->objectsRoot, SIGNAL(editingFinished()), this, SLOT(objectsRootChanged()));
-    connect(ui->askOverWrite, SIGNAL(toggled(bool)), this, SLOT(askOverwriteStateChanged(bool)));
     connect(ui->bChooseObjectsRoot, SIGNAL(clicked()), this, SLOT(objectsFolderChooseClicked()));
+
+    // sync signals
+    connect(ui->objectsRoot, SIGNAL(editingFinished()), this, SLOT(save()));
+    connect(ui->askOverWrite, SIGNAL(clicked()), this, SLOT(save()));
+
+    connectObject();
 }
 
 
@@ -58,21 +61,25 @@ FileSystemStorageHelper::~FileSystemStorageHelper()
 }
 
 
+void FileSystemStorageHelper::load()
+{
+    if (ui->objectsRoot->text() != m_storage->objectsRootPath())
+        ui->objectsRoot->setText(m_storage->objectsRootPath());
+    if (m_storage->askForOverwrite() != ui->askOverWrite->isChecked())
+        ui->askOverWrite->setChecked(m_storage->askForOverwrite());
+}
+
+
 void FileSystemStorageHelper::save()
 {
-    m_storage->setObjectsRootPath(ui->objectsRoot->text());
-}
+    disconnectObject();
 
+    if (ui->objectsRoot->text() != m_storage->objectsRootPath())
+        m_storage->setObjectsRootPath(ui->objectsRoot->text());
+    if (m_storage->askForOverwrite() != ui->askOverWrite->isChecked())
+        ui->askOverWrite->setChecked(m_storage->askForOverwrite());
 
-void FileSystemStorageHelper::objectsRootChanged()
-{
-    m_storage->setObjectsRootPath(ui->objectsRoot->text());
-}
-
-
-void FileSystemStorageHelper::askOverwriteStateChanged(bool b)
-{
-    m_storage->setAskForOverwrite(b);
+    connectObject();
 }
 
 
@@ -86,4 +93,16 @@ void FileSystemStorageHelper::objectsFolderChooseClicked()
         ui->objectsRoot->setText(d.selectedFiles().at(0));
         m_storage->setObjectsRootPath(ui->objectsRoot->text());
     }
+}
+
+
+void FileSystemStorageHelper::connectObject()
+{
+    connect(m_storage, SIGNAL(changed()), this, SLOT(load()));
+}
+
+
+void FileSystemStorageHelper::disconnectObject()
+{
+    disconnect(m_storage, SIGNAL(changed()), this, SLOT(load()));
 }

@@ -247,7 +247,12 @@ QString setVariablesValue(const QString & str, const QVariantHash & values)
         if (pos != -1) {
             QString strOrig = rx.cap(0);
             QString varName = rx.cap(variablesRegExpNum);
-            QString varValue = values.value(varName).toString();
+            QVariant varValueVariant = values.value(varName);
+            QString varValue;
+            switch (varValueVariant.type()) {
+                case QVariant::String: varValue = values.value(varName).toString(); break;
+                default: varValue = "NonString";
+            }
             strOut.replace(QString("${%1}").arg(varName), varValue);
             pos += strOrig.length();
         }

@@ -55,6 +55,7 @@ HEADERS += \
     renderedreportinterface.h \
     scriptextensioninterface.h \
     importinterface.h \
+    designeriteminterface.h
 
 SOURCES += \
     globals.cpp \
@@ -87,6 +88,7 @@ SOURCES += \
     renderedreportinterface.cpp \
     scriptextensioninterface.cpp \
     importinterface.cpp \
+    designeriteminterface.cpp
 
 
 PRIVATE_HEADERS.files = reportcore.h reportinterface.h datasetinterface.h bandinterface.h iteminterface.h baseiteminterface.h \
@@ -104,3 +106,6 @@ contains(DEFINES, SYSTEMINSTALL) {
     PRIVATE_HEADERS.path = $$OUT_PWD/../../$$BUILD_DIR/$$REPORT_HEADERS_PATH
 }
 
+contains(DEFINES, STATIC_CORE) {
+    CONFIG += static
+}

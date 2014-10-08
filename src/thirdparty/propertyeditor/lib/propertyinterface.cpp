@@ -91,8 +91,8 @@ bool PropertyInterface::setValue(QVariant data)
 
 PropertyValidator* PropertyInterface::validator(QVariant::Type type)
 {
-	if (dynamic_cast<PropertyEditor*>(m_propertyModel->parent()))
-		return dynamic_cast<PropertyEditor*>(m_propertyModel->parent())->validator(type);
+	if (dynamic_cast<EditorWidget*>(m_propertyModel->parent()))
+		return dynamic_cast<EditorWidget*>(m_propertyModel->parent())->validator(type);
 	return 0;
 }
 
@@ -188,6 +188,14 @@ QString PropertyInterface::propertyDescription()
 {
     object()->setProperty("_current_property", objectProperty());
     return object()->property("_current_property_description").toString();
+}
+
+
+int PropertyInterface::propertyPrecision()
+{
+    object()->setProperty("_current_property", objectProperty());
+    QVariant value = object()->property("_current_property_precision");
+    return value.isNull() ? -1 : value.toInt();
 }
 
 }

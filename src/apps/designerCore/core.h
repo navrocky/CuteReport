@@ -45,6 +45,12 @@ namespace CuteReport
 class MainWindow;
 class QSettings;
 class QLabel;
+class DesignerItemInterfaceObject;
+
+namespace PropertyEditor {
+    class EditorWidget;
+    class PluginManager;
+}
 
 enum Answer {AnswerOk, AnswerCancel};
 
@@ -58,6 +64,7 @@ class DESIGNER_EXPORTS Core : public QObject
     Q_FLAGS(StdAction StdActions)
 
 public:
+    //enum SignalType {SignalBefore, SignalAfter};
     enum StdAction {
         ActionUndo = 0x0001,
         ActionRedo = 0x0002,
@@ -101,6 +108,18 @@ public:
 
     CuteReport::ReportCore * reportCore() {return m_reportCore;}
 
+    QList<CuteDesigner::ModuleInterface *> modules() const;
+    QList<CuteDesigner::ModuleInterface *> guiModules() const;
+
+    PropertyEditor::EditorWidget * createPropertyEditor(QWidget *parent = 0);
+
+    void emitNewReportBefore();
+    void emitNewReportAfter(CuteReport::ReportInterface*report);
+    void emitLoadReportBefore(QString url);
+    void emitLoadReportAfter(CuteReport::ReportInterface* report);
+    void emitDeleteReportBefore(CuteReport::ReportInterface* report);
+    void emitDeleteReportAfter(CuteReport::ReportInterface* report);
+
 signals:
     void newReport_before();
     void newReport_after(CuteReport::ReportInterface*);
@@ -112,7 +131,7 @@ signals:
     void deletePage_after(CuteReport::PageInterface*);
     void newItem_after(CuteReport::BaseItemInterface* item, QPointF pagePos);
     void activeObjectChanged(QObject * object);
-    void loadReport_before(CuteReport::ReportInterface* report);
+    void loadReport_before(QString url);
     void loadReport_after(CuteReport::ReportInterface* report);
     void saveReport_before(CuteReport::ReportInterface* report);
     void saveReport_after(CuteReport::ReportInterface* report);
@@ -123,12 +142,14 @@ signals:
     void deleteDataset_before(CuteReport::DatasetInterface*);
     void deleteDataset_after(CuteReport::DatasetInterface*);
     void initDone();
-    void requestForReport(QString);
+    void requestForReport(const QString & url);
 
-    void currentReportChanged(CuteReport::ReportInterface*);
+    void currentReportChanged(CuteReport::ReportInterface * report);
     void currentPageChanged(CuteReport::PageInterface * page);
     void currentDatasetChanged(CuteReport::DatasetInterface * page);
     void currentFormChanged(CuteReport::FormInterface*);
+
+    void appIsAboutToClose();
 
 public slots:
     bool newPage();
@@ -145,14 +166,15 @@ private:
     void _newPeportPage();
 
 private slots:
-    void slotInitDone();
+    void slotInit();
     void _afterItemRemoved(CuteReport::BaseItemInterface*item);
-    void slotMainWindowClosed();
+    void slotMainWindowCloseRequest();
     void propertyEditorLog(int logLevel, const QString & module, const QString & shortMessage, const QString & fullMessage);
     void _rendererDone(CuteReport::ReportInterface*report, bool successful);
 
 private:
     CuteReport::ReportCore * m_reportCore;
+    PropertyEditor::PluginManager * m_propertyManager;
     QSettings * m_settings;
     MainWindow * m_mainWindow;
     CuteReport::ReportInterface* m_currentReport;
@@ -160,9 +182,12 @@ private:
     CuteReport::DatasetInterface* m_currentDataset;
     CuteReport::FormInterface* m_currentForm;
     QList<CuteDesigner::ModuleInterface*> m_guiModules;
-    QList<CuteDesigner::ModuleInterface*> m_nonGuiModules;
+    QList<CuteDesigner::ModuleInterface*> m_modules;
     int m_currentModuleIndex;
     QMap<int, QString> m_documentTitles;
+    DesignerItemInterfaceObject  * m_designerItemObject;
+
+    friend class ModuleInterface;
 };
 
 } //namecpace

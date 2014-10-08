@@ -44,12 +44,12 @@ static const char * ShiftModeStr[] = {"AlwaysShift", "DontShift", "ShiftWhenOver
 static const int ShiftModeNum = 3;
 
 ItemInterface::ItemInterface(QObject * parent)
-    :BaseItemInterface(*new ItemInterfacePrivate, parent)
+    :BaseItemInterface(new ItemInterfacePrivate, parent)
 {
 }
 
 
-ItemInterface::ItemInterface(ItemInterfacePrivate &dd, QObject * parent)
+ItemInterface::ItemInterface(ItemInterfacePrivate *dd, QObject * parent)
     :BaseItemInterface(dd, parent)
 {
 }

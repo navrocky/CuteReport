@@ -26,9 +26,10 @@
 #include <QPushButton>
 #include <QLayout>
 
-ItemsToolWidget::ItemsToolWidget(QWidget * parent)
+ItemsToolWidget::ItemsToolWidget(QWidget * parent, const QString & imagePath)
     :QWidget( parent )
-    , m_menu(0)
+    ,m_menu(0)
+    ,m_imagePath(imagePath)
 {
     this->setObjectName("ItemsToolWidget");
     this->setWindowTitle(tr ("Items Tool Widget"));
@@ -38,7 +39,14 @@ ItemsToolWidget::ItemsToolWidget(QWidget * parent)
     connect(&m_hideDelay, SIGNAL(timeout()), this, SLOT(tryHideMenu()));
 }
 
-void ItemsToolWidget::addItem(const QIcon & icon, const QString & name, const QString & group)
+
+void ItemsToolWidget::setImagesPath(const QString &path)
+{
+    m_imagePath = path;
+}
+
+
+void ItemsToolWidget::addItem(const QIcon & icon, const QString & name, const QString &suiteName, const QString & group)
 {
     if (!layout()) {
         this->setLayout(new QHBoxLayout(this));
@@ -50,12 +58,11 @@ void ItemsToolWidget::addItem(const QIcon & icon, const QString & name, const QS
     if (m_groups.contains(group)) {
         groupButton = m_groups.value(group, 0);
     } else {
-        QIcon groupIcon(QString(REPORT_IMAGES_PATH) + "/group_" + group + ".png");
+        QString filePath = m_imagePath + "/group_" + group + ".png";
+        QIcon groupIcon(filePath);
         groupButton = new ToolButton(groupIcon, "", this);
         this->layout()->addWidget(groupButton);
         m_groups.insert(group, groupButton);
-//        connect ( groupButton, SIGNAL(hovered()), this, SLOT(showItems()) );
-//        connect ( groupButton, SIGNAL(triggered()), this, SLOT(showItems()) );
     }
 
     if (group.isEmpty()) {
@@ -70,7 +77,9 @@ void ItemsToolWidget::addItem(const QIcon & icon, const QString & name, const QS
             groupButton->setMenu(menu);
             m_menus.insert(group, menu);
         }
-        QAction * newItem = new QAction(icon, name, this );
+        QString actionName = (suiteName.isEmpty() || (suiteName == "Standard")) ? name : QString("%1 (%2)").arg(name, suiteName);
+        QAction * newItem = new QAction(icon, actionName, this );
+        newItem->setData(suiteName.isEmpty() ? name : suiteName + "::" + name);
         menu->addAction( newItem );
     }
 
@@ -86,7 +95,7 @@ void ItemsToolWidget::addItem(const QIcon & icon, const QString & name, const QS
         if (menus.contains(group))
             menu = menus.value(group);
         else {
-            QIcon groupIcon(QString(REPORT_IMAGES_PATH) + "/group_" + group + ".png");
+            QIcon groupIcon( m_imagePath + "/group_" + group + ".png");
             QAction * groupAction = new QAction(groupIcon, group, this );
             addAction(groupAction);
             menu = new Menu( this );
@@ -178,7 +187,7 @@ void Menu::mousePressEvent ( QMouseEvent * event )
         QDrag *drag = new QDrag(this);
         QMimeData *mimeData = new QMimeData;
 
-        mimeData->setText(QString("CuteReport::BaseItemInterface::%1").arg(action->text()));
+        mimeData->setText(QString("CuteReport::BaseItemInterface::%1").arg(action->data().toString()));
         drag->setMimeData(mimeData);
         drag->setPixmap(action->icon().pixmap(100,100));
 

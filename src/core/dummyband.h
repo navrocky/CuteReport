@@ -53,16 +53,18 @@ public:
     virtual void init_gui();
 
     virtual BaseItemInterface *createInstance(QObject * parent) const;
-    virtual BaseItemInterface *clone();
     virtual QByteArray serialize();
     virtual void deserialize(QByteArray &data);
     virtual bool canContain(QObject * object);
 
-    virtual CuteReport::RenderedItemInterface * render(int customDPI = 0);
+    virtual bool renderPrepare();
+    virtual RenderedItemInterface * renderView();
+
     static void paint(QPainter * painter, const QStyleOptionGraphicsItem *option, const BaseItemInterfacePrivate * data, const QRectF &boundingRect, RenderingType type);
 
     virtual QIcon itemIcon() const;
-    virtual QString moduleName() const;
+    virtual QString moduleShortName() const;
+    virtual QString suitName() const { return "Standard"; }
     virtual QString itemGroup() const;
 
     QString originalModuleName() const;
@@ -76,7 +78,8 @@ public:
 signals:
 
 protected:
-    DummyBand(DummyBandPrivate &dd, QObject * parent);
+    DummyBand(DummyBandPrivate *dd, QObject * parent);
+    virtual BaseItemInterface * itemClone() const;
 
 private:
     Q_DECLARE_PRIVATE(DummyBand)
@@ -118,18 +121,18 @@ public:
 
 //===============================================================================
 
-//class CUTEREPORT_EXPORTS RenderedDummyBand : public CuteReport::RenderedItemInterface
-//{
-//public:
-//    explicit RenderedDummyBand(CuteReport::ItemInterface * item, CuteReport::ItemInterfacePrivate *itemPrivateData)
-//        :RenderedItemInterface(item, itemPrivateData) {}
+class CUTEREPORT_EXPORTS RenderedDummyBand : public CuteReport::RenderedItemInterface
+{
+public:
+    explicit RenderedDummyBand(CuteReport::BaseItemInterface * item, CuteReport::BaseItemInterfacePrivate *itemPrivateData)
+        :RenderedItemInterface(item, itemPrivateData) {}
 
-//    virtual void paint(QPainter * painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0)
-//    {
-//        Q_UNUSED(widget)
-//        DummyBand::paint(painter, option, d_ptr, boundingRect(), RenderingReport);
-//    }
-//};
+    virtual void paint(QPainter * painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0)
+    {
+        Q_UNUSED(widget)
+        DummyBand::paint(painter, option, d_ptr, boundingRect(), RenderingReport);
+    }
+};
 
 
 } // namespace

@@ -36,7 +36,7 @@
 using namespace CuteReport;
 
 RenderedItemInterface::RenderedItemInterface(BaseItemInterface *item, BaseItemInterfacePrivate *itemPrivateData)
-    : d_ptr(itemPrivateData), m_item(item)
+    : d_ptr(itemPrivateData)/*, m_item(item)*/
 {
     if (d_ptr->selfRendering)
         d_ptr->initRenderingData();
@@ -55,6 +55,24 @@ RenderedItemInterface::~RenderedItemInterface()
 }
 
 
+quint32 RenderedItemInterface::id() const
+{
+    return m_id;
+}
+
+
+void RenderedItemInterface::setId(quint32 id)
+{
+    m_id = id;
+}
+
+
+//void RenderedItemInterface::setParentItem(RenderedItemInterface *parent)
+//{
+//    qDebug() << "setParentItem";
+//}
+
+
 void RenderedItemInterface::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     paintBegin(painter, option, widget);
@@ -64,7 +82,7 @@ void RenderedItemInterface::paint(QPainter *painter, const QStyleOptionGraphicsI
 
 void RenderedItemInterface::redraw(bool withChildren)
 {
-    QRectF itemPixelRect = convertUnit(d_ptr->rect, d_ptr->unit, Pixel, d_ptr->dpi);
+    QRectF itemPixelRect = convertUnit(d_ptr->rect, Millimeter, Pixel, d_ptr->dpi);
 
 #if QT_VERSION >= 0x050000
     itemPixelRect.setBottom(itemPixelRect.bottom() -1);
@@ -80,13 +98,17 @@ void RenderedItemInterface::redraw(bool withChildren)
         pos = absPos;
     }
     //    qDebug() << "pos" << pos;
-    setPos(pos);
     setRect(0,0, itemPixelRect.width(), itemPixelRect.height());
+
+    setRotation(-d_ptr->rotation);
+
+    QPointF transPos = BaseItemInterface::transformedPos(d_ptr, QRectF(pos, itemPixelRect.size()));
+    setPos(transPos);
 
     if (withChildren) {
         QList<QGraphicsItem *> list = childItems();
         foreach (QGraphicsItem * item, list) {
-            if (item->parentItem() == this && item->type() == RenderedItemInterfaceType) {
+            if (item->parentItem() == this && item->type() == RenderedItemInterface::Type) {
                 RenderedItemInterface * rendItem = static_cast<RenderedItemInterface *>(item);
                 rendItem->redraw(true);
             }
@@ -115,6 +137,20 @@ QRectF RenderedItemInterface::absoluteGeometry(Unit unit) const
         return QRectF();
     Unit u = (unit == UnitNotDefined) ? d_ptr->unit : unit;
     return convertUnit(d_ptr->rect, Millimeter, u, d_ptr->dpi);
+
+//    QGraphicsItem * parent = parentItem();
+//    QRectF geometry = convertUnit(d_ptr->rect, d_ptr->unit, u, d_ptr->dpi);
+
+//    while (parent) {
+//        if (parent->type() == RenderedPageInterface::Type) {
+//            RenderedItemInterface * parentItem = reinterpret_cast<RenderedItemInterface *>(parent);
+//            if (parentItem)
+//                geometry.translated(-parentItem->absoluteGeometry(Millimeter).topLeft());
+//        }
+//        parent = parent->parentItem();
+//    }
+
+//    return geometry;
 }
 
 
@@ -133,7 +169,7 @@ QPointF RenderedItemInterface::absolutePixelPos() const
     QPointF itemPixelpos = convertUnit(d_ptr->rect.topLeft(), d_ptr->unit, Pixel, d_ptr->dpi);
 
     while (parent) {
-        if (parent->type() == RenderedPageInterfaceType) {
+        if (parent->type() == RenderedPageInterface::Type) {
             //            QPointF pageAbsPos = parent->mapToScene(QPointF(0,0));
             QPointF itemMapped = parent->mapToScene(itemPixelpos);
             return itemMapped;
@@ -142,6 +178,23 @@ QPointF RenderedItemInterface::absolutePixelPos() const
     }
 
     return itemPixelpos;
+}
+
+
+QRectF RenderedItemInterface::absoluteBoundingRect(Unit unit) const
+{
+    if (!d_ptr)
+        return QRectF();
+    Unit u = (unit == UnitNotDefined) ? d_ptr->unit : unit;
+
+    QTransform trans;
+    trans.rotate(d_ptr->rotation);
+    int delta = d_ptr->rect.height() * sin(d_ptr->rotation * 3.14159265 /180);
+    trans.translate(delta,0);
+
+    QRectF rect = QRectF(QPointF(0,0), QSizeF(d_ptr->rect.size()));
+    QRectF resRect = QRectF(d_ptr->rect.topLeft(), trans.mapRect(rect).size());
+    return convertUnit(resRect, Millimeter, u, d_ptr->dpi);
 }
 
 
@@ -158,7 +211,7 @@ void RenderedItemInterface::setDpi(int dpi, bool withChildren)
     if (withChildren) {
         QList<QGraphicsItem *> list = childItems();
         foreach (QGraphicsItem * item, list) {
-            if (item->parentItem() == this && item->type() == RenderedItemInterfaceType) {
+            if (item->parentItem() == this && item->type() == RenderedItemInterface::Type) {
                 RenderedItemInterface * rendItem = static_cast<RenderedItemInterface *>(item);
                 rendItem->setDpi(dpi, true);
             }

@@ -1,10 +1,10 @@
 TEMPLATE = subdirs
 SUBDIRS = \
-        dataset_editor \
-        page_editor \
-        preview \
         report_editor \
+        page_editor \
+        dataset_editor \
         script_editor \
-        #form_editor \
+        preview \
+#        form_editor \
         
 

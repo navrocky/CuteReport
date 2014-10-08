@@ -1,0 +1,1145 @@
+<!DOCTYPE CuteReport>
+<Report>
+ <properties>
+  <name type="QString">Invoice 1</name>
+  <author type="QString">Author</author>
+  <description type="QString"></description>
+  <script type="QString"></script>
+  <version type="int">0</version>
+  <filePath type="QString">git:reports/invoice_1.qtrp</filePath>
+  <defaultStorageName type="QString"></defaultStorageName>
+  <variables type="QVariantHash"/>
+ </properties>
+ <children>
+  <Page moduleName="Standard::Page" moduleVersion="1" extends="">
+   <properties>
+    <objectName type="QString">page</objectName>
+    <orientation type="int">0</orientation>
+    <format type="QString">A4</format>
+    <paperSize type="QSizeF">210,297</paperSize>
+    <unit type="QString">Millimeter</unit>
+    <dpi type="int">152</dpi>
+    <margins type="CuteReport::Margins">10,10,10,10</margins>
+    <background type="QColor">255,255,255,255</background>
+    <useGrid type="bool">false</useGrid>
+    <gridStep type="double">0.5</gridStep>
+    <magnetValue type="int">7</magnetValue>
+    <magnetRate type="int">6</magnetRate>
+    <gridSteps type="QString">0=0.5</gridSteps>
+   </properties>
+   <children>
+    <Band layoutType="1" moduleName="Standard::Title" moduleVersion="1" extends="" layoutPriority="75">
+     <properties>
+      <objectName type="QString">title</objectName>
+      <enabled type="bool">true</enabled>
+      <geometry type="QRectF">10,10,190,62</geometry>
+      <boundingRect type="QRectF">10,10,190,62</boundingRect>
+      <frame type="int">0</frame>
+      <opacity type="double">1</opacity>
+      <rotation type="double">0</rotation>
+      <borderPen type="QPen">
+       <brush type="QBrush">
+        <color type="QColor">0,0,0,255</color>
+        <style type="int">1</style>
+        <texture type="QPixmap"></texture>
+       </brush>
+       <capStyle type="int">16</capStyle>
+       <color type="QColor">0,0,0,255</color>
+       <isCosmetic type="bool">true</isCosmetic>
+       <joinStyle type="int">64</joinStyle>
+       <miterLimit type="double">2</miterLimit>
+       <style type="int">1</style>
+       <width type="int">0</width>
+      </borderPen>
+      <backgroundBrush type="QBrush">
+       <color type="QColor">0,0,0,255</color>
+       <style type="int">0</style>
+       <texture type="QPixmap"></texture>
+      </backgroundBrush>
+      <order type="int">0</order>
+      <stretchable type="bool">false</stretchable>
+      <showStretchability type="bool">false</showStretchability>
+      <stretchOriginalSize type="QSizeF">-1,-1</stretchOriginalSize>
+     </properties>
+     <children>
+      <Item moduleName="Standard::Image" moduleVersion="1" extends="">
+       <properties>
+        <objectName type="QString">image</objectName>
+        <enabled type="bool">true</enabled>
+        <geometry type="QRectF">0,0,62,22.5</geometry>
+        <boundingRect type="QRectF">0,0,62,22.5</boundingRect>
+        <frame type="int">0</frame>
+        <opacity type="double">1</opacity>
+        <rotation type="double">0</rotation>
+        <borderPen type="QPen">
+         <brush type="QBrush">
+          <color type="QColor">0,0,0,255</color>
+          <style type="int">1</style>
+          <texture type="QPixmap"></texture>
+         </brush>
+         <capStyle type="int">16</capStyle>
+         <color type="QColor">0,0,0,255</color>
+         <isCosmetic type="bool">true</isCosmetic>
+         <joinStyle type="int">64</joinStyle>
+         <miterLimit type="double">2</miterLimit>
+         <style type="int">1</style>
+         <width type="int">0</width>
+        </borderPen>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">0,0,0,255</color>
+         <style type="int">0</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <order type="int">0</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
+        <sourceType alternateValue="1" type="QString">Storage</sourceType>
+        <source type="QString">res:image/logo.png</source>
+        <image type="QPixmap"></image>
+        <keepAspectRatio type="bool">true</keepAspectRatio>
+        <scaleType alternateValue="1" type="QString">ScaleImage</scaleType>
+        <center type="bool">true</center>
+       </properties>
+       <children>
+        <ItemSelection>
+         <properties>
+          <parent type=""/>
+          <opacity type="double">1</opacity>
+          <enabled type="bool">true</enabled>
+          <visible type="bool">true</visible>
+          <pos type="QPointF">60,60</pos>
+          <x type="double">60</x>
+          <y type="double">60</y>
+          <z type="double">100</z>
+          <rotation type="double">0</rotation>
+          <scale type="double">1</scale>
+          <transformOriginPoint type="QPointF">0,0</transformOriginPoint>
+          <effect type=""/>
+          <children type=""/>
+          <width type="double">0</width>
+          <height type="double">0</height>
+         </properties>
+        </ItemSelection>
+       </children>
+      </Item>
+      <Item moduleName="Standard::Memo" moduleVersion="1" extends="">
+       <properties>
+        <objectName type="QString">memo</objectName>
+        <enabled type="bool">true</enabled>
+        <geometry type="QRectF">136,0,54,10.5</geometry>
+        <boundingRect type="QRectF">136,0,54,10.5</boundingRect>
+        <frame type="int">15</frame>
+        <opacity type="double">1</opacity>
+        <rotation type="double">0</rotation>
+        <borderPen type="QPen">
+         <brush type="QBrush">
+          <color type="QColor">0,0,0,255</color>
+          <style type="int">1</style>
+          <texture type="QPixmap"></texture>
+         </brush>
+         <capStyle type="int">16</capStyle>
+         <color type="QColor">0,0,0,255</color>
+         <isCosmetic type="bool">true</isCosmetic>
+         <joinStyle type="int">64</joinStyle>
+         <miterLimit type="double">2</miterLimit>
+         <style type="int">1</style>
+         <width type="int">0</width>
+        </borderPen>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">6,10,85,255</color>
+         <style type="int">1</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <order type="int">1</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
+        <textFlags type="int">132</textFlags>
+        <stretchMode alternateValue="1" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <text type="QString">Invoice</text>
+        <textColor type="QColor">255,255,255,255</textColor>
+        <textMargin type="double">1</textMargin>
+        <font type="QFont">Arial Black,13,-1,5,50,0,0,0,0,0</font>
+        <stretchFont type="bool">false</stretchFont>
+        <expDelimiters type="QString">[ , ]</expDelimiters>
+       </properties>
+      </Item>
+      <Item moduleName="Standard::Memo" moduleVersion="1" extends="">
+       <properties>
+        <objectName type="QString">memo_1</objectName>
+        <enabled type="bool">true</enabled>
+        <geometry type="QRectF">0,26,56.5,5</geometry>
+        <boundingRect type="QRectF">0,26,56.5,5</boundingRect>
+        <frame type="int">0</frame>
+        <opacity type="double">1</opacity>
+        <rotation type="double">0</rotation>
+        <borderPen type="QPen">
+         <brush type="QBrush">
+          <color type="QColor">0,0,0,255</color>
+          <style type="int">1</style>
+          <texture type="QPixmap"></texture>
+         </brush>
+         <capStyle type="int">16</capStyle>
+         <color type="QColor">0,0,0,255</color>
+         <isCosmetic type="bool">true</isCosmetic>
+         <joinStyle type="int">64</joinStyle>
+         <miterLimit type="double">2</miterLimit>
+         <style type="int">1</style>
+         <width type="int">0</width>
+        </borderPen>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">0,0,0,255</color>
+         <style type="int">0</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <order type="int">2</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
+        <textFlags type="int">129</textFlags>
+        <stretchMode alternateValue="1" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <text type="QString">Demo Company</text>
+        <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
+        <font type="QFont">Arial,10,-1,5,50,0,0,0,0,0</font>
+        <stretchFont type="bool">false</stretchFont>
+        <expDelimiters type="QString">[ , ]</expDelimiters>
+       </properties>
+      </Item>
+      <Item moduleName="Standard::Memo" moduleVersion="1" extends="">
+       <properties>
+        <objectName type="QString">memo_3</objectName>
+        <enabled type="bool">true</enabled>
+        <geometry type="QRectF">0,36,56.5,5</geometry>
+        <boundingRect type="QRectF">0,36,56.5,5</boundingRect>
+        <frame type="int">0</frame>
+        <opacity type="double">1</opacity>
+        <rotation type="double">0</rotation>
+        <borderPen type="QPen">
+         <brush type="QBrush">
+          <color type="QColor">0,0,0,255</color>
+          <style type="int">1</style>
+          <texture type="QPixmap"></texture>
+         </brush>
+         <capStyle type="int">16</capStyle>
+         <color type="QColor">0,0,0,255</color>
+         <isCosmetic type="bool">true</isCosmetic>
+         <joinStyle type="int">64</joinStyle>
+         <miterLimit type="double">2</miterLimit>
+         <style type="int">1</style>
+         <width type="int">0</width>
+        </borderPen>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">0,0,0,255</color>
+         <style type="int">0</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <order type="int">3</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
+        <textFlags type="int">129</textFlags>
+        <stretchMode alternateValue="1" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <text type="QString">Ashland, KY 41102</text>
+        <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
+        <font type="QFont">Arial,10,-1,5,50,0,0,0,0,0</font>
+        <stretchFont type="bool">false</stretchFont>
+        <expDelimiters type="QString">[ , ]</expDelimiters>
+       </properties>
+      </Item>
+      <Item moduleName="Standard::Memo" moduleVersion="1" extends="">
+       <properties>
+        <objectName type="QString">memo_4</objectName>
+        <enabled type="bool">true</enabled>
+        <geometry type="QRectF">62,26,63,5</geometry>
+        <boundingRect type="QRectF">62,26,63,5</boundingRect>
+        <frame type="int">0</frame>
+        <opacity type="double">1</opacity>
+        <rotation type="double">0</rotation>
+        <borderPen type="QPen">
+         <brush type="QBrush">
+          <color type="QColor">0,0,0,255</color>
+          <style type="int">1</style>
+          <texture type="QPixmap"></texture>
+         </brush>
+         <capStyle type="int">16</capStyle>
+         <color type="QColor">0,0,0,255</color>
+         <isCosmetic type="bool">true</isCosmetic>
+         <joinStyle type="int">64</joinStyle>
+         <miterLimit type="double">2</miterLimit>
+         <style type="int">1</style>
+         <width type="int">0</width>
+        </borderPen>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">0,0,0,255</color>
+         <style type="int">0</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <order type="int">4</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
+        <textFlags type="int">129</textFlags>
+        <stretchMode alternateValue="1" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <text type="QString">Phone:  555-555-5555</text>
+        <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
+        <font type="QFont">Arial,10,-1,5,50,0,0,0,0,0</font>
+        <stretchFont type="bool">false</stretchFont>
+        <expDelimiters type="QString">[ , ]</expDelimiters>
+       </properties>
+      </Item>
+      <Item moduleName="Standard::Memo" moduleVersion="1" extends="">
+       <properties>
+        <objectName type="QString">memo_5</objectName>
+        <enabled type="bool">true</enabled>
+        <geometry type="QRectF">62,31,63,5</geometry>
+        <boundingRect type="QRectF">62,31,63,5</boundingRect>
+        <frame type="int">0</frame>
+        <opacity type="double">1</opacity>
+        <rotation type="double">0</rotation>
+        <borderPen type="QPen">
+         <brush type="QBrush">
+          <color type="QColor">0,0,0,255</color>
+          <style type="int">1</style>
+          <texture type="QPixmap"></texture>
+         </brush>
+         <capStyle type="int">16</capStyle>
+         <color type="QColor">0,0,0,255</color>
+         <isCosmetic type="bool">true</isCosmetic>
+         <joinStyle type="int">64</joinStyle>
+         <miterLimit type="double">2</miterLimit>
+         <style type="int">1</style>
+         <width type="int">0</width>
+        </borderPen>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">0,0,0,255</color>
+         <style type="int">0</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <order type="int">5</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
+        <textFlags type="int">129</textFlags>
+        <stretchMode alternateValue="1" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <text type="QString">E-Mail: company@democompany.com</text>
+        <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
+        <font type="QFont">Arial,10,-1,5,50,0,0,0,0,0</font>
+        <stretchFont type="bool">false</stretchFont>
+        <expDelimiters type="QString">[ , ]</expDelimiters>
+       </properties>
+      </Item>
+      <Item moduleName="Standard::Memo" moduleVersion="1" extends="">
+       <properties>
+        <objectName type="QString">memo_6</objectName>
+        <enabled type="bool">true</enabled>
+        <geometry type="QRectF">62,36,63,5</geometry>
+        <boundingRect type="QRectF">62,36,63,5</boundingRect>
+        <frame type="int">0</frame>
+        <opacity type="double">1</opacity>
+        <rotation type="double">0</rotation>
+        <borderPen type="QPen">
+         <brush type="QBrush">
+          <color type="QColor">0,0,0,255</color>
+          <style type="int">1</style>
+          <texture type="QPixmap"></texture>
+         </brush>
+         <capStyle type="int">16</capStyle>
+         <color type="QColor">0,0,0,255</color>
+         <isCosmetic type="bool">true</isCosmetic>
+         <joinStyle type="int">64</joinStyle>
+         <miterLimit type="double">2</miterLimit>
+         <style type="int">1</style>
+         <width type="int">0</width>
+        </borderPen>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">0,0,0,255</color>
+         <style type="int">0</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <order type="int">6</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
+        <textFlags type="int">129</textFlags>
+        <stretchMode alternateValue="1" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <text type="QString">Web: http://www.ksoftware.net</text>
+        <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
+        <font type="QFont">Arial,10,-1,5,50,0,0,0,0,0</font>
+        <stretchFont type="bool">false</stretchFont>
+        <expDelimiters type="QString">[ , ]</expDelimiters>
+       </properties>
+      </Item>
+      <Item moduleName="Standard::Memo" moduleVersion="1" extends="">
+       <properties>
+        <objectName type="QString">memo_7</objectName>
+        <enabled type="bool">true</enabled>
+        <geometry type="QRectF">136,13,17,4</geometry>
+        <boundingRect type="QRectF">136,13,17,4</boundingRect>
+        <frame type="int">0</frame>
+        <opacity type="double">1</opacity>
+        <rotation type="double">0</rotation>
+        <borderPen type="QPen">
+         <brush type="QBrush">
+          <color type="QColor">0,0,0,255</color>
+          <style type="int">1</style>
+          <texture type="QPixmap"></texture>
+         </brush>
+         <capStyle type="int">16</capStyle>
+         <color type="QColor">0,0,0,255</color>
+         <isCosmetic type="bool">true</isCosmetic>
+         <joinStyle type="int">64</joinStyle>
+         <miterLimit type="double">2</miterLimit>
+         <style type="int">1</style>
+         <width type="int">0</width>
+        </borderPen>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">0,0,0,255</color>
+         <style type="int">0</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <order type="int">7</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
+        <textFlags type="int">129</textFlags>
+        <stretchMode alternateValue="1" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <text type="QString">Invoice No.</text>
+        <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
+        <font type="QFont">Arial,8,-1,5,75,0,0,0,0,0</font>
+        <stretchFont type="bool">false</stretchFont>
+        <expDelimiters type="QString">[ , ]</expDelimiters>
+       </properties>
+      </Item>
+      <Item moduleName="Standard::Memo" moduleVersion="1" extends="">
+       <properties>
+        <objectName type="QString">memo_8</objectName>
+        <enabled type="bool">true</enabled>
+        <geometry type="QRectF">136,17,17,4</geometry>
+        <boundingRect type="QRectF">136,17,17,4</boundingRect>
+        <frame type="int">0</frame>
+        <opacity type="double">1</opacity>
+        <rotation type="double">0</rotation>
+        <borderPen type="QPen">
+         <brush type="QBrush">
+          <color type="QColor">0,0,0,255</color>
+          <style type="int">1</style>
+          <texture type="QPixmap"></texture>
+         </brush>
+         <capStyle type="int">16</capStyle>
+         <color type="QColor">0,0,0,255</color>
+         <isCosmetic type="bool">true</isCosmetic>
+         <joinStyle type="int">64</joinStyle>
+         <miterLimit type="double">2</miterLimit>
+         <style type="int">1</style>
+         <width type="int">0</width>
+        </borderPen>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">0,0,0,255</color>
+         <style type="int">0</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <order type="int">8</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
+        <textFlags type="int">129</textFlags>
+        <stretchMode alternateValue="1" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <text type="QString">Account #</text>
+        <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
+        <font type="QFont">Arial,8,-1,5,75,0,0,0,0,0</font>
+        <stretchFont type="bool">false</stretchFont>
+        <expDelimiters type="QString">[ , ]</expDelimiters>
+       </properties>
+      </Item>
+      <Item moduleName="Standard::Memo" moduleVersion="1" extends="">
+       <properties>
+        <objectName type="QString">memo_9</objectName>
+        <enabled type="bool">true</enabled>
+        <geometry type="QRectF">136,21,17,4</geometry>
+        <boundingRect type="QRectF">136,21,17,4</boundingRect>
+        <frame type="int">0</frame>
+        <opacity type="double">1</opacity>
+        <rotation type="double">0</rotation>
+        <borderPen type="QPen">
+         <brush type="QBrush">
+          <color type="QColor">0,0,0,255</color>
+          <style type="int">1</style>
+          <texture type="QPixmap"></texture>
+         </brush>
+         <capStyle type="int">16</capStyle>
+         <color type="QColor">0,0,0,255</color>
+         <isCosmetic type="bool">true</isCosmetic>
+         <joinStyle type="int">64</joinStyle>
+         <miterLimit type="double">2</miterLimit>
+         <style type="int">1</style>
+         <width type="int">0</width>
+        </borderPen>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">0,0,0,255</color>
+         <style type="int">0</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <order type="int">9</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
+        <textFlags type="int">129</textFlags>
+        <stretchMode alternateValue="1" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <text type="QString">Date</text>
+        <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
+        <font type="QFont">Arial,8,-1,5,75,0,0,0,0,0</font>
+        <stretchFont type="bool">false</stretchFont>
+        <expDelimiters type="QString">[ , ]</expDelimiters>
+       </properties>
+      </Item>
+      <Item moduleName="Standard::Memo" moduleVersion="1" extends="">
+       <properties>
+        <objectName type="QString">memo_10</objectName>
+        <enabled type="bool">true</enabled>
+        <geometry type="QRectF">136,25,17,4</geometry>
+        <boundingRect type="QRectF">136,25,17,4</boundingRect>
+        <frame type="int">0</frame>
+        <opacity type="double">1</opacity>
+        <rotation type="double">0</rotation>
+        <borderPen type="QPen">
+         <brush type="QBrush">
+          <color type="QColor">0,0,0,255</color>
+          <style type="int">1</style>
+          <texture type="QPixmap"></texture>
+         </brush>
+         <capStyle type="int">16</capStyle>
+         <color type="QColor">0,0,0,255</color>
+         <isCosmetic type="bool">true</isCosmetic>
+         <joinStyle type="int">64</joinStyle>
+         <miterLimit type="double">2</miterLimit>
+         <style type="int">1</style>
+         <width type="int">0</width>
+        </borderPen>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">0,0,0,255</color>
+         <style type="int">0</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <order type="int">10</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
+        <textFlags type="int">129</textFlags>
+        <stretchMode alternateValue="1" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <text type="QString">Due By</text>
+        <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
+        <font type="QFont">Arial,8,-1,5,75,0,0,0,0,0</font>
+        <stretchFont type="bool">false</stretchFont>
+        <expDelimiters type="QString">[ , ]</expDelimiters>
+       </properties>
+      </Item>
+      <Item moduleName="Standard::Memo" moduleVersion="1" extends="">
+       <properties>
+        <objectName type="QString">memo_11</objectName>
+        <enabled type="bool">true</enabled>
+        <geometry type="QRectF">136,29,17,4</geometry>
+        <boundingRect type="QRectF">136,29,17,4</boundingRect>
+        <frame type="int">0</frame>
+        <opacity type="double">1</opacity>
+        <rotation type="double">0</rotation>
+        <borderPen type="QPen">
+         <brush type="QBrush">
+          <color type="QColor">0,0,0,255</color>
+          <style type="int">1</style>
+          <texture type="QPixmap"></texture>
+         </brush>
+         <capStyle type="int">16</capStyle>
+         <color type="QColor">0,0,0,255</color>
+         <isCosmetic type="bool">true</isCosmetic>
+         <joinStyle type="int">64</joinStyle>
+         <miterLimit type="double">2</miterLimit>
+         <style type="int">1</style>
+         <width type="int">0</width>
+        </borderPen>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">0,0,0,255</color>
+         <style type="int">0</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <order type="int">11</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
+        <textFlags type="int">129</textFlags>
+        <stretchMode alternateValue="1" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <text type="QString">Terms</text>
+        <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
+        <font type="QFont">Arial,8,-1,5,75,0,0,0,0,0</font>
+        <stretchFont type="bool">false</stretchFont>
+        <expDelimiters type="QString">[ , ]</expDelimiters>
+       </properties>
+      </Item>
+      <Item moduleName="Standard::Memo" moduleVersion="1" extends="">
+       <properties>
+        <objectName type="QString">memo_12</objectName>
+        <enabled type="bool">true</enabled>
+        <geometry type="QRectF">136,33,17,4</geometry>
+        <boundingRect type="QRectF">136,33,17,4</boundingRect>
+        <frame type="int">0</frame>
+        <opacity type="double">1</opacity>
+        <rotation type="double">0</rotation>
+        <borderPen type="QPen">
+         <brush type="QBrush">
+          <color type="QColor">0,0,0,255</color>
+          <style type="int">1</style>
+          <texture type="QPixmap"></texture>
+         </brush>
+         <capStyle type="int">16</capStyle>
+         <color type="QColor">0,0,0,255</color>
+         <isCosmetic type="bool">true</isCosmetic>
+         <joinStyle type="int">64</joinStyle>
+         <miterLimit type="double">2</miterLimit>
+         <style type="int">1</style>
+         <width type="int">0</width>
+        </borderPen>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">0,0,0,255</color>
+         <style type="int">0</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <order type="int">12</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
+        <textFlags type="int">129</textFlags>
+        <stretchMode alternateValue="1" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <text type="QString">PO No.</text>
+        <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
+        <font type="QFont">Arial,8,-1,5,75,0,0,0,0,0</font>
+        <stretchFont type="bool">false</stretchFont>
+        <expDelimiters type="QString">[ , ]</expDelimiters>
+       </properties>
+      </Item>
+      <Item moduleName="Standard::Memo" moduleVersion="1" extends="">
+       <properties>
+        <objectName type="QString">memo_13</objectName>
+        <enabled type="bool">true</enabled>
+        <geometry type="QRectF">136,37,17,4</geometry>
+        <boundingRect type="QRectF">136,37,17,4</boundingRect>
+        <frame type="int">0</frame>
+        <opacity type="double">1</opacity>
+        <rotation type="double">0</rotation>
+        <borderPen type="QPen">
+         <brush type="QBrush">
+          <color type="QColor">0,0,0,255</color>
+          <style type="int">1</style>
+          <texture type="QPixmap"></texture>
+         </brush>
+         <capStyle type="int">16</capStyle>
+         <color type="QColor">0,0,0,255</color>
+         <isCosmetic type="bool">true</isCosmetic>
+         <joinStyle type="int">64</joinStyle>
+         <miterLimit type="double">2</miterLimit>
+         <style type="int">1</style>
+         <width type="int">0</width>
+        </borderPen>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">0,0,0,255</color>
+         <style type="int">0</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <order type="int">13</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
+        <textFlags type="int">129</textFlags>
+        <stretchMode alternateValue="1" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <text type="QString">Sales Rep</text>
+        <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
+        <font type="QFont">Arial,8,-1,5,75,0,0,0,0,0</font>
+        <stretchFont type="bool">false</stretchFont>
+        <expDelimiters type="QString">[ , ]</expDelimiters>
+       </properties>
+      </Item>
+      <Item moduleName="Standard::Memo" moduleVersion="1" extends="">
+       <properties>
+        <objectName type="QString">memo_2</objectName>
+        <enabled type="bool">true</enabled>
+        <geometry type="QRectF">0,31,56.5,5</geometry>
+        <boundingRect type="QRectF">0,31,56.5,5</boundingRect>
+        <frame type="int">0</frame>
+        <opacity type="double">1</opacity>
+        <rotation type="double">0</rotation>
+        <borderPen type="QPen">
+         <brush type="QBrush">
+          <color type="QColor">0,0,0,255</color>
+          <style type="int">1</style>
+          <texture type="QPixmap"></texture>
+         </brush>
+         <capStyle type="int">16</capStyle>
+         <color type="QColor">0,0,0,255</color>
+         <isCosmetic type="bool">true</isCosmetic>
+         <joinStyle type="int">64</joinStyle>
+         <miterLimit type="double">2</miterLimit>
+         <style type="int">1</style>
+         <width type="int">0</width>
+        </borderPen>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">0,0,0,255</color>
+         <style type="int">0</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <order type="int">16</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
+        <textFlags type="int">129</textFlags>
+        <stretchMode alternateValue="1" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <text type="QString">1234 Main Street</text>
+        <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
+        <font type="QFont">Arial,10,-1,5,50,0,0,0,0,0</font>
+        <stretchFont type="bool">false</stretchFont>
+        <expDelimiters type="QString">[ , ]</expDelimiters>
+       </properties>
+      </Item>
+      <Item moduleName="Standard::Memo" moduleVersion="1" extends="">
+       <properties>
+        <objectName type="QString">memo_14</objectName>
+        <enabled type="bool">true</enabled>
+        <geometry type="QRectF">153,13,32.5,4</geometry>
+        <boundingRect type="QRectF">153,13,32.5,4</boundingRect>
+        <frame type="int">0</frame>
+        <opacity type="double">1</opacity>
+        <rotation type="double">0</rotation>
+        <borderPen type="QPen">
+         <brush type="QBrush">
+          <color type="QColor">0,0,0,255</color>
+          <style type="int">1</style>
+          <texture type="QPixmap"></texture>
+         </brush>
+         <capStyle type="int">16</capStyle>
+         <color type="QColor">0,0,0,255</color>
+         <isCosmetic type="bool">true</isCosmetic>
+         <joinStyle type="int">64</joinStyle>
+         <miterLimit type="double">2</miterLimit>
+         <style type="int">1</style>
+         <width type="int">0</width>
+        </borderPen>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">0,0,0,255</color>
+         <style type="int">0</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <order type="int">17</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
+        <textFlags type="int">129</textFlags>
+        <stretchMode alternateValue="1" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <text type="QString">Memo</text>
+        <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
+        <font type="QFont">Arial,8,-1,5,50,0,0,0,0,0</font>
+        <stretchFont type="bool">false</stretchFont>
+        <expDelimiters type="QString">[ , ]</expDelimiters>
+       </properties>
+      </Item>
+      <Item moduleName="Standard::Memo" moduleVersion="1" extends="">
+       <properties>
+        <objectName type="QString">memo_15</objectName>
+        <enabled type="bool">true</enabled>
+        <geometry type="QRectF">153,17,32.5,4</geometry>
+        <boundingRect type="QRectF">153,17,32.5,4</boundingRect>
+        <frame type="int">0</frame>
+        <opacity type="double">1</opacity>
+        <rotation type="double">0</rotation>
+        <borderPen type="QPen">
+         <brush type="QBrush">
+          <color type="QColor">0,0,0,255</color>
+          <style type="int">1</style>
+          <texture type="QPixmap"></texture>
+         </brush>
+         <capStyle type="int">16</capStyle>
+         <color type="QColor">0,0,0,255</color>
+         <isCosmetic type="bool">true</isCosmetic>
+         <joinStyle type="int">64</joinStyle>
+         <miterLimit type="double">2</miterLimit>
+         <style type="int">1</style>
+         <width type="int">0</width>
+        </borderPen>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">0,0,0,255</color>
+         <style type="int">0</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <order type="int">18</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
+        <textFlags type="int">129</textFlags>
+        <stretchMode alternateValue="1" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <text type="QString">Memo</text>
+        <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
+        <font type="QFont">Arial,8,-1,5,50,0,0,0,0,0</font>
+        <stretchFont type="bool">false</stretchFont>
+        <expDelimiters type="QString">[ , ]</expDelimiters>
+       </properties>
+      </Item>
+      <Item moduleName="Standard::Memo" moduleVersion="1" extends="">
+       <properties>
+        <objectName type="QString">memo_16</objectName>
+        <enabled type="bool">true</enabled>
+        <geometry type="QRectF">153,21,32.5,4</geometry>
+        <boundingRect type="QRectF">153,21,32.5,4</boundingRect>
+        <frame type="int">0</frame>
+        <opacity type="double">1</opacity>
+        <rotation type="double">0</rotation>
+        <borderPen type="QPen">
+         <brush type="QBrush">
+          <color type="QColor">0,0,0,255</color>
+          <style type="int">1</style>
+          <texture type="QPixmap"></texture>
+         </brush>
+         <capStyle type="int">16</capStyle>
+         <color type="QColor">0,0,0,255</color>
+         <isCosmetic type="bool">true</isCosmetic>
+         <joinStyle type="int">64</joinStyle>
+         <miterLimit type="double">2</miterLimit>
+         <style type="int">1</style>
+         <width type="int">0</width>
+        </borderPen>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">0,0,0,255</color>
+         <style type="int">0</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <order type="int">19</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
+        <textFlags type="int">129</textFlags>
+        <stretchMode alternateValue="1" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <text type="QString">Memo</text>
+        <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
+        <font type="QFont">Arial,8,-1,5,50,0,0,0,0,0</font>
+        <stretchFont type="bool">false</stretchFont>
+        <expDelimiters type="QString">[ , ]</expDelimiters>
+       </properties>
+      </Item>
+      <Item moduleName="Standard::Memo" moduleVersion="1" extends="">
+       <properties>
+        <objectName type="QString">memo_17</objectName>
+        <enabled type="bool">true</enabled>
+        <geometry type="QRectF">153,25,32.5,4</geometry>
+        <boundingRect type="QRectF">153,25,32.5,4</boundingRect>
+        <frame type="int">0</frame>
+        <opacity type="double">1</opacity>
+        <rotation type="double">0</rotation>
+        <borderPen type="QPen">
+         <brush type="QBrush">
+          <color type="QColor">0,0,0,255</color>
+          <style type="int">1</style>
+          <texture type="QPixmap"></texture>
+         </brush>
+         <capStyle type="int">16</capStyle>
+         <color type="QColor">0,0,0,255</color>
+         <isCosmetic type="bool">true</isCosmetic>
+         <joinStyle type="int">64</joinStyle>
+         <miterLimit type="double">2</miterLimit>
+         <style type="int">1</style>
+         <width type="int">0</width>
+        </borderPen>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">0,0,0,255</color>
+         <style type="int">0</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <order type="int">20</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
+        <textFlags type="int">129</textFlags>
+        <stretchMode alternateValue="1" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <text type="QString">Memo</text>
+        <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
+        <font type="QFont">Arial,8,-1,5,50,0,0,0,0,0</font>
+        <stretchFont type="bool">false</stretchFont>
+        <expDelimiters type="QString">[ , ]</expDelimiters>
+       </properties>
+      </Item>
+      <Item moduleName="Standard::Memo" moduleVersion="1" extends="">
+       <properties>
+        <objectName type="QString">memo_18</objectName>
+        <enabled type="bool">true</enabled>
+        <geometry type="QRectF">153,29,32.5,4</geometry>
+        <boundingRect type="QRectF">153,29,32.5,4</boundingRect>
+        <frame type="int">0</frame>
+        <opacity type="double">1</opacity>
+        <rotation type="double">0</rotation>
+        <borderPen type="QPen">
+         <brush type="QBrush">
+          <color type="QColor">0,0,0,255</color>
+          <style type="int">1</style>
+          <texture type="QPixmap"></texture>
+         </brush>
+         <capStyle type="int">16</capStyle>
+         <color type="QColor">0,0,0,255</color>
+         <isCosmetic type="bool">true</isCosmetic>
+         <joinStyle type="int">64</joinStyle>
+         <miterLimit type="double">2</miterLimit>
+         <style type="int">1</style>
+         <width type="int">0</width>
+        </borderPen>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">0,0,0,255</color>
+         <style type="int">0</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <order type="int">21</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
+        <textFlags type="int">129</textFlags>
+        <stretchMode alternateValue="1" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <text type="QString">Memo</text>
+        <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
+        <font type="QFont">Arial,8,-1,5,50,0,0,0,0,0</font>
+        <stretchFont type="bool">false</stretchFont>
+        <expDelimiters type="QString">[ , ]</expDelimiters>
+       </properties>
+      </Item>
+      <Item moduleName="Standard::Memo" moduleVersion="1" extends="">
+       <properties>
+        <objectName type="QString">memo_19</objectName>
+        <enabled type="bool">true</enabled>
+        <geometry type="QRectF">153,33,32.5,4</geometry>
+        <boundingRect type="QRectF">153,33,32.5,4</boundingRect>
+        <frame type="int">0</frame>
+        <opacity type="double">1</opacity>
+        <rotation type="double">0</rotation>
+        <borderPen type="QPen">
+         <brush type="QBrush">
+          <color type="QColor">0,0,0,255</color>
+          <style type="int">1</style>
+          <texture type="QPixmap"></texture>
+         </brush>
+         <capStyle type="int">16</capStyle>
+         <color type="QColor">0,0,0,255</color>
+         <isCosmetic type="bool">true</isCosmetic>
+         <joinStyle type="int">64</joinStyle>
+         <miterLimit type="double">2</miterLimit>
+         <style type="int">1</style>
+         <width type="int">0</width>
+        </borderPen>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">0,0,0,255</color>
+         <style type="int">0</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <order type="int">22</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
+        <textFlags type="int">129</textFlags>
+        <stretchMode alternateValue="1" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <text type="QString">Memo</text>
+        <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
+        <font type="QFont">Arial,8,-1,5,50,0,0,0,0,0</font>
+        <stretchFont type="bool">false</stretchFont>
+        <expDelimiters type="QString">[ , ]</expDelimiters>
+       </properties>
+      </Item>
+      <Item moduleName="Standard::Memo" moduleVersion="1" extends="">
+       <properties>
+        <objectName type="QString">memo_20</objectName>
+        <enabled type="bool">true</enabled>
+        <geometry type="QRectF">153,37,32.5,4</geometry>
+        <boundingRect type="QRectF">153,37,32.5,4</boundingRect>
+        <frame type="int">0</frame>
+        <opacity type="double">1</opacity>
+        <rotation type="double">0</rotation>
+        <borderPen type="QPen">
+         <brush type="QBrush">
+          <color type="QColor">0,0,0,255</color>
+          <style type="int">1</style>
+          <texture type="QPixmap"></texture>
+         </brush>
+         <capStyle type="int">16</capStyle>
+         <color type="QColor">0,0,0,255</color>
+         <isCosmetic type="bool">true</isCosmetic>
+         <joinStyle type="int">64</joinStyle>
+         <miterLimit type="double">2</miterLimit>
+         <style type="int">1</style>
+         <width type="int">0</width>
+        </borderPen>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">0,0,0,255</color>
+         <style type="int">0</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <order type="int">23</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
+        <textFlags type="int">129</textFlags>
+        <stretchMode alternateValue="1" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <text type="QString">Memo</text>
+        <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
+        <font type="QFont">Arial,8,-1,5,50,0,0,0,0,0</font>
+        <stretchFont type="bool">false</stretchFont>
+        <expDelimiters type="QString">[ , ]</expDelimiters>
+       </properties>
+      </Item>
+      <Item moduleName="Standard::Memo" moduleVersion="1" extends="">
+       <properties>
+        <objectName type="QString">memo_21</objectName>
+        <enabled type="bool">true</enabled>
+        <geometry type="QRectF">0,44.5,73.5,3.5</geometry>
+        <boundingRect type="QRectF">0,44.5,73.5,3.5</boundingRect>
+        <frame type="int">8</frame>
+        <opacity type="double">1</opacity>
+        <rotation type="double">0</rotation>
+        <borderPen type="QPen">
+         <brush type="QBrush">
+          <color type="QColor">0,0,0,255</color>
+          <style type="int">1</style>
+          <texture type="QPixmap"></texture>
+         </brush>
+         <capStyle type="int">16</capStyle>
+         <color type="QColor">0,0,0,255</color>
+         <isCosmetic type="bool">true</isCosmetic>
+         <joinStyle type="int">64</joinStyle>
+         <miterLimit type="double">2</miterLimit>
+         <style type="int">1</style>
+         <width type="int">0</width>
+        </borderPen>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">0,0,0,255</color>
+         <style type="int">0</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <order type="int">24</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
+        <textFlags type="int">129</textFlags>
+        <stretchMode alternateValue="1" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <text type="QString">Bill To</text>
+        <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
+        <font type="QFont">Arial,8,-1,5,75,0,0,0,0,0</font>
+        <stretchFont type="bool">false</stretchFont>
+        <expDelimiters type="QString">[ , ]</expDelimiters>
+       </properties>
+      </Item>
+      <Item moduleName="Standard::Memo" moduleVersion="1" extends="">
+       <properties>
+        <objectName type="QString">memo_22</objectName>
+        <enabled type="bool">true</enabled>
+        <geometry type="QRectF">79.5,44.5,73.5,3.5</geometry>
+        <boundingRect type="QRectF">79.5,44.5,73.5,3.5</boundingRect>
+        <frame type="int">8</frame>
+        <opacity type="double">1</opacity>
+        <rotation type="double">0</rotation>
+        <borderPen type="QPen">
+         <brush type="QBrush">
+          <color type="QColor">0,0,0,255</color>
+          <style type="int">1</style>
+          <texture type="QPixmap"></texture>
+         </brush>
+         <capStyle type="int">16</capStyle>
+         <color type="QColor">0,0,0,255</color>
+         <isCosmetic type="bool">true</isCosmetic>
+         <joinStyle type="int">64</joinStyle>
+         <miterLimit type="double">2</miterLimit>
+         <style type="int">1</style>
+         <width type="int">0</width>
+        </borderPen>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">0,0,0,255</color>
+         <style type="int">0</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <order type="int">25</order>
+        <shiftMode alternateValue="0" type="QString">AlwaysShift</shiftMode>
+        <textFlags type="int">129</textFlags>
+        <stretchMode alternateValue="1" type="QString">DontStretch</stretchMode>
+        <showStretchability type="bool">true</showStretchability>
+        <allowHTML type="bool">false</allowHTML>
+        <text type="QString">Ship To</text>
+        <textColor type="QColor">0,0,0,255</textColor>
+        <textMargin type="double">1</textMargin>
+        <font type="QFont">Arial,8,-1,5,75,0,0,0,0,0</font>
+        <stretchFont type="bool">false</stretchFont>
+        <expDelimiters type="QString">[ , ]</expDelimiters>
+       </properties>
+      </Item>
+     </children>
+    </Band>
+    <PageGUI>
+     <properties/>
+     <children>
+      <QGraphicsScene>
+       <properties>
+        <backgroundBrush type="QBrush">
+         <color type="QColor">160,160,164,255</color>
+         <style type="int">1</style>
+         <texture type="QPixmap"></texture>
+        </backgroundBrush>
+        <foregroundBrush type="QBrush">
+         <color type="QColor">0,0,0,255</color>
+         <style type="int">0</style>
+         <texture type="QPixmap"></texture>
+        </foregroundBrush>
+        <sceneRect type="QRectF">0,0,1377,1898</sceneRect>
+        <bspTreeDepth type="int">5</bspTreeDepth>
+        <palette type="QPalette"/>
+        <font type="QFont">Ubuntu,11,-1,5,50,0,0,0,0,0</font>
+        <sortCacheEnabled type="bool">false</sortCacheEnabled>
+        <stickyFocus type="bool">false</stickyFocus>
+       </properties>
+       <children>
+        <QGraphicsSceneBspTreeIndex>
+         <properties>
+          <bspTreeDepth type="int">5</bspTreeDepth>
+         </properties>
+        </QGraphicsSceneBspTreeIndex>
+       </children>
+      </QGraphicsScene>
+      <Magnets>
+       <properties/>
+      </Magnets>
+     </children>
+    </PageGUI>
+   </children>
+  </Page>
+  <Storage moduleName="Standard::Resource" moduleVersion="1" extends="">
+   <properties>
+    <objectName type="QString">storage</objectName>
+    <localPath type="QString"></localPath>
+    <objects type="QVariantHash">
+     <key name="image/logo.png">
+      <value type="QByteArray">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</value>
+     </key>
+    </objects>
+    <reports type="QVariantHash"/>
+   </properties>
+  </Storage>
+  <CuteReport::RenderedReport>
+   <properties/>
+  </CuteReport::RenderedReport>
+ </children>
+</Report>

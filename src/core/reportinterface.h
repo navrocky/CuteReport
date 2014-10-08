@@ -53,7 +53,8 @@ class RenderedReportInterface;
 class CUTEREPORT_EXPORTS ReportInterface : public QObject
 {
 
-	Q_OBJECT
+    Q_OBJECT
+
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
     Q_PROPERTY(QString author READ author WRITE setAuthor NOTIFY authorChanged)
     Q_PROPERTY(QString description READ description WRITE setDescription NOTIFY descriptionChanged)
@@ -88,9 +89,8 @@ public:
 
 //    typedef QMap<QString, ReportValue> ReportValues;
 
-public:
     ~ReportInterface();
-    ReportInterface * clone(bool withChildren = true);
+    ReportInterface * clone(bool withChildren = true, bool init = true);
 
     void init();
 
@@ -112,9 +112,14 @@ public:
     QString filePath();
     void setFilePath(const QString & filePath);
 
+    QList<CuteReport::BaseItemInterface *> items();
+    CuteReport::BaseItemInterface * item (const QString & itemName);
+
     QList<CuteReport::PageInterface *> pages();
+    CuteReport::PageInterface * page(const QString & pageName);
     void addPage (CuteReport::PageInterface * page);
     void deletePage(CuteReport::PageInterface * page);
+    void deletePage(const QString & pageName);
 
     QList<CuteReport::DatasetInterface *> datasets();
     CuteReport::DatasetInterface * dataset(const QString & datasetName);
@@ -133,15 +138,16 @@ public:
     CuteReport::PrinterInterface * printer() const;
     void setPrinter(CuteReport::PrinterInterface *printer);
 
-    CuteReport::StorageInterface *storage(const QString & storageName) const;
-    CuteReport::StorageInterface* storageByScheme(const QString & scheme) const;
-    CuteReport::StorageInterface *storageByUrl(const QString & url) const;
+    CuteReport::StorageInterface * storage(const QString & objectName) const;
+    CuteReport::StorageInterface * storageByUrl(const QString & url) const;
+    QList<CuteReport::StorageInterface*> storageListByScheme(const QString & scheme) const;
+    QList<CuteReport::StorageInterface*> storageListByModuleName(const QString & moduleName) const;
     QList<StorageInterface *> storages() const;
     QStringList storagesName() const;
-    void setStorage(CuteReport::StorageInterface *storage);
-    void deleteStorage(const QString & moduleName);
+    void addStorage(CuteReport::StorageInterface *storage);
+    void deleteStorage(const QString & storageName);
     void deleteStorage(StorageInterface * storage);
-    bool hasStorage(const QString & moduleName);
+    bool hasStorageModule(const QString & moduleName);
     QString defaultStorageName() const;
     void setDefaultStorageName(const QString &name);
     StorageInterface * defaultStorage() const;
@@ -188,16 +194,17 @@ signals:
     void pageAdded(CuteReport::PageInterface*);
     void pageDeleted(CuteReport::PageInterface*);
     void itemAdded(CuteReport::BaseItemInterface*);
-    void itemDeleted(CuteReport::BaseItemInterface*);
+    void itemDeleted(CuteReport::BaseItemInterface*, bool);
     void variablesChanged();
     void dirtynessChanged(bool);
     void validityChanged(bool);
     void changed();
+    void propertyChanged();
 
 private slots:
     void childDestroyed(QObject * object);
-    void slotItemAdded(CuteReport::BaseItemInterface *item, QPointF);
-    void slotItemRemoved(CuteReport::BaseItemInterface* item);
+    void slotItemAdded(CuteReport::BaseItemInterface *item);
+    void slotItemRemoved(CuteReport::BaseItemInterface* item, QString, bool directDeletion);
     void slotScriptStringsChanged();
     void slotObjectVariablesChanged();
     void slotNewItemAdded(CuteReport::BaseItemInterface* item);

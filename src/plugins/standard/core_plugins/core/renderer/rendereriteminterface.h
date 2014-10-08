@@ -65,6 +65,7 @@ public:
     Q_INVOKABLE virtual void unregisterBandFromDatasetIteration(const QString &datasetName, CuteReport::BandInterface * band);
     Q_INVOKABLE virtual CuteReport::BandsList bandRegisteredToDataset(const QString & datasetName);
 
+    Q_INVOKABLE virtual void registerEvaluationString(const QString & string, const QString & delimiterBegin, const QString & delimiterEnd, CuteReport::BaseItemInterface *item);
     Q_INVOKABLE virtual void registerEvaluationString(const QString & string, CuteReport::BaseItemInterface *item);
     Q_INVOKABLE void resetAggregateFunctions(CuteReport::BandInterface * band);
 
@@ -78,8 +79,11 @@ public:
     Q_INVOKABLE virtual QVariant getStorageObject(const QString & objectUrl);
 
     Q_INVOKABLE virtual CuteReport::BandInterface * lastProcessedBand();
+    Q_INVOKABLE virtual CuteReport::BandInterface * currentProcessingBand();
     Q_INVOKABLE virtual void prepareCurrentPage();
     Q_INVOKABLE virtual void postprocessCurrentPage();
+    Q_INVOKABLE virtual quint32 lastProcessedItemId(const QString & itemName);
+    Q_INVOKABLE virtual CuteReport::RenderedItemInterface * lastProcessedItemPointer(const QString & itemName);
 
     Q_INVOKABLE virtual void error(const QString & /*sender*/, const QString & /*errorMessage*/){}
 

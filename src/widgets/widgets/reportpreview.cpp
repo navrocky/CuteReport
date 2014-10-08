@@ -36,6 +36,8 @@
 
 #define MODULENAME "ReportPreview"
 
+inline void initMyResource() { Q_INIT_RESOURCE(reportpreview); }
+
 namespace CuteReport
 {
 
@@ -67,6 +69,7 @@ ReportPreview::~ReportPreview()
 
 void ReportPreview::initMe(PreviewFlags f)
 {
+    initMyResource();
     ui->setupUi(this);
 
     setShowFlags(f);
@@ -424,6 +427,10 @@ void ReportPreview::updateScrollBars()
         ui->vScrollBar->setSingleStep(ui->view->verticalScrollBar()->singleStep());
         ui->vScrollBar->setPageStep(ui->view->verticalScrollBar()->pageStep());
     }
+
+    //ui->gridLayout->update();
+    //ui->view->updateGeometry();
+    //ui->view->update();
 }
 
 
@@ -536,7 +543,7 @@ void ReportPreview::slotExport()
 
     QStringList filters;
     foreach (ExportInterface * m, m_reportCore->exportModules()) {
-        filters << QString("%1 (*.%2)").arg(m->moduleName()).arg(m->format().toLower());
+        filters << QString("%1 (*.%2)").arg(m->moduleFullName()).arg(m->format().toLower());
     }
 
     StdStorageDialog d(m_reportCore, m_report, m_reportCore->rootWidget(), "Export to file");
@@ -553,7 +560,7 @@ void ReportPreview::slotExport()
 
     ExportInterface * exportModule = 0;
     foreach (ExportInterface * m, m_reportCore->exportModules()) {
-        if (m->moduleName().toLower() == moduleName.toLower()) {
+        if (m->moduleFullName().toLower() == moduleName.toLower()) {
             exportModule = m;
             break;
         }

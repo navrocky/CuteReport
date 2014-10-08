@@ -44,6 +44,7 @@ class DatasetInterface;
 class StorageInterface;
 class FormInterface;
 class RenderedPageInterface;
+class RenderedItemInterface;
 
 class CUTEREPORT_EXPORTS RendererPublicInterface : public QObject
 {
@@ -54,85 +55,78 @@ public:
     explicit RendererPublicInterface(QObject *parent = 0);
     
     /** set/read global variable accessible to any item */
-    virtual void setValue(const QString & valueName, const QVariant & value) = 0;
-    virtual QVariant getValue(const QString & valueName) = 0;
+    Q_INVOKABLE virtual void setValue(const QString & valueName, const QVariant & value) = 0;
+    Q_INVOKABLE virtual QVariant getValue(const QString & valueName) = 0;
 
-    virtual QString processString(const QString & string, const QString & delimiterBegin, const QString & delimiterEnd, const CuteReport::BaseItemInterface * item ) = 0;
-    virtual QString processString(const QString & string, const CuteReport::BaseItemInterface * item ) = 0;
+    Q_INVOKABLE virtual QString processString(const QString & string, const QString & delimiterBegin, const QString & delimiterEnd, const CuteReport::BaseItemInterface * item ) = 0;
+    Q_INVOKABLE virtual QString processString(const QString & string, const CuteReport::BaseItemInterface * item ) = 0;
 
-    virtual int currentPageNumber() = 0; // 1,2,3...
-    virtual PageDrawState currentState() = 0;
+    Q_INVOKABLE virtual int currentPageNumber() = 0; // 1,2,3...
+    Q_INVOKABLE virtual PageDrawState currentState() = 0;
 
-    virtual QRectF pageFreeSpace() = 0;
-    virtual QPointF currentBandDelta() = 0; // mm
+    Q_INVOKABLE virtual QRectF pageFreeSpace() = 0;
+    Q_INVOKABLE virtual QPointF currentBandDelta() = 0; // mm
 
     /** manage bands that will be processed by renderer for each dataset iteration */
-    virtual void registerBandToDatasetIteration(const QString &datasetName, const QString & objectName) = 0;
-    virtual void registerBandToDatasetIteration(const QString & datasetName, CuteReport::BandInterface * band) = 0;
-    virtual void unregisterBandFromDatasetIteration(const QString & datasetName, const QString & objectName) = 0;
-    virtual void unregisterBandFromDatasetIteration(const QString &datasetName, CuteReport::BandInterface * band) = 0;
-    virtual BandsList bandRegisteredToDataset(const QString & datasetName) = 0;
+    Q_INVOKABLE virtual void registerBandToDatasetIteration(const QString &datasetName, const QString & objectName) = 0;
+    Q_INVOKABLE virtual void registerBandToDatasetIteration(const QString & datasetName, CuteReport::BandInterface * band) = 0;
+    Q_INVOKABLE virtual void unregisterBandFromDatasetIteration(const QString & datasetName, const QString & objectName) = 0;
+    Q_INVOKABLE virtual void unregisterBandFromDatasetIteration(const QString &datasetName, CuteReport::BandInterface * band) = 0;
+    Q_INVOKABLE virtual BandsList bandRegisteredToDataset(const QString & datasetName) = 0;
 
     /** Register strings that have to be processed before printing in some kind
      *  All sctring that have scripting, functions, etc should be registered before rendering
+     *  For method without delimiter entire string is evaluation
     */
-    virtual void registerEvaluationString(const QString & string, CuteReport::BaseItemInterface*) = 0;
+    Q_INVOKABLE virtual void registerEvaluationString(const QString & string, const QString & delimiterBegin, const QString & delimiterEnd, CuteReport::BaseItemInterface *item) = 0;
+    Q_INVOKABLE virtual void registerEvaluationString(const QString & string, CuteReport::BaseItemInterface*) = 0;
 
     /** method for clearing all accumulated aggregate values at the end of current iteration
      *  keep in mind values will not be reset immediately, so they will be accessable till iteration changed */
-    virtual void resetAggregateFunctions(CuteReport::BandInterface * band) = 0;
+    Q_INVOKABLE virtual void resetAggregateFunctions(CuteReport::BandInterface * band) = 0;
 
-    virtual CuteReport::DatasetInterface * dataset(const QString &datasetname) = 0;
-    virtual void iterateDataset(CuteReport::DatasetInterface * dtst) = 0;
-    virtual void iterateDataset(const QString & objectName) = 0;
+    Q_INVOKABLE virtual CuteReport::DatasetInterface * dataset(const QString &datasetname) = 0;
+    Q_INVOKABLE virtual void iterateDataset(CuteReport::DatasetInterface * dtst) = 0;
+    Q_INVOKABLE virtual void iterateDataset(const QString & objectName) = 0;
 
-    virtual void processBand(CuteReport::BandInterface * band) = 0;
-    virtual void processBand(const QString & objectName) = 0;
+    Q_INVOKABLE virtual void processBand(CuteReport::BandInterface * band) = 0;
+    Q_INVOKABLE virtual void processBand(const QString & objectName) = 0;
 
-    virtual void createNewPage() = 0;
+    Q_INVOKABLE virtual void createNewPage() = 0;
 
-    virtual QVariant getStorageObject(const QString & objectUrl) = 0;
+    Q_INVOKABLE virtual QVariant getStorageObject(const QString & objectUrl) = 0;
 
-    virtual BandInterface * lastProcessedBand() = 0;
-    virtual void prepareCurrentPage() = 0;
-    virtual void postprocessCurrentPage() = 0;
+    Q_INVOKABLE virtual BandInterface * lastProcessedBand() = 0;
+    Q_INVOKABLE virtual CuteReport::BandInterface * currentProcessingBand() = 0;
+    Q_INVOKABLE virtual void prepareCurrentPage() = 0;
+    Q_INVOKABLE virtual void postprocessCurrentPage() = 0;
+    Q_INVOKABLE virtual quint32 lastProcessedItemId(const QString & itemName) = 0;
+    Q_INVOKABLE virtual CuteReport::RenderedItemInterface * lastProcessedItemPointer(const QString & itemName) = 0;
 
-    virtual void error(const QString & sender, const QString & errorMessage) = 0;
+    Q_INVOKABLE virtual void error(const QString & sender, const QString & errorMessage) = 0;
+
+    Q_INVOKABLE virtual QString moduleName() = 0;
+
+    Q_INVOKABLE virtual void run() = 0;
 
 signals:
-    void onBandBefore(CuteReport::BandInterface * band);
-    void onBandAfter(CuteReport::BandInterface * band);
-    void onBandGemetryAfter(CuteReport::BandInterface * band);
-    void onItemBefore(CuteReport::BaseItemInterface * item);
-    void onItemAfter(CuteReport::BaseItemInterface * item);
-    void onItemGeometryAfter(CuteReport::BaseItemInterface * item);
-    void onDatasetBefore(CuteReport::DatasetInterface * dataset);
-    void onDatasetAfter(CuteReport::DatasetInterface * dataset);
-    void onDatasetIteration(CuteReport::DatasetInterface * dataset);
-    void onPageBefore(CuteReport::RenderedPageInterface * page);
-    void onPageAfter(CuteReport::RenderedPageInterface * page);
-    void onFormBefore(CuteReport::FormInterface * dataset);
-    void onFormAfter(CuteReport::FormInterface * dataset);
+    void reportStart();
+    void bandBefore(CuteReport::BandInterface * band);
+    void bandAfter(CuteReport::BandInterface * band);
+    void bandGeometryAfter(CuteReport::BandInterface * band);
+    void itemBefore(CuteReport::BaseItemInterface * item);
+    void itemAfter(CuteReport::BaseItemInterface * item);
+    void itemGeometryAfter(CuteReport::BaseItemInterface * item);
+    void datasetBefore(CuteReport::DatasetInterface * dataset);
+    void datasetAfter(CuteReport::DatasetInterface * dataset);
+    void datasetIteration(CuteReport::DatasetInterface * dataset);
+    void pageBefore(CuteReport::RenderedPageInterface * page);
+    void pageAfter(CuteReport::RenderedPageInterface * page);
+    void formBefore(CuteReport::FormInterface * dataset);
+    void formAfter(CuteReport::FormInterface * dataset);
+    void reportDone();
 };
 
 }
 
 #endif // RENDERERTOITEMINTERFACE_H
-
-/*
-    virtual void prepareCurrentPage();
-    virtual void postprocessCurrentPage();
-    virtual int currentPageNumber();
-    virtual int currentDatasetRow();
-    virtual QString currentDatasetName();
-    virtual CuteReport::DataSet * currentDataset();
-    virtual int currentDetailNumber();
-    virtual void setDetailNumber(int num);
-    virtual void newPage();
-    virtual void processBand(BandInterface * band);
-//    virtual void prepareDatasets();
-    virtual void processDataset(DataSet * dtst);
-    virtual QRectF pageFreeSpace();
-    virtual void setPageFreeSpace (QRectF rect);
-    virtual BandInterface * lastProcessedBand();
-    */

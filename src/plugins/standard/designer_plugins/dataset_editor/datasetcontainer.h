@@ -37,13 +37,14 @@ class Core;
 }
 
 class QAbstractItemModel;
+class DatasetEditor;
 
 class DatasetContainer : public QWidget
 {
     Q_OBJECT
     
 public:
-    explicit DatasetContainer(CuteDesigner::Core * core, QWidget *parent = 0);
+    explicit DatasetContainer(DatasetEditor * datasetEditor, QWidget *parent = 0);
     ~DatasetContainer();
 
     void reloadSettings();
@@ -78,7 +79,7 @@ private slots:
 
 private:
     Ui::DatasetContainer *ui;
-    CuteDesigner::Core * m_core;
+    DatasetEditor * m_datasetEditor;
     QWidget * m_propertyEditor;
 };
 

@@ -48,8 +48,9 @@ public:
     Title(QObject * parent = 0);
     ~Title();
 
+    virtual void moduleInit();
+
     virtual BaseItemInterface *createInstance(QObject * parent) const;
-    virtual BaseItemInterface * clone();
     virtual QByteArray serialize();
     virtual void deserialize(QByteArray &data);
     virtual bool canContain(QObject * object);
@@ -59,17 +60,20 @@ public:
     CuteReport::BandInterface::AccomodationType accommodationType(){ return AccomodationFirstPage;}
 
     QIcon itemIcon() const;
-    QString moduleName() const;
+    QString moduleShortName() const;
+    virtual QString suitName() const { return "Standard"; }
     QString itemGroup() const;
 
-    virtual CuteReport::RenderedItemInterface * render(int customDPI = 0);
-    virtual CuteReport::RenderedItemInterface * renderNewPage(int customDPI = 0);
+    virtual bool renderPrepare();
+    virtual bool renderNewPage();
+    virtual CuteReport::RenderedItemInterface * renderView();
 
 protected:
-    Title(TitlePrivate &dd, QObject * parent);
+    Title(TitlePrivate *dd, QObject * parent);
 
 private:
     Q_DECLARE_PRIVATE(Title)
+    virtual BaseItemInterface * itemClone() const;
 };
 
 class TitlePrivate : public CuteReport::BandInterfacePrivate

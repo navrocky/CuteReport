@@ -44,11 +44,14 @@
 #include "log/log.h"
 #include "renderedreportinterface.h"
 #include "scriptextensioninterface.h"
+#include "designeriteminterface.h"
 
 #include <QApplication>
 #include <QtCore>
 #include <QUrl>
 #include <QtXml>
+
+void * gDesigner = 0;
 
 static const QString MODULENAME = "ReportCore";
 static const int MaxRenderingThreads = 100;
@@ -64,12 +67,27 @@ void processModuleList(QList<T*> & modules)
     QMutableListIterator<T*> i(modules);
     while (i.hasNext()) {
         T* module = i.next();
-        if (removeList.contains(module->moduleName()))
+        if (removeList.contains(module->moduleFullName()))
             i.remove();
     }
     foreach (T * module, modules)  module->moduleInit();
 }
 
+template <class T>
+void processModuleList(QList<T*> * modules)
+{
+    QStringList removeList;
+    foreach (T * module, *modules) {
+        removeList.append(module->removesModules());
+    }
+    QMutableListIterator<T*> i(*modules);
+    while (i.hasNext()) {
+        T* module = i.next();
+        if (removeList.contains(module->moduleFullName()))
+            i.remove();
+    }
+    foreach (T * module, *modules)  module->moduleInit();
+}
 
 
 namespace CuteReport
@@ -77,17 +95,17 @@ namespace CuteReport
 
 
 int                                 ReportCore::m_refCount = 0;
-QList<BaseItemInterface*>           ReportCore::m_itemPlugins;
-QList<PageInterface*>               ReportCore::m_pagePlugins;
-QList<DatasetInterface*>            ReportCore::m_datasetPlugins;
-QList<StorageInterface*>            ReportCore::m_storagePlugins;
-QList<SerializerInterface*>         ReportCore::m_serializePlugins;
-QList<RendererInterface*>           ReportCore::m_rendererPlugins;
-QList<PrinterInterface*>            ReportCore::m_printerPlugins;
-QList<FormInterface*>               ReportCore::m_formPlugins;
-QList<ImportInterface*>             ReportCore::m_importPlugins;
-QList<ExportInterface*>             ReportCore::m_exportPlugins;
-QList<ScriptExtensionInterface*>    ReportCore::m_scriptExtensionPlugins;
+QList<BaseItemInterface*> *         ReportCore::m_itemPlugins = 0;
+QList<PageInterface*> *             ReportCore::m_pagePlugins;
+QList<DatasetInterface*> *          ReportCore::m_datasetPlugins;
+QList<StorageInterface*> *          ReportCore::m_storagePlugins;
+QList<SerializerInterface*> *       ReportCore::m_serializePlugins;
+QList<RendererInterface*> *         ReportCore::m_rendererPlugins;
+QList<PrinterInterface*> *          ReportCore::m_printerPlugins;
+QList<FormInterface*> *             ReportCore::m_formPlugins;
+QList<ImportInterface*> *           ReportCore::m_importPlugins;
+QList<ExportInterface*> *           ReportCore::m_exportPlugins;
+QList<ScriptExtensionInterface*> *  ReportCore::m_scriptExtensionPlugins;
 
 
 QueueReport::QueueReport()
@@ -129,17 +147,28 @@ ReportCore::~ReportCore()
     qDeleteAll(m_exporters);
 
     if (m_refCount == 0) {
-        qDeleteAll(m_itemPlugins);
-        qDeleteAll(m_pagePlugins);
-        qDeleteAll(m_datasetPlugins);
-        qDeleteAll(m_storagePlugins);
-        qDeleteAll(m_serializePlugins);
-        qDeleteAll(m_rendererPlugins);
-        qDeleteAll(m_printerPlugins);
-        qDeleteAll(m_formPlugins);
-        qDeleteAll(m_importPlugins);
-        qDeleteAll(m_exportPlugins);
-        qDeleteAll(m_scriptExtensionPlugins);
+        qDeleteAll(*m_itemPlugins);
+        delete m_itemPlugins;
+        qDeleteAll(*m_pagePlugins);
+        delete m_pagePlugins;
+        qDeleteAll(*m_datasetPlugins);
+        delete m_datasetPlugins;
+        qDeleteAll(*m_storagePlugins);
+        delete m_storagePlugins;
+        qDeleteAll(*m_serializePlugins);
+        delete m_serializePlugins;
+        qDeleteAll(*m_rendererPlugins);
+        delete m_rendererPlugins;
+        qDeleteAll(*m_printerPlugins);
+        delete m_printerPlugins;
+        qDeleteAll(*m_formPlugins);
+        delete m_formPlugins;
+        qDeleteAll(*m_importPlugins);
+        delete m_importPlugins;
+        qDeleteAll(*m_exportPlugins);
+        delete m_exportPlugins;
+        qDeleteAll(*m_scriptExtensionPlugins);
+        delete m_scriptExtensionPlugins;
     }
 
     if (Log::instance())
@@ -192,7 +221,7 @@ CuteReport::StorageInterface * ReportCore::getStorageModule(const QString & modu
     CuteReport::StorageInterface * module = moduleName.isEmpty() ? m_defaultStorage : storageModule(moduleName);
 
     if (!module) {
-        QString error = tr("Storage Module name \'%1\' not found").arg(module->moduleName());
+        QString error = tr("Storage Module name \'%1\' not found").arg(module->moduleFullName());
         if (errorText)
             *errorText = error;
         log(LogWarning, MODULENAME, error);
@@ -211,7 +240,43 @@ CuteReport::RendererInterface * ReportCore::getRenderer(const CuteReport::Report
 }
 
 
-CuteReport::StorageInterface * ReportCore::getStorageByScheme(const QString & urlString, CuteReport::ReportInterface * report) const
+QSettings *ReportCore::settings()
+{
+    return m_settings;
+}
+
+
+QString ReportCore::resourcesPath() const
+{
+    QString path = m_settings->value("CuteReport/ResourcesPath").toString();
+    if (!path.isEmpty())
+        return QDir::cleanPath(path);
+    path = m_settings->value("CuteReport/RootPath").toString();
+    return QDir::cleanPath(path.isEmpty() ? REPORT_RESOURCES_PATH : path + "/resources");
+}
+
+
+QString ReportCore::imagesPath() const
+{
+    QString path = m_settings->value("CuteReport/ImagesPath").toString();
+    if (!path.isEmpty())
+        return QDir::cleanPath(path);
+    path = m_settings->value("CuteReport/RootPath").toString();
+    return QDir::cleanPath(path.isEmpty() ? REPORT_IMAGES_PATH : path + "/images");
+}
+
+
+QString ReportCore::pluginsPath() const
+{
+    QString path = m_settings->value("CuteReport/PluginsPath").toString();
+    if (!path.isEmpty())
+        return QDir::cleanPath(path);
+    path = m_settings->value("CuteReport/RootPath").toString();
+    return QDir::cleanPath(path.isEmpty() ? REPORT_PLUGINS_PATH : path + "/plugins");
+}
+
+
+CuteReport::StorageInterface * ReportCore::getStorageByUrl(const QString & urlString, CuteReport::ReportInterface * report) const
 {
     QUrl url(urlString);
     QString urlScheme = url.scheme();
@@ -227,7 +292,7 @@ CuteReport::StorageInterface * ReportCore::getStorageByScheme(const QString & ur
 
         if (!module) {
             foreach (CuteReport::StorageInterface * storage, storages)
-                if (storage->urlScheme() == urlScheme) {
+                if (storage->objectName() == urlScheme) {
                     module = storage;
                     break;
                 }
@@ -239,7 +304,7 @@ CuteReport::StorageInterface * ReportCore::getStorageByScheme(const QString & ur
         module = m_defaultStorage;
 
     if (!module) {
-        foreach (CuteReport::StorageInterface * m, m_storagePlugins) {
+        foreach (CuteReport::StorageInterface * m, *m_storagePlugins) {
             if (m->urlScheme() == urlScheme)
                 return m;
         }
@@ -249,20 +314,20 @@ CuteReport::StorageInterface * ReportCore::getStorageByScheme(const QString & ur
 }
 
 
-CuteReport::StorageInterface * ReportCore::getStorageByModuleName(const QString & moduleName, CuteReport::ReportInterface * report) const
+CuteReport::StorageInterface * ReportCore::getStorageByName(const QString & storageName, CuteReport::ReportInterface * report) const
 {
     CuteReport::StorageInterface * module = 0;
 
     /// by first try report's storage
     if (report) {
         QList<CuteReport::StorageInterface *> storages = report->storages();
-        if (moduleName.isEmpty()) {
+        if (storageName.isEmpty()) {
             module = report->defaultStorage();
         }
 
         if (!module) {
             foreach (CuteReport::StorageInterface * storage, storages)
-                if (storage->moduleName() == moduleName) {
+                if (storage->objectName() == storageName) {
                     module = storage;
                     break;
                 }
@@ -270,12 +335,12 @@ CuteReport::StorageInterface * ReportCore::getStorageByModuleName(const QString 
     }
 
     /// next looking for global's default storages
-    if ((!module && m_defaultStorage && ((m_defaultStorage->moduleName() == moduleName))) || moduleName.isEmpty())
+    if ((!module && m_defaultStorage && ((m_defaultStorage->objectName() == storageName))) || storageName.isEmpty())
         module = m_defaultStorage;
 
     if (!module) {
-        foreach (CuteReport::StorageInterface * m, m_storagePlugins) {
-            if (m->moduleName() == moduleName)
+        foreach (CuteReport::StorageInterface * m, m_storages) {
+            if (m->objectName() == storageName)
                 return m;
         }
     }
@@ -286,7 +351,9 @@ CuteReport::StorageInterface * ReportCore::getStorageByModuleName(const QString 
 
 void ReportCore::setDefaultStorage(const QString & storageName)
 {
-    m_defaultStorage = storageModule(storageName);
+    StorageInterface * newStorage = storageModule(storageName);
+    if (newStorage)
+        m_defaultStorage = newStorage;
 }
 
 
@@ -296,7 +363,7 @@ bool ReportCore::setDefaultStorageByScheme(const QString & scheme)
     if (!plugin)
         return false;
 
-    setDefaultStorage(plugin->moduleName());
+    setDefaultStorage(plugin->moduleFullName());
     return true;
 }
 
@@ -309,7 +376,9 @@ CuteReport::StorageInterface * ReportCore::defaultStorage() const
 
 void ReportCore::setDefaultPrinter(const QString moduleName)
 {
-    m_defaultPrinter = printerModule(moduleName);
+    PrinterInterface * newPrinter = printerModule(moduleName);
+    if (newPrinter)
+        m_defaultPrinter = newPrinter;
 }
 
 
@@ -321,7 +390,9 @@ CuteReport::PrinterInterface * ReportCore::defaultPrinter() const
 
 void ReportCore::setDefaultRenderer(const QString & moduleName)
 {
-    m_defaultRenderer = rendererModule(moduleName);
+    RendererInterface * newRenderer = rendererModule(moduleName);
+    if (newRenderer)
+        m_defaultRenderer = newRenderer;
 }
 
 
@@ -345,6 +416,7 @@ QWidget * ReportCore::rootWidget()
 
 void ReportCore::init(QSettings *settings, bool initLogSystem)
 {
+    m_designerInterface = 0;
     m_rootWidget = 0;
     m_maxRenderingThreads = MaxRenderingThreads;
     m_settings = settings;
@@ -355,70 +427,157 @@ void ReportCore::init(QSettings *settings, bool initLogSystem)
     /** FIXME - log can be inited by other ReportCore instance. as temporary solution we still track reference counter */
     Log::refCounterInc();
 
-
     if (!m_settings) {
         QString orgName = QApplication::organizationName();
         QString appName = QApplication::applicationName();
         m_settings = new QSettings(QSettings::IniFormat, QSettings::UserScope,
                                    orgName.isEmpty() ? "ExaroLogic" : orgName,
-                                   appName.isEmpty() ? "Cute Report" : appName,
+                                   appName.isEmpty() ? "CuteReport" : appName,
                                    this);
     }
 
     log(CuteReport::LogDebug, MODULENAME, "Version", QString("CuteReport version: %1").arg(REPORT_VERSION));
 
+    bool pluginsResultOk = true;
     if (m_refCount == 0)
-        loadPlugins();
+        pluginsResultOk = loadPlugins(m_settings);
     else
         log(CuteReport::LogDebug, MODULENAME, "Plugins are already preloaded!");
 
-    foreach (SerializerInterface * m, m_serializePlugins) {
+    if (!pluginsResultOk) {
+        log(CuteReport::LogCritical, MODULENAME, "Application is exiting because of critial error in CuteReport!");
+        exit(1);
+    }
+
+    foreach (SerializerInterface * m, *m_serializePlugins) {
         SerializerInterface * localModule = m->createInstance(this);
         localModule->setReportCore(this);
         m_serializers.append(localModule);
+
+        setModuleOptionsStr(localModule,
+                            m_settings->value(QString("CuteReport/Serializer_%1_options")
+                                              .arg(localModule->moduleFullName()
+                                                   .replace("::","_"))).toString());
     }
 
-    foreach (StorageInterface * m, m_storagePlugins) {
+    foreach (StorageInterface * m, *m_storagePlugins) {
         StorageInterface * localModule = m->createInstance(this);
         localModule->setReportCore(this);
+        localModule->setObjectName(localModule->urlScheme());
         m_storages.append(localModule);
+
+        setModuleOptionsStr(localModule,
+                            m_settings->value(QString("CuteReport/Storage_%1_options")
+                                              .arg(localModule->moduleFullName()
+                                                   .replace("::","_"))).toString());
     }
 
-    foreach (PrinterInterface * m, m_printerPlugins) {
+    foreach (PrinterInterface * m, *m_printerPlugins) {
         PrinterInterface * localModule = m->createInstance(this);
         localModule->setReportCore(this);
         m_printers.append(localModule);
+
+        setModuleOptionsStr(localModule,
+                            m_settings->value(QString("CuteReport/Printer_%1_options")
+                                              .arg(localModule->moduleFullName()
+                                                   .replace("::","_"))).toString());
     }
 
-    foreach (RendererInterface * m, m_rendererPlugins) {
+    foreach (RendererInterface * m, *m_rendererPlugins) {
         RendererInterface * localModule = m->createInstance(this);
         localModule->setReportCore(this);
         m_renderers.append(localModule);
+
+        setModuleOptionsStr(localModule,
+                            m_settings->value(QString("CuteReport/Renderer_%1_options")
+                                              .arg(localModule->moduleFullName()
+                                                   .replace("::","_"))).toString());
     }
 
-    foreach (ImportInterface * m, m_importPlugins) {
-        ImportInterface * localModule = m->createInstance(this);
-        localModule->setReportCore(this);
-        m_importPlugins.append(localModule);
-    }
+//    foreach (ImportInterface * m, *m_importPlugins) {
+//        ImportInterface * localModule = m->createInstance(this);
+//        localModule->setReportCore(this);
+//        m_importPlugins->append(localModule);
+//    }
 
-    foreach (ExportInterface * m, m_exportPlugins) {
+    foreach (ExportInterface * m, *m_exportPlugins) {
         ExportInterface * localModule = m->createInstance(this);
         localModule->setReportCore(this);
         m_exporters.append(localModule);
     }
 
-    m_defaultSerializer = serializerModule(m_settings->value("CuteReport/serializer").toString());
-    m_defaultStorage = storageModule(m_settings->value("CuteReport/storage").toString());
-    m_defaultPrinter = printerModule(m_settings->value("CuteReport/printer").toString());
-    m_defaultRenderer = rendererModule(m_settings->value("CuteReport/renderer").toString());
+    m_defaultSerializer = serializerModule(m_settings->value("CuteReport/PrimarySerializer").toString());
+    if (!m_defaultSerializer) {
+        foreach (SerializerInterface * m, m_serializers)
+            if (m->moduleFullName() == "Standard::XML") {
+                m_defaultSerializer = m;
+                break;
+            }
+    }
+    if (!m_defaultSerializer) {
+        foreach (SerializerInterface * m, m_serializers)
+            if (m->moduleShortName().toUpper() == "XML") {
+                m_defaultSerializer = m;
+                break;
+            }
+    }
+    if (!m_defaultSerializer) m_defaultSerializer = m_serializers[0];
+
+    m_defaultStorage = storageModule(m_settings->value("CuteReport/PrimaryStorage").toString());
+    if (!m_defaultStorage) {
+        foreach (StorageInterface * m, m_storages)
+            if (m->moduleFullName().toLower() == "standard::filesystem") {
+                m_defaultStorage = m;
+                break;
+            }
+    }
+    if (!m_defaultStorage) {
+        foreach (StorageInterface * m, m_storages)
+            if (m->moduleShortName().toLower().contains("file")) {
+                m_defaultStorage = m;
+                break;
+            }
+    }
+    if (!m_defaultStorage) m_defaultStorage = m_storages[0];
+
+    m_defaultPrinter = printerModule(m_settings->value("CuteReport/PrimaryPrinter").toString());
+    if (!m_defaultPrinter) {
+        foreach (PrinterInterface * m, m_printers)
+            if (m->moduleFullName().toLower() == "standard::printer") {
+                m_defaultPrinter = m;
+                break;
+            }
+    }
+    if (!m_defaultPrinter) {
+        foreach (PrinterInterface * m, m_printers)
+            if (m->moduleShortName().toLower() == "printer") {
+                m_defaultPrinter = m;
+                break;
+            }
+    }
+    if (!m_defaultPrinter) m_defaultPrinter = m_printers[0];
+
+    m_defaultRenderer = rendererModule(m_settings->value("CuteReport/PrimaryRenderer").toString());
+    if (!m_defaultRenderer) {
+        foreach (RendererInterface * m, m_renderers)
+            if (m->moduleFullName().toLower() == "standard::renderer") {
+                m_defaultRenderer = m;
+                break;
+            }
+    }
+    if (!m_defaultPrinter) {
+        foreach (RendererInterface * m, m_renderers)
+            if (m->moduleShortName().toLower() == "renderer") {
+                m_defaultRenderer = m;
+                break;
+            }
+    }
+    if (!m_defaultPrinter) m_defaultRenderer = m_renderers[0];
 
     ++m_refCount;
 }
 
-
-
-bool ReportCore::loadPlugins()
+bool ReportCore::loadPlugins(QSettings *settings)
 {
     //    qRegisterMetaType<CuteReport::Unit>("CuteReport::Unit");
     qRegisterMetaType<CuteReport::Units>("CuteReport::Units");
@@ -429,7 +588,20 @@ bool ReportCore::loadPlugins()
 
     QFileInfoList files;
     QStringList dirs;
-    dirs << REPORT_PLUGINS_PATH;
+    QString iniPath = settings->value("CuteReport/PluginsPath").toString();
+    if (iniPath.isEmpty())
+        dirs << REPORT_PLUGINS_PATH;
+    else
+        dirs << iniPath;
+
+    QList<ReportPluginInterface *> pluginList;
+    foreach (QObject *plugin, QPluginLoader::staticInstances()) {
+        //qDebug() << "test: " << plugin->metaObject()->className();
+        if (plugin && qobject_cast<ReportPluginInterface*>(plugin)) {
+            log(LogDebug, MODULENAME, QString("Found static plugin: %1").arg(plugin->metaObject()->className()), "");
+            pluginList.push_back(qobject_cast<ReportPluginInterface*>(plugin));
+        }
+    }
 
     foreach (const QString & dirStr, dirs) {
         QDir dir(dirStr);
@@ -439,56 +611,69 @@ bool ReportCore::loadPlugins()
 
     QPluginLoader loader;
     loader.setLoadHints(QLibrary::ResolveAllSymbolsHint|QLibrary::ExportExternalSymbolsHint);
-    ReportPluginInterface *plugin = 0;
 
     foreach(const QFileInfo & fileName, files) {
-        log(CuteReport::LogDebug, MODULENAME, "Loading plugin: " + fileName.fileName() );
-
         loader.setFileName(fileName.absoluteFilePath());
         if (!loader.load()) {
-            log(LogCritical, MODULENAME, "Loader error: " + loader.errorString() );
+            log(LogWarning, MODULENAME, "Error while loading plugin " + fileName.fileName() + ": " + loader.errorString() );
             continue;
         }
 
-        plugin = dynamic_cast<ReportPluginInterface *>(loader.instance());
-
+        ReportPluginInterface * plugin = dynamic_cast<ReportPluginInterface *>(loader.instance());
         if (plugin) {
+            log(CuteReport::LogDebug, MODULENAME, "Loading plugin: " + fileName.baseName() );
+            pluginList.append(plugin);
+        } else {
+            log(CuteReport::LogDebug, MODULENAME, "Plugin has not CuteReport's type: " + fileName.baseName() );
+            loader.unload();
+        }
+    }
 
-            if (qobject_cast<CuteReport::BaseItemInterface*>(plugin))
-                m_itemPlugins.append(static_cast<CuteReport::BaseItemInterface*>(plugin));
+    m_itemPlugins = new QList<BaseItemInterface*>();
+    m_pagePlugins = new QList<PageInterface*>;
+    m_datasetPlugins = new QList<DatasetInterface*>;
+    m_storagePlugins = new QList<StorageInterface*>;
+    m_serializePlugins = new QList<SerializerInterface*>;
+    m_rendererPlugins = new QList<RendererInterface*>;
+    m_printerPlugins = new QList<PrinterInterface*>;
+    m_formPlugins = new QList<FormInterface*>;
+    m_importPlugins = new QList<ImportInterface*>;
+    m_exportPlugins = new QList<ExportInterface*>;
+    m_scriptExtensionPlugins = new QList<ScriptExtensionInterface*>;
 
-            else if (qobject_cast<CuteReport::PageInterface*>(plugin))
-                m_pagePlugins.append(static_cast<CuteReport::PageInterface*>(plugin));
+    foreach (ReportPluginInterface * plugin, pluginList) {
+        if (qobject_cast<CuteReport::BaseItemInterface*>(plugin))
+            m_itemPlugins->append(static_cast<CuteReport::BaseItemInterface*>(plugin));
 
-            else if (qobject_cast<CuteReport::DatasetInterface*>(plugin))
-                m_datasetPlugins.append(static_cast<CuteReport::DatasetInterface*>(plugin));
+        else if (qobject_cast<CuteReport::PageInterface*>(plugin))
+            m_pagePlugins->append(static_cast<CuteReport::PageInterface*>(plugin));
 
-            else if (qobject_cast<CuteReport::StorageInterface*>(plugin))
-                m_storagePlugins.append(static_cast<CuteReport::StorageInterface*>(plugin));
+        else if (qobject_cast<CuteReport::DatasetInterface*>(plugin))
+            m_datasetPlugins->append(static_cast<CuteReport::DatasetInterface*>(plugin));
 
-            else if (qobject_cast<CuteReport::RendererInterface*>(plugin))
-                m_rendererPlugins.append(static_cast<CuteReport::RendererInterface*>(plugin));
+        else if (qobject_cast<CuteReport::StorageInterface*>(plugin))
+            m_storagePlugins->append(static_cast<CuteReport::StorageInterface*>(plugin));
 
-            else if (qobject_cast<CuteReport::PrinterInterface*>(plugin))
-                m_printerPlugins.append(static_cast<CuteReport::PrinterInterface*>(plugin));
+        else if (qobject_cast<CuteReport::RendererInterface*>(plugin))
+            m_rendererPlugins->append(static_cast<CuteReport::RendererInterface*>(plugin));
 
-            else if (qobject_cast<CuteReport::FormInterface*>(plugin))
-                m_formPlugins.append(static_cast<CuteReport::FormInterface*>(plugin));
+        else if (qobject_cast<CuteReport::PrinterInterface*>(plugin))
+            m_printerPlugins->append(static_cast<CuteReport::PrinterInterface*>(plugin));
 
-            else if (qobject_cast<CuteReport::SerializerInterface*>(plugin))
-                m_serializePlugins.append(static_cast<CuteReport::SerializerInterface*>(plugin));
+        else if (qobject_cast<CuteReport::FormInterface*>(plugin))
+            m_formPlugins->append(static_cast<CuteReport::FormInterface*>(plugin));
 
-            else if (qobject_cast<CuteReport::ImportInterface*>(plugin))
-                m_importPlugins.append(static_cast<CuteReport::ImportInterface*>(plugin));
+        else if (qobject_cast<CuteReport::SerializerInterface*>(plugin))
+            m_serializePlugins->append(static_cast<CuteReport::SerializerInterface*>(plugin));
 
-            else if (qobject_cast<CuteReport::ExportInterface*>(plugin))
-                m_exportPlugins.append(static_cast<CuteReport::ExportInterface*>(plugin));
+        else if (qobject_cast<CuteReport::ImportInterface*>(plugin))
+            m_importPlugins->append(static_cast<CuteReport::ImportInterface*>(plugin));
 
-            else if (qobject_cast<CuteReport::ScriptExtensionInterface*>(plugin))
-                m_scriptExtensionPlugins.append(static_cast<CuteReport::ScriptExtensionInterface*>(plugin));
+        else if (qobject_cast<CuteReport::ExportInterface*>(plugin))
+            m_exportPlugins->append(static_cast<CuteReport::ExportInterface*>(plugin));
 
-        } else
-            log(LogWarning, MODULENAME, "Error while loading plugin " + fileName.fileName() + ": " + loader.errorString() );
+        else if (qobject_cast<CuteReport::ScriptExtensionInterface*>(plugin))
+            m_scriptExtensionPlugins->append(static_cast<CuteReport::ScriptExtensionInterface*>(plugin));
     }
 
     processModuleList<BaseItemInterface>(m_itemPlugins);
@@ -502,70 +687,57 @@ bool ReportCore::loadPlugins()
     processModuleList<ExportInterface>(m_exportPlugins);
     processModuleList<ScriptExtensionInterface>(m_scriptExtensionPlugins);
 
-
-//    foreach (BaseItemInterface * m, m_itemPlugins)                      m->moduleInit();
-//    foreach (PageInterface * m, m_pagePlugins)                          m->moduleInit();
-//    foreach (DatasetInterface * m, m_datasetPlugins)                    m->moduleInit();
-//    foreach (SerializerInterface * m, m_serializePlugins)               m->moduleInit();
-//    foreach (StorageInterface * m, m_storagePlugins)                    m->moduleInit();
-//    foreach (PrinterInterface * m, m_printerPlugins)                    m->moduleInit();
-//    foreach (RendererInterface * m, m_rendererPlugins)                  m->moduleInit();
-//    foreach (ImportInterface * m, m_importPlugins)                      m->moduleInit();
-//    foreach (ExportInterface * m, m_exportPlugins)                      m->moduleInit();
-//    foreach (ScriptExtensionInterface * m, m_scriptExtensionPlugins)    m->moduleInit();
-
     /// Checking critical plugins presence and default plugin settings
     bool error = false;
 
-    if (!m_itemPlugins.size()) {
+    if (!m_itemPlugins->size()) {
         error = true;
         log(LogCritical, MODULENAME, "Item plugins not found!" );
     }
 
-    if (!m_pagePlugins.size()) {
+    if (!m_pagePlugins->size()) {
         error = true;
         log(LogCritical, MODULENAME, "Page plugins not found!" );
     }
 
-    if (!m_datasetPlugins.size()) {
+    if (!m_datasetPlugins->size()) {
         error = true;
         log(LogCritical, MODULENAME, "Dataset plugins not found!" );
     }
 
-    if (!m_storagePlugins.size()) {
+    if (!m_storagePlugins->size()) {
         error = true;
         log(LogCritical, MODULENAME, "Storage plugins not found!" );
     }
 
-    if (!m_serializePlugins.size()) {
+    if (!m_serializePlugins->size()) {
         error = true;
         log(LogCritical, MODULENAME, "Serialize plugins not found!" );
     }
 
-    if (!m_rendererPlugins.size()) {
+    if (!m_rendererPlugins->size()) {
         error = true;
         log(LogCritical, MODULENAME, "Renderer plugins not found!" );
     }
 
-    if (!m_printerPlugins.size()) {
+    if (!m_printerPlugins->size()) {
         error = true;
         log(LogCritical, MODULENAME, "Printer plugins not found!" );
     }
 
-    if (!m_formPlugins.size()) {
-        error = true;
+    if (!m_formPlugins->size()) {
         log(LogCritical, MODULENAME, "Forms plugins not found!" );
     }
 
-    if (!m_importPlugins.size()) {
+    if (!m_importPlugins->size()) {
         log(LogWarning, MODULENAME, "Import plugins not found!" );
     }
 
-    if (!m_exportPlugins.size()) {
+    if (!m_exportPlugins->size()) {
         log(LogWarning, MODULENAME, "Export plugins not found!" );
     }
 
-    if (!m_scriptExtensionPlugins.size()) {
+    if (!m_scriptExtensionPlugins->size()) {
         log(LogWarning, MODULENAME, "Script extension plugins not found!" );
     }
 
@@ -580,19 +752,19 @@ bool ReportCore::loadPlugins()
 
 const QList<CuteReport::BaseItemInterface*> & ReportCore::itemModules() const
 {
-    return m_itemPlugins;
+    return *m_itemPlugins;
 }
 
 
 const QList<CuteReport::PageInterface*>  & ReportCore::pageModules() const
 {
-    return m_pagePlugins;
+    return *m_pagePlugins;
 }
 
 
 const QList<DatasetInterface*> & ReportCore::datasetModules() const
 {
-    return m_datasetPlugins;
+    return *m_datasetPlugins;
 }
 
 
@@ -616,13 +788,13 @@ const QList<CuteReport::PrinterInterface*> & ReportCore::printerModules() const
 
 const QList<CuteReport::FormInterface*> & ReportCore::formModules() const
 {
-    return m_formPlugins;
+    return *m_formPlugins;
 }
 
 
 const QList<ImportInterface *> &ReportCore::importModules() const
 {
-    return m_importPlugins;
+    return *m_importPlugins;
 }
 
 
@@ -634,7 +806,31 @@ const QList<CuteReport::ExportInterface*> & ReportCore::exportModules() const
 
 const QList<ScriptExtensionInterface *> &ReportCore::scriptExtensionModules() const
 {
-    return m_scriptExtensionPlugins;
+    return *m_scriptExtensionPlugins;
+}
+
+
+QList<StorageInterface *> ReportCore::storageObjectList(ReportInterface *report) const
+{
+    QList<StorageInterface *> list;
+    if (report) {
+        QList<CuteReport::StorageInterface *> storages = report->storages();
+        list << storages;
+    }
+
+    foreach (CuteReport::StorageInterface * m, m_storages) {
+        bool exists = false;
+        foreach(CuteReport::StorageInterface * mExists, list) {
+            if (mExists->objectName() == m->objectName()) {
+                exists =  true;
+                break;
+            }
+        }
+        if (!exists)
+            list << m;
+    }
+
+    return list;
 }
 
 
@@ -642,39 +838,39 @@ QStringList ReportCore::moduleNames(ModuleType moduleType) const
 {
     QStringList list;
     switch (moduleType) {
-    case UnknownModuleType: break;
-    case ItemModule:
-        foreach (ReportPluginInterface * module, m_itemPlugins)
-            list.append(module->moduleName());
-        break;
-    case PageModule:
-        foreach (ReportPluginInterface * module, m_pagePlugins)
-            list.append(module->moduleName());
-        break;
-    case DatasetModule:
-        foreach (ReportPluginInterface * module, m_datasetPlugins)
-            list.append(module->moduleName());
-        break;
-    case StorageModule:
-        foreach (ReportPluginInterface * module, m_storages)
-            list.append(module->moduleName());
-        break;
-    case RendererModule:
-        foreach (ReportPluginInterface * module, m_renderers)
-            list.append(module->moduleName());
-        break;
-    case PrinterModule:
-        foreach (ReportPluginInterface * module, m_printers)
-            list.append(module->moduleName());
-        break;
-    case FormModule:
-        foreach (ReportPluginInterface * module, m_formPlugins)
-            list.append(module->moduleName());
-        break;
-    case ExportModule:
-        foreach (ReportPluginInterface * module, m_exporters)
-            list.append(module->moduleName());
-        break;
+        case UnknownModuleType: break;
+        case ItemModule:
+            foreach (ReportPluginInterface * module, *m_itemPlugins)
+                list.append(module->moduleFullName());
+            break;
+        case PageModule:
+            foreach (ReportPluginInterface * module, *m_pagePlugins)
+                list.append(module->moduleFullName());
+            break;
+        case DatasetModule:
+            foreach (ReportPluginInterface * module, *m_datasetPlugins)
+                list.append(module->moduleFullName());
+            break;
+        case StorageModule:
+            foreach (ReportPluginInterface * module, m_storages)
+                list.append(module->moduleFullName());
+            break;
+        case RendererModule:
+            foreach (ReportPluginInterface * module, m_renderers)
+                list.append(module->moduleFullName());
+            break;
+        case PrinterModule:
+            foreach (ReportPluginInterface * module, m_printers)
+                list.append(module->moduleFullName());
+            break;
+        case FormModule:
+            foreach (ReportPluginInterface * module, *m_formPlugins)
+                list.append(module->moduleFullName());
+            break;
+        case ExportModule:
+            foreach (ReportPluginInterface * module, m_exporters)
+                list.append(module->moduleFullName());
+            break;
     }
 
     return list;
@@ -686,15 +882,15 @@ const CuteReport::ReportPluginInterface * ReportCore::module(ModuleType moduleTy
     const CuteReport::ReportPluginInterface * module = 0;
 
     switch (moduleType) {
-    case UnknownModuleType: break;
-    case ItemModule:     module = itemModule(moduleName);  break;
-    case PageModule:     module = pageModule(moduleName);  break;
-    case DatasetModule:  module = datasetModule(moduleName);  break;
-    case StorageModule:  module = storageModule(moduleName);  break;
-    case RendererModule: module = rendererModule(moduleName);  break;
-    case PrinterModule:  module = printerModule(moduleName);  break;
-    case FormModule:     module = formModule(moduleName);  break;
-    case ExportModule:   module = exportModule(moduleName);  break;
+        case UnknownModuleType: break;
+        case ItemModule:     module = itemModule(moduleName);  break;
+        case PageModule:     module = pageModule(moduleName);  break;
+        case DatasetModule:  module = datasetModule(moduleName);  break;
+        case StorageModule:  module = storageModule(moduleName);  break;
+        case RendererModule: module = rendererModule(moduleName);  break;
+        case PrinterModule:  module = printerModule(moduleName);  break;
+        case FormModule:     module = formModule(moduleName);  break;
+        case ExportModule:   module = exportModule(moduleName);  break;
     }
 
     return module;
@@ -708,7 +904,13 @@ QStringList ReportCore::moduleOptions(ReportPluginInterface * module )
     if (!module)
         return list;
 
-    for (int i = 2; i<module->metaObject()->propertyCount(); ++i) {
+#if QT_VERSION >= 0x050000
+    int firstIndex = 1;
+#else
+    int firstIndex = 2;
+#endif
+
+    for (int i = firstIndex; i<module->metaObject()->propertyCount(); ++i) {
         QString propertyName = module->metaObject()->property(i).name();
         if (!propertyName.isEmpty() && propertyName.at(0) != '_') {
             QString str = QString("%1=%2").arg(propertyName).arg(module->metaObject()->property(i).read(module).toString());
@@ -745,15 +947,14 @@ void ReportCore::setModuleOptionsStr(ReportPluginInterface * module, const QStri
     setModuleOptions(module, options.split(delimiter, QString::SkipEmptyParts));
 }
 
-
 const BaseItemInterface * ReportCore::itemModule(const QString & moduleName) const
 {
     BaseItemInterface * module = 0;
-    if (moduleName.isEmpty() && m_itemPlugins.count())
-        module = m_itemPlugins.at(0);
+    if (moduleName.isEmpty() && m_itemPlugins->count())
+        module = m_itemPlugins->at(0);
     else {
-        foreach (BaseItemInterface * m, m_itemPlugins) {
-            if (m->moduleName() == moduleName) {
+        foreach (BaseItemInterface * m, *m_itemPlugins) {
+            if (m->moduleFullName() == moduleName) {
                 module = m;
                 break;
             }
@@ -767,11 +968,11 @@ const BaseItemInterface * ReportCore::itemModule(const QString & moduleName) con
 const PageInterface *ReportCore::pageModule(const QString & moduleName) const
 {
     PageInterface * module = 0;
-    if (moduleName.isEmpty() && m_pagePlugins.count())
-        module = m_pagePlugins.at(0);
+    if (moduleName.isEmpty() && m_pagePlugins->count())
+        module = m_pagePlugins->at(0);
     else {
-        foreach (PageInterface * m, m_pagePlugins) {
-            if (m->moduleName() == moduleName) {
+        foreach (PageInterface * m, *m_pagePlugins) {
+            if (m->moduleFullName() == moduleName) {
                 module = m;
                 break;
             }
@@ -785,11 +986,11 @@ const PageInterface *ReportCore::pageModule(const QString & moduleName) const
 const DatasetInterface *ReportCore::datasetModule(const QString & moduleName) const
 {
     DatasetInterface * module = 0;
-    if (moduleName.isEmpty() && m_datasetPlugins.count())
-        module = m_datasetPlugins.at(0);
+    if (moduleName.isEmpty() && m_datasetPlugins->count())
+        module = m_datasetPlugins->at(0);
     else {
-        foreach (DatasetInterface * m, m_datasetPlugins) {
-            if (m->moduleName() == moduleName) {
+        foreach (DatasetInterface * m, *m_datasetPlugins) {
+            if (m->moduleFullName() == moduleName) {
                 module = m;
                 break;
             }
@@ -807,7 +1008,7 @@ CuteReport::SerializerInterface * ReportCore::serializerModule(const QString & m
         module = m_serializers.at(0);
     else {
         foreach (SerializerInterface * m, m_serializers) {
-            if (m->moduleName() == moduleName) {
+            if (m->moduleFullName() == moduleName) {
                 module = m;
                 break;
             }
@@ -825,7 +1026,7 @@ StorageInterface *ReportCore::storageModule(const QString & moduleName) const
         module = m_storages.at(0);
     else {
         foreach (StorageInterface * m, m_storages) {
-            if (m->moduleName() == moduleName) {
+            if (m->moduleFullName() == moduleName) {
                 module = m;
                 break;
             }
@@ -872,7 +1073,7 @@ CuteReport::PrinterInterface*  ReportCore::printerModule(const QString & moduleN
         printer = m_printers.at(0);
     else {
         foreach (PrinterInterface * i, m_printers) {
-            if (i->moduleName() == moduleName) {
+            if (i->moduleFullName() == moduleName) {
                 printer = i;
                 break;
             }
@@ -885,11 +1086,11 @@ CuteReport::PrinterInterface*  ReportCore::printerModule(const QString & moduleN
 CuteReport::FormInterface* ReportCore::formModule(const QString & moduleName) const
 {
     FormInterface * form = 0;
-    if (moduleName.isEmpty() && m_formPlugins.count())
-        form = m_formPlugins.at(0);
+    if (moduleName.isEmpty() && m_formPlugins->count())
+        form = m_formPlugins->at(0);
     else {
-        foreach (FormInterface * i, m_formPlugins) {
-            if (i->moduleName() == moduleName) {
+        foreach (FormInterface * i, *m_formPlugins) {
+            if (i->moduleFullName() == moduleName) {
                 form = i;
                 break;
             }
@@ -903,8 +1104,8 @@ const ImportInterface *ReportCore::importModule(const QString &moduleName) const
 {
     ImportInterface * module = 0;
 
-    foreach (ImportInterface * m, m_importPlugins) {
-        if (m->moduleName() == moduleName) {
+    foreach (ImportInterface * m, *m_importPlugins) {
+        if (m->moduleFullName() == moduleName) {
             module = m;
             break;
         }
@@ -918,7 +1119,7 @@ CuteReport::ExportInterface* ReportCore::exportModule(const QString & moduleName
 {
     ExportInterface * exporter = 0;
     foreach (ExportInterface * i, m_exporters) {
-        if (i->moduleName() == moduleName) {
+        if (i->moduleFullName() == moduleName) {
             exporter = i;
             break;
         }
@@ -932,15 +1133,16 @@ CuteReport::RendererInterface * ReportCore::rendererModule(const QString & modul
     RendererInterface * renderer = 0;
     if (moduleName.isEmpty() && m_renderers.count()) {
         renderer = m_renderers.at(0);
+        QString moduleShortName = moduleName.section("::",1,1);
         foreach (RendererInterface * r, m_renderers) {
-            if (r->extendsModules().contains(renderer->moduleName())) {
+            if (r->extendsModules().contains(renderer->moduleFullName())  || r->extendsModules().contains(moduleShortName)) {
                 renderer = r;
                 break;
             }
         }
     } else {
         foreach (RendererInterface * r, m_renderers) {
-            if (r->moduleName() == moduleName) {
+            if (r->moduleFullName() == moduleName) {
                 renderer = r;
                 break;
             }
@@ -1020,7 +1222,7 @@ bool ReportCore::saveReport(const QString & urlString, CuteReport::ReportInterfa
         return false;
 
     CuteReport::StorageInterface * module = 0;
-    if (!checkReportPointer(report, errorText) || !(module = getStorageByScheme(urlString, report) ))
+    if (!checkReportPointer(report, errorText) || !(module = getStorageByUrl(urlString, report) ))
         return false;
 
     bool saveResultOk = module->saveObject(urlString, serialize(report));
@@ -1043,7 +1245,7 @@ CuteReport::ReportInterface * ReportCore::loadReport(const QString & urlString, 
         return 0;
 
     CuteReport::StorageInterface * module = 0;
-    if (!(module = getStorageByScheme(urlString, 0)))
+    if (!(module = getStorageByUrl(urlString, 0)))
         return 0;
 
     QVariant object = module->loadObject(urlString);
@@ -1066,7 +1268,7 @@ bool ReportCore::saveObject(const QString & urlString,
                             QString * errorText)
 {
     CuteReport::StorageInterface * module = 0;
-    if (!checkReportPointer(report, errorText) || !(module = getStorageByScheme(urlString, report)) )
+    if (!checkReportPointer(report, errorText) || !(module = getStorageByUrl(urlString, report)) )
         return false;
 
     bool saveResultOk = module->saveObject(urlString, objectData);
@@ -1082,7 +1284,7 @@ QVariant ReportCore::loadObject(const QString & urlString,
                                 QString * errorText)
 {
     CuteReport::StorageInterface * module = 0;
-    if ((report && !checkReportPointer(report, errorText)) || !(module = getStorageByScheme(urlString, report)) )
+    if ((report && !checkReportPointer(report, errorText)) || !(module = getStorageByUrl(urlString, report)) )
         return QByteArray();
 
     QVariant data = module->loadObject(urlString);
@@ -1099,26 +1301,30 @@ QString ReportCore::localCachedFileName(const QString & url, CuteReport::ReportI
     if (!report)
         return QString();
 
-    CuteReport::StorageInterface * module = getStorageByScheme(url, report);
+    CuteReport::StorageInterface * module = getStorageByUrl(url, report);
     return module ? module->localCachedFileName(url) : QString();
 }
 
 
 CuteReport::PageInterface * ReportCore::createPageObject(CuteReport::ReportInterface *report, const QString & moduleName)
 {
+    QList<CuteReport::ReportPluginInterface*> modules = this->findChildren<CuteReport::ReportPluginInterface*>();
     CuteReport::PageInterface * plugin = 0;
-    if (moduleName.isEmpty() && m_pagePlugins.count())
-        plugin =  m_pagePlugins.at(0);
+    if (moduleName.isEmpty() && m_pagePlugins->count())
+        plugin =  m_pagePlugins->at(0);
     else
-        foreach  (CuteReport::PageInterface * i, m_pagePlugins)
-            if (i->moduleName() == moduleName) {
+        foreach  (CuteReport::PageInterface * i, *m_pagePlugins)  {
+            qDebug() << i->moduleFullName();
+            if (i->moduleFullName() == moduleName) {
                 plugin = i;
                 break;
             }
+        }
 
     if (!plugin) {
-        foreach  (CuteReport::PageInterface * i, m_pagePlugins)
-            if (i->extendsModules().contains(moduleName)) {
+        QString moduleShortName = moduleName.section("::",1,1);
+        foreach  (CuteReport::PageInterface * i, *m_pagePlugins)
+            if (i->extendsModules().contains(moduleName) || i->extendsModules().contains(moduleShortName)) {
                 plugin = i;
                 break;
             }
@@ -1128,6 +1334,12 @@ CuteReport::PageInterface * ReportCore::createPageObject(CuteReport::ReportInter
         CuteReport::PageInterface * newObject =  plugin->createInstance(report);
         newObject->setReportCore(this);
         newObject->setObjectName(this->uniqueName(newObject, "page", report));
+        newObject->setParent(report);
+        qDebug() << newObject->parent();
+        QList<CuteReport::ReportPluginInterface*> modules2 = this->findChildren<CuteReport::ReportPluginInterface*>();
+        qDebug() << qobject_cast<CuteReport::ReportPluginInterface*>(newObject);
+        qDebug() << qobject_cast<CuteReport::PageInterface*>(newObject);
+        QList<QObject*> modules3 = this->findChildren<QObject*>();
         return newObject;
     } else
         return 0;
@@ -1137,19 +1349,28 @@ CuteReport::PageInterface * ReportCore::createPageObject(CuteReport::ReportInter
 CuteReport::BaseItemInterface * ReportCore::createItemObject(CuteReport::ReportInterface *report, const QString & moduleName, QObject * parent)
 {
     CuteReport::BaseItemInterface * plugin = 0;
-    if (moduleName.isEmpty() && m_itemPlugins.count())
-        plugin =  m_itemPlugins.at(0);
+    if (moduleName.isEmpty() && m_itemPlugins->count())
+        plugin =  m_itemPlugins->at(0);
     else
-        foreach  (CuteReport::BaseItemInterface * i, m_itemPlugins)
-            if (i->moduleName() == moduleName) {
+        foreach  (CuteReport::BaseItemInterface * i, *m_itemPlugins)
+            if (i->moduleFullName() == moduleName) {
                 plugin = i;
                 break;
             }
 
+    if (!plugin) {
+        QString moduleShortName = moduleName.section("::",1,1);
+        foreach  (CuteReport::BaseItemInterface * i, *m_itemPlugins)
+            if (i->extendsModules().contains(moduleName) || i->extendsModules().contains(moduleShortName)) {
+                plugin = i;
+                break;
+            }
+    }
+
     if (plugin) {
         CuteReport::BaseItemInterface * newObject =  plugin->createInstance(parent);
         newObject->setReportCore(this);
-        newObject->setObjectName(this->uniqueName(newObject, plugin->moduleName().toLower(), newObject->page() ? (QObject*)newObject->page() : (QObject*)report));
+        newObject->setObjectName(this->uniqueName(newObject, plugin->moduleShortName().toLower(), newObject->page() ? (QObject*)newObject->page() : (QObject*)report));
         return newObject;
     } else
         return 0;
@@ -1159,14 +1380,23 @@ CuteReport::BaseItemInterface * ReportCore::createItemObject(CuteReport::ReportI
 CuteReport::DatasetInterface * ReportCore::createDatasetObject(CuteReport::ReportInterface *report, const QString & moduleName)
 {
     CuteReport::DatasetInterface * plugin = 0;
-    if (moduleName.isEmpty() && m_datasetPlugins.count())
-        plugin =  m_datasetPlugins.at(0);
+    if (moduleName.isEmpty() && m_datasetPlugins->count())
+        plugin =  m_datasetPlugins->at(0);
     else
-        foreach  (CuteReport::DatasetInterface * i, m_datasetPlugins)
-            if (i->moduleName() == moduleName) {
+        foreach  (CuteReport::DatasetInterface * i, *m_datasetPlugins)
+            if (i->moduleFullName() == moduleName) {
                 plugin = i;
                 break;
             }
+
+    if (!plugin) {
+        QString moduleShortName = moduleName.section("::",1,1);
+        foreach  (CuteReport::DatasetInterface * i, *m_datasetPlugins)
+            if (i->extendsModules().contains(moduleName) || i->extendsModules().contains(moduleShortName)) {
+                plugin = i;
+                break;
+            }
+    }
 
     if (plugin) {
         CuteReport::DatasetInterface * newObject =  plugin->createInstance(report);
@@ -1183,20 +1413,29 @@ CuteReport::DatasetInterface * ReportCore::createDatasetObject(CuteReport::Repor
 CuteReport::StorageInterface * ReportCore::createStorageObject(ReportInterface *report, const QString & moduleName)
 {
     CuteReport::StorageInterface * plugin = 0;
-    if (moduleName.isEmpty() && m_storagePlugins.count())
-        plugin =  m_storagePlugins.at(0);
+    if (moduleName.isEmpty() && m_storagePlugins->count())
+        plugin =  m_storagePlugins->at(0);
     else
-        foreach  (CuteReport::StorageInterface * i, m_storagePlugins)
-            if (i->moduleName() == moduleName) {
+        foreach  (CuteReport::StorageInterface * i, *m_storagePlugins)
+            if (i->moduleFullName() == moduleName) {
                 plugin = i;
                 break;
             }
+
+    if (!plugin) {
+        QString moduleShortName = moduleName.section("::",1,1);
+        foreach  (CuteReport::StorageInterface * i, *m_storagePlugins)
+            if (i->extendsModules().contains(moduleName) || i->extendsModules().contains(moduleShortName)) {
+                plugin = i;
+                break;
+            }
+    }
 
     if (plugin) {
         /** do not set parent. ReportInterface should send signal for new storage */
         CuteReport::StorageInterface * newObject =  plugin->createInstance();
         newObject->setReportCore(this);
-        newObject->setObjectName(this->uniqueName(newObject, "storage", report));
+        newObject->setObjectName(this->uniqueName(newObject, newObject->urlScheme(), report));
         return newObject;
     } else
         return 0;
@@ -1206,14 +1445,23 @@ CuteReport::StorageInterface * ReportCore::createStorageObject(ReportInterface *
 CuteReport::PrinterInterface * ReportCore::createPrinterObject(CuteReport::ReportInterface *report, const QString & moduleName)
 { 
     CuteReport::PrinterInterface * plugin = 0;
-    if (moduleName.isEmpty() && m_printerPlugins.count())
-        plugin =  m_printerPlugins.at(0);
+    if (moduleName.isEmpty() && m_printerPlugins->count())
+        plugin =  m_printerPlugins->at(0);
     else
-        foreach  (CuteReport::PrinterInterface * i, m_printerPlugins)
-            if (i->moduleName() == moduleName) {
+        foreach  (CuteReport::PrinterInterface * i, *m_printerPlugins)
+            if (i->moduleFullName() == moduleName) {
                 plugin = i;
                 break;
             }
+
+    if (!plugin) {
+        QString moduleShortName = moduleName.section("::",1,1);
+        foreach  (CuteReport::PrinterInterface * i, *m_printerPlugins)
+            if (i->extendsModules().contains(moduleName) || i->extendsModules().contains(moduleShortName)) {
+                plugin = i;
+                break;
+            }
+    }
 
     if (plugin) {
         /** do not set parent. ReportInterface should send signal for new printer */
@@ -1229,14 +1477,23 @@ CuteReport::PrinterInterface * ReportCore::createPrinterObject(CuteReport::Repor
 CuteReport::RendererInterface * ReportCore::createRendererObject(CuteReport::ReportInterface *report, const QString & moduleName)
 {
     CuteReport::RendererInterface * plugin = 0;
-    if (moduleName.isEmpty() && m_rendererPlugins.count())
-        plugin =  m_rendererPlugins.at(0);
+    if (moduleName.isEmpty() && m_rendererPlugins->count())
+        plugin =  m_rendererPlugins->at(0);
     else
-        foreach  (CuteReport::RendererInterface * i, m_rendererPlugins)
-            if (i->moduleName() == moduleName) {
+        foreach  (CuteReport::RendererInterface * i, *m_rendererPlugins)
+            if (i->moduleFullName() == moduleName) {
                 plugin = i;
                 break;
             }
+
+    if (!plugin) {
+        QString moduleShortName = moduleName.section("::",1,1);
+        foreach  (CuteReport::RendererInterface * i, *m_rendererPlugins)
+            if (i->extendsModules().contains(moduleName) || i->extendsModules().contains(moduleShortName)) {
+                plugin = i;
+                break;
+            }
+    }
 
     if (plugin) {
         /** do not set parent. ReportInterface should send signal for new renderer */
@@ -1252,14 +1509,23 @@ CuteReport::RendererInterface * ReportCore::createRendererObject(CuteReport::Rep
 CuteReport::FormInterface * ReportCore::createFormObject(ReportInterface *report, const QString & moduleName)
 {
     CuteReport::FormInterface * formPlugin = 0;
-    if (moduleName.isEmpty() && m_formPlugins.count())
-        formPlugin =  m_formPlugins.at(0);
+    if (moduleName.isEmpty() && m_formPlugins->count())
+        formPlugin =  m_formPlugins->at(0);
     else
-        foreach  (CuteReport::FormInterface * form, m_formPlugins)
-            if (form->moduleName() == moduleName) {
+        foreach  (CuteReport::FormInterface * form, *m_formPlugins)
+            if (form->moduleFullName() == moduleName) {
                 formPlugin = form;
                 break;
             }
+
+    if (!formPlugin) {
+        QString moduleShortName = moduleName.section("::",1,1);
+        foreach  (CuteReport::FormInterface * i, *m_formPlugins)
+            if (i->extendsModules().contains(moduleName) || i->extendsModules().contains(moduleShortName)) {
+                formPlugin = i;
+                break;
+            }
+    }
 
     if (formPlugin) {
         CuteReport::FormInterface * newObject =  formPlugin->createInstance(report);
@@ -1276,10 +1542,19 @@ CuteReport::ExportInterface * ReportCore::createExportObject(CuteReport::ReportI
     CuteReport::ExportInterface * exportPlugin = 0;
 
     foreach  (CuteReport::ExportInterface * m, m_exporters) {
-        if (m->moduleName() == moduleName) {
+        if (m->moduleFullName() == moduleName) {
             exportPlugin = m;
             break;
         }
+    }
+
+    if (!exportPlugin) {
+        QString moduleShortName = moduleName.section("::",1,1);
+        foreach  (CuteReport::ExportInterface * i, m_exporters)
+            if (i->extendsModules().contains(moduleName) || i->extendsModules().contains(moduleShortName)) {
+                exportPlugin = i;
+                break;
+            }
     }
 
     if (exportPlugin) {
@@ -1298,10 +1573,10 @@ QByteArray ReportCore::serialize(const QObject * object, bool * ok, QString *err
 
     SerializerInterface * serializer = moduleName.isEmpty() ? m_defaultSerializer : serializerModule(moduleName);
 
-    log(LogWarning, MODULENAME, "serializer " + moduleName + ":" + (serializer ? serializer->moduleName() : "not found!") );
+    log(LogWarning, MODULENAME, "serializer " + moduleName + ":" + (serializer ? serializer->moduleFullName() : "not found!") );
 
-    if (!serializer && m_serializePlugins.size())
-        serializer = m_serializePlugins.at(0);
+    if (!serializer && m_serializePlugins->size())
+        serializer = m_serializePlugins->at(0);
 
     if (serializer) {
         ba = m_defaultSerializer->serialize(object, ok);
@@ -1325,8 +1600,8 @@ QObject * ReportCore::deserialize(const QByteArray &data, bool *ok, QString *err
     QObject * object;
     SerializerInterface * serializer = moduleName.isEmpty() ? m_defaultSerializer : serializerModule(moduleName);
 
-    if (!serializer && m_serializePlugins.size())
-        serializer = m_serializePlugins.at(0);
+    if (!serializer && m_serializePlugins->size())
+        serializer = m_serializePlugins->at(0);
 
     if (serializer) {
         object = m_defaultSerializer->deserialize(data, ok);
@@ -1348,8 +1623,8 @@ QObject * ReportCore::deserialize(const QByteArray &data, bool *ok, QString *err
 const QList<QString> ReportCore::renderers()
 {
     QStringList list;
-    foreach (RendererInterface * r, m_rendererPlugins)
-        list.append(r->moduleName());
+    foreach (RendererInterface * r, *m_rendererPlugins)
+        list.append(r->moduleFullName());
 
     return list;
 }
@@ -1432,9 +1707,9 @@ void ReportCore::_renderDone(QueueReport *queueReport)
     emit rendererDone(queueReport->report, queueReport->success);
 
     switch (queueReport->destination) {
-    case RenderToPreview: delete queueReport; break;
-    case RenderToExport:  queueReport->success ? _export(queueReport) : _exportDone(queueReport); break;
-    case RenderToPrinter: queueReport->success ? _print(queueReport)  : _printDone(queueReport);  break;
+        case RenderToPreview: delete queueReport; break;
+        case RenderToExport:  queueReport->success ? _export(queueReport) : _exportDone(queueReport); break;
+        case RenderToPrinter: queueReport->success ? _print(queueReport)  : _printDone(queueReport);  break;
     }
 }
 
@@ -1587,7 +1862,7 @@ void ReportCore::print(const QString url)
 QStringList ReportCore::importExtensions() const
 {
     QStringList list;
-    foreach (ImportInterface * module, m_importPlugins) {
+    foreach (ImportInterface * module, *m_importPlugins) {
         list << module->fileExtensions();
     }
     return list;
@@ -1596,7 +1871,7 @@ QStringList ReportCore::importExtensions() const
 
 bool ReportCore::canImport(const QString &reportUrl) const
 {
-    foreach (ImportInterface * module, m_importPlugins) {
+    foreach (ImportInterface * module, *m_importPlugins) {
         if (module->canHandle(reportUrl))
             return true;
     }
@@ -1607,9 +1882,9 @@ bool ReportCore::canImport(const QString &reportUrl) const
 QStringList ReportCore::importModulesForFile(const QString &reportUrl) const
 {
     QStringList list;
-    foreach (ImportInterface * module, m_importPlugins) {
+    foreach (ImportInterface * module, *m_importPlugins) {
         if (module->canHandle(reportUrl))
-            list << module->moduleName();
+            list << module->moduleFullName();
     }
     return list;
 }
@@ -1621,7 +1896,7 @@ ReportInterface *ReportCore::import(const QString &reportUrl, const QString &mod
 
     if (!module) {
         QList<ImportInterface*> list;
-        foreach (ImportInterface * module, m_importPlugins) {
+        foreach (ImportInterface * module, *m_importPlugins) {
             if (module->canHandle(reportUrl))
                 list << module;
         }
@@ -1683,7 +1958,7 @@ bool ReportCore::isNameUnique(QObject * object, const QString & name, QObject * 
 }
 
 
-QString ReportCore::uniqueName(QObject * object, const QString & proposedName, QObject *rootObject)
+QString ReportCore::uniqueName(QObject * object, const QString & proposedName, QObject * rootObject)
 {
     QString className = proposedName.isEmpty() ? object->metaObject()->className() : proposedName;
     QString newName = className.section("::", -1,-1).toLower();
@@ -1795,6 +2070,21 @@ int ReportCore::maxRenderingThreads() const
 void ReportCore::setMaxRenderingThreads(int maxRenderingThreads)
 {
     m_maxRenderingThreads = maxRenderingThreads;
+}
+
+void ReportCore::registerDesignerInterface(DesignerItemInterface *_interface)
+{
+    //FIX: compiler mingw32  C:\Projects\cutereport\src\core\reportcore.cpp:1944: error: expected primary-expression before 'struct'
+    //    m_designerInterface = interface;
+    //                          ^
+    delete m_designerInterface;
+    m_designerInterface = _interface;
+}
+
+
+DesignerItemInterface *ReportCore::designerInterface() const
+{
+    return m_designerInterface;
 }
 
 

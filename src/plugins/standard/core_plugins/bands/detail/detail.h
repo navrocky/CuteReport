@@ -61,18 +61,21 @@ public:
     Detail(QObject * parent = 0);
     ~Detail();
 
+    virtual void moduleInit();
+
     virtual CuteReport::BaseItemInterface *createInstance(QObject * parent) const;
-    virtual BaseItemInterface * clone();
     virtual QByteArray serialize();
     virtual void deserialize(QByteArray &data);
     virtual bool canContain(QObject * object);
 
     virtual void renderInit(CuteReport::RendererPublicInterface * renderer);
     virtual void renderReset();
-    virtual CuteReport::RenderedItemInterface * render(int customDPI = 0);
+    virtual bool renderPrepare();
+    virtual CuteReport::RenderedItemInterface * renderView();
 
     virtual QIcon itemIcon() const;
-    virtual QString moduleName() const;
+    virtual QString moduleShortName() const;
+    virtual QString suitName() const { return "Standard"; }
     virtual QString itemGroup() const;
 
     int layoutPriority() const { return 50;}
@@ -98,11 +101,12 @@ signals:
     void alternateBrushChanged(QBrush);
     void forceNewPageChanged(bool);
 
-protected:
-    Detail(DetailPrivate &dd, QObject * parent);
-
 private:
     Q_DECLARE_PRIVATE(Detail)
+
+    Detail(DetailPrivate *dd, QObject * parent);
+    virtual BaseItemInterface * itemClone() const;
+
     CuteReport::RendererPublicInterface * m_renderer;
 };
 

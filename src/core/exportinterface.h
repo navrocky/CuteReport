@@ -44,6 +44,8 @@ class ExportHelperInterface;
 class CUTEREPORT_EXPORTS ExportInterface : public ReportPluginInterface
 {
     Q_OBJECT
+    Q_INTERFACES(CuteReport::ReportPluginInterface)
+
 public:
     explicit ExportInterface(QObject *parent = 0);
     virtual ~ExportInterface();
@@ -64,7 +66,6 @@ protected:
     ExportInterface(const ExportInterface & dd, QObject * parent);
 
 signals:
-    void changed();
 
 };
 

@@ -37,8 +37,10 @@
 
 using namespace CuteReport;
 
+inline void initMyResource() { Q_INIT_RESOURCE(pie); }
+
 PieItem::PieItem(QObject *parent)
-    :ItemInterface(*new PieItemPrivate, parent)
+    :ItemInterface(new PieItemPrivate, parent)
 {
     Q_INIT_RESOURCE(pie);
     Q_D(PieItem);
@@ -48,17 +50,23 @@ PieItem::PieItem(QObject *parent)
 }
 
 
-PieItem::PieItem(PieItemPrivate &dd, QObject * parent)
+void PieItem::moduleInit()
+{
+    initMyResource();
+}
+
+
+PieItem::PieItem(PieItemPrivate *dd, QObject * parent)
     :ItemInterface(dd, parent)
 {
     Q_INIT_RESOURCE(pie);
 }
 
 
-CuteReport::BaseItemInterface * PieItem::clone()
+CuteReport::BaseItemInterface * PieItem::itemClone() const
 {
-    Q_D(PieItem);
-    return new PieItem(*new PieItemPrivate(*d), parent());
+    Q_D(const PieItem);
+    return new PieItem(new PieItemPrivate(*d), parent());
 }
 
 
@@ -131,7 +139,7 @@ QIcon PieItem::itemIcon() const
 }
 
 
-QString PieItem::moduleName() const
+QString PieItem::moduleShortName() const
 {
     return tr("Pie");
 }
@@ -143,25 +151,20 @@ QString PieItem::itemGroup() const
 }
 
 
-CuteReport::RenderedItemInterface * PieItem::render(int customDPI)
+bool PieItem::renderPrepare()
 {
-    Q_UNUSED(customDPI);
+    emit printBefore();
+    setRenderingPointer(new PieItemPrivate(*(reinterpret_cast<PieItemPrivate*>(d_ptr))));
+    emit printDataBefore();
+    emit printDataAfter();
+    return true;
+}
+
+
+RenderedItemInterface *PieItem::renderView()
+{
     Q_D(PieItem);
-
-    emit renderingBefore();
-
-    PieItemPrivate * pCurrent = d;
-    PieItemPrivate * pNew = new PieItemPrivate(*d);
-
-    d_ptr = pNew;
-    emit rendering();
-    d_ptr = pCurrent;
-
-    RenderedPieItem * view = new RenderedPieItem(this, pNew);
-
-    emit rendered(view);
-    emit renderingAfter();
-
+    RenderedPieItem * view = new RenderedPieItem(this, new PieItemPrivate(*d));
     return view;
 }
 
@@ -282,5 +285,5 @@ QString PieItem::_current_property_description() const
 }
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(pie, PieItem)
+Q_EXPORT_PLUGIN2(Pie, PieItem)
 #endif

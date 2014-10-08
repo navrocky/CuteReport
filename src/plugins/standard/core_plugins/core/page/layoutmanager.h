@@ -30,16 +30,18 @@
 #ifndef LAYOUTMANAGER_H
 #define LAYOUTMANAGER_H
 
+#include "plugins_common.h"
+
 #include <QtCore>
 #include <QtGui>
-
-//{
 
 namespace CuteReport
 {
 class BandInterface;
 class BaseItemInterface;
 }
+
+SUIT_BEGIN_NAMESPACE
 
 class Page;
 
@@ -50,7 +52,6 @@ typedef QList<CuteReport::BandInterface *> BandList;
 class LayoutManager : public QObject
 {
 public:
-//    explicit LayoutManager(PageInterface * page);
 
     static void itemAdded(Page * page, CuteReport::BaseItemInterface *item);
     static void updatePositions(Page *page);
@@ -62,22 +63,9 @@ public:
     static BandList sortByOrder(BandList lc);
 
 
-//    static void ItemDelete(ItemInterface * item/*, QObject * parent*/);
-//    static void itemGeometryChanged(QObject * item);
-//    static void itemChangeOrder(QObject * item, int order, int oldOrder, int bandMargin = 0);
-//    static void updatePositions(QObject * item /*, int bandMargin = 0*/);
-
-//    static bool splitOnLayoutTypes(QObject * item, BandMap * listTop, BandMap * listBottom, BandMap * listFree);
-//    static bool splitOnLayoutTypesSorted(QObject * item, BandList * listTop, BandList * listBottom, BandList * listFree);
-//    static BandMap sortByPriority(BandList lc);
-//    static BandMap sortByPriority(ItemList lc);
-//    static BandList sortByOrder(BandList lc);
-
-//    static int margin();
-//    static void setMargin(int value);
 private:
-//    PageInterface * m_page;
 };
 
-//}
+SUIT_END_NAMESPACE
+
 #endif // LAYOUTMANAGER_H

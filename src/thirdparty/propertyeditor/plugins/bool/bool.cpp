@@ -114,6 +114,6 @@ PropertyInterface* Bool::createInstance(QObject * object, int property, const Pr
 }
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(boolean, Bool)
+Q_EXPORT_PLUGIN2(BoolProperty, Bool)
 #endif
 

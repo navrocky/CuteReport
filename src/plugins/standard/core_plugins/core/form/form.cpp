@@ -44,6 +44,15 @@ Form::Form(QObject *parent) :
 }
 
 
+Form::Form(const Form &dd, QObject *parent) :
+    FormInterface(parent),
+    m_processor(0),
+    m_data(dd.m_data)
+{
+
+}
+
+
 Form::~Form()
 {
     renderReset();
@@ -59,6 +68,12 @@ CuteReport::FormHelperInterface * Form::helper()
 FormInterface * Form::createInstance( QObject * parent) const
 {
     return new Form(parent);
+}
+
+
+FormInterface * Form::clone() const
+{
+    return new Form(*this, parent());
 }
 
 
@@ -126,6 +141,7 @@ QVariant Form::invoke(const QString &objectName, const QString &method, const QV
     QVariant result = m_processor->invoke(objectName, method, arg1, arg2, arg3, arg4, arg5, arg6);
     return result;
 }
+
 
 
 #if QT_VERSION < 0x050000

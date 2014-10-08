@@ -40,10 +40,10 @@ static const QString ModuleName("GIT");
 class StorageGit : public CuteReport::StorageInterface
 {
     Q_OBJECT
+    Q_INTERFACES(CuteReport::StorageInterface)
 #if QT_VERSION >= 0x050000
     Q_PLUGIN_METADATA(IID "CuteReport.StorageInterface/1.0")
 #endif
-    Q_INTERFACES(CuteReport::StorageInterface)
 
     Q_PROPERTY(QString remoteURL READ remoteUrl WRITE setRemoteUrl NOTIFY remoteUrlChanged)
     Q_PROPERTY(QString localPath READ localPath WRITE setLocalPath NOTIFY localPathChanged)
@@ -62,6 +62,8 @@ public:
 
     explicit StorageGit(QObject * parent = 0);
     ~StorageGit();
+
+    virtual void moduleInit();
 
     virtual CuteReport::StorageSyncStatus sync();               // if false, then storage cannot be synced correct;
     virtual CuteReport::StorageSyncStatus interruptSync();
@@ -87,7 +89,8 @@ public:
     virtual QString lastError() const;
 
     virtual int moduleVersion() const {return 1;}
-    virtual QString moduleName() const {return ModuleName; }
+    virtual QString moduleShortName() const {return ModuleName; }
+    virtual QString suitName() const { return "Standard"; }
 
     // storage must care of deleting helper
     virtual CuteReport::StorageHelperInterface * helper();

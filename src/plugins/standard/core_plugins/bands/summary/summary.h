@@ -52,28 +52,29 @@ public:
     Summary(QObject * parent = 0);
     ~Summary();
 
+    virtual void moduleInit();
+
     virtual BaseItemInterface *createInstance(QObject * parent) const;
-    virtual BaseItemInterface * clone();
     virtual QByteArray serialize();
     virtual void deserialize(QByteArray &data);
     virtual bool canContain(QObject * object);
 
-    virtual CuteReport::RenderedItemInterface * render(int customDPI = 0);
+    virtual bool renderPrepare();
+    virtual CuteReport::RenderedItemInterface * renderView();
 
     CuteReport::BandInterface::LayoutType layoutType(){return LayoutTop;}
     int layoutPriority() const { return 20;}
 
     virtual QIcon itemIcon() const;
-    virtual QString moduleName() const;
+    virtual QString moduleShortName() const;
+    virtual QString suitName() const { return "Standard"; }
     virtual QString itemGroup() const;
-
-signals:
-
-protected:
-    Summary(SummaryPrivate &dd, QObject * parent);
 
 private:
     Q_DECLARE_PRIVATE(Summary)
+
+    Summary(SummaryPrivate *dd, QObject * parent);
+    virtual BaseItemInterface * itemClone() const;
 };
 
 

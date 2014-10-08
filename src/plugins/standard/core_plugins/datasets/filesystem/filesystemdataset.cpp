@@ -53,6 +53,25 @@ FileSystemDataset::FileSystemDataset(QObject *parent)
 }
 
 
+FileSystemDataset::FileSystemDataset(const FileSystemDataset &dd, QObject * parent)
+    : DatasetInterface(parent),
+      m_filters(dd.m_filters),
+      m_currentRow(0),
+      m_recursionLevel(dd.m_recursionLevel),
+      m_maxNumber(dd.m_maxNumber),
+      m_isPopulated(false),
+      m_pathAppearance(dd.m_pathAppearance)
+{
+    m_model = new FSModel (this);
+    m_fmodel = new QSortFilterProxyModel(this);
+    m_fmodel->setSourceModel(m_model);
+    if (dd.m_isPopulated) {
+        populate();
+        setCurrentRow(dd.m_currentRow);
+    }
+}
+
+
 FileSystemDataset::~FileSystemDataset()
 {
 }
@@ -71,6 +90,12 @@ DatasetInterface * FileSystemDataset::createInstance(QObject* parent) const
 }
 
 
+DatasetInterface *FileSystemDataset::objectClone() const
+{
+    return new FileSystemDataset(*this, parent());
+}
+
+
 DatasetHelperInterface * FileSystemDataset::helper()
 {
     if (!m_helper)
@@ -80,9 +105,9 @@ DatasetHelperInterface * FileSystemDataset::helper()
 }
 
 
-QString FileSystemDataset::moduleName() const
+QString FileSystemDataset::moduleShortName() const
 {
-    return QString("FileSystem Dataset");
+    return QString("FileSystem");
 }
 
 
@@ -143,6 +168,12 @@ void FileSystemDataset::setFilters(FileSystemDataset::Filters filters)
 QString FileSystemDataset::fieldName(int column )
 {
     return m_model->headerData ( column, Qt::Horizontal).toString();
+}
+
+
+QVariant::Type FileSystemDataset::fieldType(int column)
+{
+    return QVariant::String;
 }
 
 
@@ -368,6 +399,14 @@ int FileSystemDataset::rows()
 }
 
 
+int FileSystemDataset::columns()
+{
+    if (!m_isPopulated)
+        populate();
+    return m_fmodel->columnCount();
+}
+
+
 QVariant FileSystemDataset::value(int index) const
 {
     return m_fmodel->data( m_fmodel->index(m_currentRow,index) );
@@ -408,5 +447,5 @@ QVariant FileSystemDataset::lookbackValue(const QString & field) const
 }
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(fileSystemDataset, FileSystemDataset)
+Q_EXPORT_PLUGIN2(DatasetFileSystem, FileSystemDataset)
 #endif

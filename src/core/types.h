@@ -31,6 +31,7 @@
 #define TYPES_H
 
 #include <QtCore>
+#include <QUrl>
 #include "globals.h"
 
 namespace CuteReport{
@@ -159,6 +160,11 @@ enum RenderingType {
     RenderingReport = 1
 };
 
+enum RenderingStage {
+    RenderingNewPage = 1,
+    RenderingNormal = 2
+};
+
 enum ResultValue {
     ResultOk = 0,
     ResultNotDefined = 1,
@@ -193,6 +199,38 @@ struct StorageProgress {
     int current;
     QString message;
 };
+
+
+enum ItemDataRole {
+    SyntaxRole =  Qt::UserRole + 1,
+    ExampleRole = Qt::UserRole + 3,
+    TemplateRole = Qt::UserRole + 4,
+    DescriptionRole = Qt::UserRole + 5,
+    ReturnValueCountRole = Qt::UserRole + 6,
+    ReturnValue1Role = Qt::UserRole + 7,
+    ReturnValue2Role = Qt::UserRole + 8,
+    ReturnValue3Role = Qt::UserRole + 9,
+    ReturnValue4Role = Qt::UserRole + 10,
+    ReturnValue5Role = Qt::UserRole + 11,
+    ConstructorCountRole = Qt::UserRole + 20,
+    Constructor1Role = Qt::UserRole + 21,
+    Constructor2Role = Qt::UserRole + 22,
+    Constructor3Role = Qt::UserRole + 23,
+    Constructor4Role = Qt::UserRole + 24,
+    ParameterCountRole = Qt::UserRole + 30,
+    Parameter1Role = Qt::UserRole + 40,
+    Parameter2Role = Qt::UserRole + 41,
+    Parameter3Role = Qt::UserRole + 42,
+    Parameter4Role = Qt::UserRole + 43,
+    Parameter5Role = Qt::UserRole + 44,
+};
+
+
+enum Events {
+    PageMouseBlock = QEvent::User + 100,
+    PageMouseUnblock = QEvent::User + 101,
+};
+
 
 } //namespace
 

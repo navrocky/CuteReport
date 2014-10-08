@@ -89,6 +89,7 @@ public:
     QStringList propertyVariants();
     QStringList propertyExclude();
     QString propertyDescription();
+    int propertyPrecision();
 
 signals:
 	void propertyChanged(QObject * obj, const QString & propertyName, const QVariant & old_value, const QVariant & new_value);

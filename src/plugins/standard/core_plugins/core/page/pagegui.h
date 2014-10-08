@@ -31,9 +31,6 @@
 #define PAGEGUI_H
 
 #include <QObject>
-#include <QGraphicsItem>
-#include <QGraphicsView>
-#include <QLabel>
 #include "page.h"
 
 #define PAGEITEM_ID QGraphicsItem::UserType + 33001
@@ -42,20 +39,22 @@
 #define PAGE_BORDER 10
 #define PAGE_SHADOW 3
 
-class QGraphicsScene;
-class QGraphicsView;
-class QGraphicsRectItem;
-
 namespace CuteReport {
 class BaseItemInterface;
 class ItemInterfaceView;
 }
 
+SUIT_BEGIN_NAMESPACE
+class Scene;
+class View;
 class PageItem;
 class PageView;
-class GraphicsView;
+class View;
 class Magnets;
+class PageGUI;
+SUIT_END_NAMESPACE
 
+SUIT_BEGIN_NAMESPACE
 class PageGUI : public QObject
 {
     Q_OBJECT
@@ -65,7 +64,8 @@ public:
 
     Page * page() { return m_page;}
 
-    CuteReport::PageViewInterface *createView(QWidget *parent = 0);
+    CuteReport::PageViewInterface *createView();
+    CuteReport::PageViewInterface *createSimpleView();
     QList <CuteReport::PageViewInterface*> views();
 
     bool canSceneContainItemAt(QPoint scenePos, CuteReport::BaseItemInterface * item);
@@ -80,25 +80,22 @@ public:
     void redrawPageBorder();
     void redrawPageGrid();
     void redrawPageMargin();
-//    void redrawItemViews();
-    //    void deleteView(PageViewInterface *view);
 
     QList<CuteReport::BaseItemInterface *> selectedItems();
     void setSelectedItems(QList<CuteReport::BaseItemInterface *> selected);
     CuteReport::BaseItemInterface * currentItem();
     void setCurrentItem(CuteReport::BaseItemInterface *item);
 
-    void setItemAjustedGeometry(CuteReport::BaseItemInterface *item, const QRectF &geometry);
+    void setItemAjustedAbsoluteGeometryMM(CuteReport::BaseItemInterface *item, const QRectF &geometry);
     Magnets * magnets() const {return m_magnets;}
 
     void setIgnoreObjectSelection(bool b);
-//    qreal zoom();
-//    void setZoom(qreal zoom);
 
     QGraphicsItem * pageItem();
     
 signals:
     void activeObjectChanged(QObject * object);
+    void sceneUpdated();
     
 public slots:
     void slotDropItem(QString className, QPointF pagePos);
@@ -108,13 +105,14 @@ private slots:
     void viewDestroyed(QObject *view);
 //    void viewDestroyed(PageView *view);
     void slotPaperSizeChanged(QSizeF size);
-    void slotMarginChanged(CuteReport::Margins margins);
-    void slotMousePressed(QMouseEvent *event, QPointF scenePos);
-    void slotMouseReleased(QMouseEvent *event, QPointF scenePos);
-    void slotMouseDoubleClicked(QMouseEvent *event, QPointF scenePos);
+    void slotMarginChanged();
+    void slotMousePressed(QGraphicsSceneMouseEvent *event);
+    void slotMouseReleased(QGraphicsSceneMouseEvent *event);
+    void slotMouseDoubleClicked(QGraphicsSceneMouseEvent *event);
     void slotItemGeometryChanged(QRectF rect);
     void slotDPIChanged(int dpi);
     void slotBackgroundChanged(QColor color);
+    void slotUnitChanged(CuteReport::Unit unit);
     void updateScene();
 
 private:
@@ -124,13 +122,9 @@ private:
     void removeFromSelection(CuteReport::BaseItemInterface * item);
     void clearSelection();
 
-//    int unitToPixelsX(qreal value);
-//    int unitToPixelsY(qreal value);
-//    void redrawItemView(CuteReport::ItemInterface* item);
-
 private:
     Page * m_page;
-    QGraphicsScene * m_scene;
+    Scene * m_scene;
     PageItem * m_pageItem;
     QGraphicsRectItem * m_pageMarginItem;
     QList<CuteReport::BaseItemInterface *> m_selectedItems;
@@ -142,7 +136,8 @@ private:
 
     friend class Magnets;
     friend class PageView;
-    friend class GraphicsView;
+    friend class View;
+    friend class Scene;
 };
 
 
@@ -162,48 +157,22 @@ private:
 //    void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 };
 
-// FIXME: set event filter and depricate PageView
-
-class GraphicsView : public QGraphicsView
-{
-    Q_OBJECT
-public:
-    explicit GraphicsView(Page * page, PageGUI * pageGui);
-
-signals:
-    void dropItem(QString classname, QPointF pos);
-    void mouseReleased(QMouseEvent * event,  QPointF scenePos);
-    void mousePressed (QMouseEvent * event,  QPointF scenePos);
-    void mouseDoubleClicked (QMouseEvent * event,  QPointF scenePos);
-
-protected:
-    virtual void dragMoveEvent ( QDragMoveEvent * event );
-    virtual void dropEvent(QDropEvent *event);
-    virtual void mousePressEvent ( QMouseEvent * event );
-    virtual void mouseReleaseEvent (QMouseEvent * event);
-    virtual void mouseMoveEvent ( QMouseEvent * event );
-    virtual void mouseDoubleClickEvent(QMouseEvent * event);
-    virtual void keyPressEvent ( QKeyEvent * event );
-
-private:
-    Page * m_page;
-    PageGUI * m_pageGui;
-};
-
 
 class PageView: public CuteReport::PageViewInterface
 {
     Q_OBJECT
+    Q_INTERFACES(CuteReport::PageViewInterface)
 public:
     explicit PageView(Page * page, PageGUI * pageGui, QWidget * parent = 0, Qt::WindowFlags f = 0);
     virtual void fit();
 
-    GraphicsView * graphicsView() {return m_view;}
+    View * graphicsView();
+
 private:
     PageGUI * m_pageGui;
-    GraphicsView * m_view;
+    View * m_view;
 };
 
+SUIT_END_NAMESPACE
 
-//} //namespace
 #endif // PAGEGUI_H

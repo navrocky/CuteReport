@@ -39,10 +39,10 @@ static const QString ModuleName("Resource");
 class StorageResource : public CuteReport::StorageInterface
 {
     Q_OBJECT
+    Q_INTERFACES(CuteReport::StorageInterface)
 #if QT_VERSION >= 0x050000
     Q_PLUGIN_METADATA(IID "CuteReport.StorageInterface/1.0")
 #endif
-    Q_INTERFACES(CuteReport::StorageInterface)
 
     Q_PROPERTY(QString localPath READ localPath WRITE setLocalPath NOTIFY localPathChanged)
     Q_PROPERTY(QVariantHash objects READ objects WRITE setObjects NOTIFY objectsChanged DESIGNABLE false)
@@ -51,6 +51,8 @@ class StorageResource : public CuteReport::StorageInterface
 public:
     explicit StorageResource(QObject * parent = 0);
     ~StorageResource();
+
+    virtual void moduleInit();
 
     virtual CuteReport::StorageSyncStatus sync();               // if false, then storage cannot be synced correct;
     virtual CuteReport::StorageSyncStatus interruptSync();
@@ -72,7 +74,8 @@ public:
     virtual QString lastError() const;
 
     virtual int moduleVersion() const {return 1;}
-    virtual QString moduleName() const {return ModuleName; }
+    virtual QString moduleShortName() const {return ModuleName; }
+    virtual QString suitName() const { return "Standard"; }
 
     // storage must care of deleting helper
     virtual CuteReport::StorageHelperInterface * helper();
@@ -107,7 +110,7 @@ signals:
 
 
 private:
-    StorageResource(const StorageResource& p );
+    explicit StorageResource(const StorageResource& p);
     inline QString absolutePath(const QString & filePath = QString()) const;
     QString convertToLocal(const QString & url) const;
     QString cleanupUrl(const QString & url);

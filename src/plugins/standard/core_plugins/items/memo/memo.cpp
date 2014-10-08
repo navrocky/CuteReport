@@ -34,11 +34,16 @@
 #include "rendererpublicinterface.h"
 #include "renderedmemoitem.h"
 #include "memoitemscript.h"
+#include "memoitemview.h"
 
 using namespace CuteReport;
 
+inline void initMyResource() { Q_INIT_RESOURCE(memo); }
+
+SUIT_BEGIN_NAMESPACE
+
 MemoItem::MemoItem(QObject * parent) :
-    ItemInterface(*new MemoItemPrivate, parent),
+    ItemInterface(new MemoItemPrivate, parent),
     m_renderer(0)
 {
     Q_D(MemoItem);
@@ -50,7 +55,7 @@ MemoItem::MemoItem(QObject * parent) :
 }
 
 
-MemoItem::MemoItem(MemoItemPrivate &dd, QObject * parent)
+MemoItem::MemoItem(MemoItemPrivate *dd, QObject * parent)
     :ItemInterface(dd, parent),
       m_renderer(0)
 {
@@ -64,15 +69,22 @@ MemoItem::~MemoItem()
 
 void MemoItem::moduleInit()
 {
-    //    qRegisterMetaType<MemoItem::StretchMode>("MemoItem::StretchMode");
-    //    qRegisterMetaTypeStreamOperators<int>("MemoItem::StretchMode");
+    initMyResource();
+}
+
+void MemoItem::init()
+{
+    Q_D(MemoItem);
+    ItemInterface::init();
+    adjust();
 }
 
 
-BaseItemInterface *MemoItem::clone()
+BaseItemInterface *MemoItem::itemClone() const
 {
-    Q_D(MemoItem);
-    return new MemoItem(*new MemoItemPrivate(*d), parent());
+    Q_D(const MemoItem);
+    MemoItemPrivate * newD = new MemoItemPrivate(*d);
+    return new MemoItem(newD, parent());
 }
 
 
@@ -97,7 +109,7 @@ void MemoItem::deserialize(QByteArray &data)
 QDataStream &operator<<(QDataStream &s, const MemoItemPrivate &p) {
     s << static_cast<const ItemInterfacePrivate&>(p);
     s << (qint8)p.stretchMode << (qint32)p.textFlags << p.text << p.font << p.textColor << p.delimiters
-      << p.stretchFont << p.allowHtml << p.originalHeight << p.showStretchability;
+      << p.stretchFont << p.allowHtml << p.allowExpressions << p.originalHeight << p.showStretchability;
     return s;
 }
 
@@ -110,7 +122,11 @@ QDataStream &operator>>(QDataStream &s, MemoItemPrivate &p) {
     p.stretchMode = (MemoItem::StretchMode)sizePolicy;
     p.textFlags = (MemoItem::TextFlags)textFlags;
     s >> p.text; s >> p.font; s >> p.textColor; s >> p.delimiters;
-    s >> p.stretchFont; s >> p.allowHtml; s >> p.originalHeight; s >> p.showStretchability;
+    s >> p.stretchFont; s >> p.allowHtml; s >> p.allowExpressions >> p.originalHeight; s >> p.showStretchability;
+
+    delete p.textDocument;
+    p.textDocument = 0;
+
     return s;
 }
 
@@ -125,7 +141,7 @@ void MemoItem::init_gui()
 {
     if (m_gui)
         return;
-    m_gui = new MemoItemView(this);
+    m_gui = new SUIT_NAMESPACE::MemoItemView(this);
 }
 
 
@@ -138,7 +154,7 @@ void MemoItem::update_gui()
 
     Q_D(MemoItem);
     QRectF currentRect = d->rect;
-    adjust(d, absoluteGeometry(Millimeter).topLeft());
+    adjust();
     if (currentRect != d->rect) {
         emit geometryChanged(d->rect);
         emit changed();
@@ -147,53 +163,92 @@ void MemoItem::update_gui()
 }
 
 
-void MemoItem::adjust(MemoItemPrivate * d, const QPointF &posDeltaMM, RenderingType type)
+void MemoItem::adjust()
 {
-    Q_UNUSED(type)
+    Q_D(MemoItem);
 
+    d->absoluteRect = absoluteGeometry(Millimeter);
+
+    if (!page())
+        return;
+    adjust(d, absoluteGeometry(Millimeter).topLeft());
+
+    emit adjusted();
+}
+
+
+void MemoItem::adjust(MemoItemPrivate * d, const QPointF &posDeltaMM)
+{
+    d->posDeltaMM = posDeltaMM;
     QRectF qrect = d->rect.translated(posDeltaMM);
+    QRectF absRectPix = convertUnit(d->absoluteRect, Millimeter, Pixel, d->dpi);
+    qreal marginPixel = convertUnit(d->textMargin, Millimeter, Pixel, d->dpi);
+    qreal bottomMargin = marginPixel;
+    qreal shift = marginPixel;
+    d->sw = (d->dpi == 0) ? 1 : (qreal)d->dpi / (qreal)qApp->desktop()->logicalDpiY();
+    qreal textWidth = d->textDocument ? d->textDocument->textWidth() : -1;
 
-    if (d->stretchFont && d->stretchMode == DontStretch) {
-        //pix = f.pointSizeF()/72*dpi;
-        //qreal marginInch = convertUnit(d->textMargin, Millimeter, Inch, d->dpi);
-        //qreal margin = convertUnit(d->textMargin, d->unit, Inch, d->dpi);
-        QRectF fontFrame = qrect;
-        //fontFrame.setTop(marginInch);
-        d->adjustedFontPointSize = convertUnit( fontFrame, d->unit, Pixel, d->dpi).height() * 0.90;
+    qreal x = marginPixel;
+    qreal y = shift;
+
+    QTextDocument * oldDoc = d->textDocument ? d->textDocument->clone() : 0;
+    delete d->textDocument;
+    if (oldDoc) {
+        d->textDocument = oldDoc;
     } else {
-        d->adjustedFontPointSize = d->font.pointSizeF() / 72 * d->dpi;
-    }
-
-    if (d->stretchMode != DontStretch || d->allowHtml) {
-        if (!d->textDocument)
-            d->textDocument = new QTextDocument();
-        int marginPixel = convertUnit(d->textMargin, Millimeter, Pixel, d->dpi);
-        QFont font = fontPrepared(d->font, d->dpi);
-        d->textDocument->setDocumentMargin(marginPixel);
-        d->textDocument->setDefaultFont(font);
-        d->textDocument->setTextWidth(convertUnit(qrect, Millimeter, Pixel, d->dpi).width());
+        d->textDocument = new QTextDocument();
         if (d->allowHtml)
             d->textDocument->setHtml(d->text);
-        else
+        else {
             d->textDocument->setPlainText(d->text);
+        }
+        d->textDocument->setDocumentMargin(0);
+    }
+    d->textDocument->setDefaultFont(d->font);
+    d->textDocument->setDefaultTextOption(QTextOption(Qt::Alignment((int)d->textFlags)));
 
-        if (d->stretchMode == ActualHeight && d->showStretchability) {
-            //        if (d->stretchMode == ActualHeight) {
-            qreal textHeight = convertUnit(d->textDocument->size().height(), Pixel, Millimeter, d->dpi);
-            if (textHeight > d->rect.height()) {
-                if (d->originalHeight == -1) // not stretched state
-                    d->originalHeight = d->rect.height();
-                d->rect.setHeight(textHeight);
-            }
+    if (d->textDocument) {
+        d->textDocument->setTextWidth( (textWidth == -1) ? (convertUnit(qrect, Millimeter, Pixel, d->dpi).width() - marginPixel*2) / d->sw : textWidth);
+
+        if (d->stretchFont && d->stretchMode == DontStretch) {
+            y = 0;
+            QFont font = d->font;
+            font.setPixelSize((absRectPix.height() - 2*marginPixel)/ d->sw * 0.85);
+            d->textDocument->setDefaultFont(font);
         }
 
-    } else {
-        delete d->textDocument;
-        d->textDocument = 0;
+        QSizeF docSize = d->textDocument->size();
+
+        if (d->textFlags.testFlag(AlignHCenter))
+            x = qMax(((qreal)absRectPix.width() - docSize.width() * d->sw )/2, x);
+        if (d->textFlags.testFlag(AlignVCenter))
+            y = qMax(((qreal)absRectPix.height() - docSize.height() * d->sw )/2, y);
+
+        d->textPos = QPointF(x,y);
+        // FIXME: +2 unknown gap at the bottom sometimes
+        d->textClipRect = QRectF(0, 0, qMin(docSize.width(), (absRectPix.width() - bottomMargin) / d->sw),
+                                 qMax((absRectPix.height() - bottomMargin - y) / d->sw, (absRectPix.height() - bottomMargin - y) / d->sw) +2);
     }
 
-    if ((d->stretchMode == DontStretch || !d->showStretchability) && d->originalHeight != -1) { // restoring original height
-        //     if (d->stretchMode == DontStretch  && d->originalHeight != -1) { // restoring original height
+    if ((d->stretchMode == ActualHeight && d->renderingType == RenderingReport)
+            || (d->stretchMode == ActualHeight && d->renderingType == RenderingTemplate && d->showStretchability)) {
+        if (textWidth == -1) {
+            qreal topMargin = 0;
+            qreal textAddon = 0;
+            topMargin = marginPixel;
+            qreal mainText = (d->textDocument && !d->textDocument->toPlainText().isEmpty()) ? d->textDocument->size().height() * d->sw : 0;
+            qreal textHeightPix = topMargin + textAddon + mainText + bottomMargin;
+            if (textHeightPix >= absRectPix.height()) {
+                qreal textHeightMM = convertUnit(QRectF(QPointF(0,0), QSizeF(0, textHeightPix)), Pixel, Millimeter, d->dpi).height();
+                if (d->originalHeight == -1) {// not stretched state
+                    d->originalHeight = d->rect.height();
+                    d->rect.setHeight(textHeightMM);
+                }
+            }
+        }
+    }
+
+    if (d->renderingType == RenderingTemplate && (d->stretchMode == DontStretch || !d->showStretchability) && d->originalHeight != -1) { // restoring original height
         d->rect.setHeight(d->originalHeight);
         d->originalHeight = -1;
     }
@@ -208,13 +263,7 @@ bool MemoItem::canContain(QObject * object)
 
 QIcon MemoItem::itemIcon() const
 {
-    return QIcon(":/memo.png");
-}
-
-
-QString MemoItem::moduleName() const
-{
-    return tr("Memo");
+    return QIcon(":/images/memo.png");
 }
 
 
@@ -229,6 +278,7 @@ void MemoItem::setGeometry(const QRectF & rect, Unit unit)
     Q_D(MemoItem);
     ItemInterface::setGeometry(rect, unit);
     d->originalHeight = -1;     // means not stretching, but real geometry
+    resetDocumentWidth();
 }
 
 
@@ -237,6 +287,7 @@ void MemoItem::setHeight(qreal height, Unit unit)
     Q_D(MemoItem);
     ItemInterface::setHeight(height, unit);
     d->originalHeight = -1;     // means not stretching, but real geometry
+    resetDocumentWidth();
 }
 
 
@@ -250,12 +301,15 @@ MemoItem::StretchMode MemoItem::stretchMode() const
 void MemoItem::setStretchMode(StretchMode sizePolicy)
 {
     Q_D(MemoItem);
-    if (sizePolicy != d->stretchMode) {
-        d->stretchMode = sizePolicy;
-        update_gui();
-        emit stretchModeChanged(d->stretchMode);
-        emit changed();
-    }
+    if (sizePolicy == d->stretchMode)
+        return;
+
+    d->stretchMode = sizePolicy;
+
+    update_gui();
+
+    emit stretchModeChanged(d->stretchMode);
+    emit changed();
 }
 
 
@@ -270,7 +324,6 @@ void MemoItem::setStretchModeStr(const QString &stretchMode)
 {
     bool ok;
     MemoItem::StretchMode value = MemoItem_StretchMode_fromString(stretchMode, &ok);
-    qDebug() << stretchMode << value << ok;
     if (ok)
         setStretchMode(value);
 }
@@ -320,6 +373,26 @@ void MemoItem::setAllowHTML(bool value)
 }
 
 
+bool MemoItem::allowExpressions() const
+{
+    Q_D(const MemoItem);
+    return d->allowExpressions;
+}
+
+
+void MemoItem::setAllowExpressions(bool value)
+{
+    Q_D(MemoItem);
+    if (d->allowExpressions == value)
+        return;
+    d->allowExpressions = value;
+    update_gui();
+    emit allowExpressionsChanged(d->allowExpressions);
+    emit changed();
+    emit scriptingStringsChanged();
+}
+
+
 qreal MemoItem::textMargin() const
 {
     Q_D(const MemoItem);
@@ -336,6 +409,10 @@ void MemoItem::setTextMargin(qreal value)
         return;
 
     d->textMargin = newValue;
+    if (d->textMargin < 0)
+        d->textMargin = 0;
+
+    resetDocumentWidth();
     update_gui();
 
     emit textMarginChaged(d->textMargin);
@@ -353,12 +430,12 @@ MemoItem::TextFlags MemoItem::textFlags() const
 void MemoItem::setTextFlags(MemoItem::TextFlags textFlags)
 {
     Q_D(MemoItem);
-    if (d->textFlags != textFlags) {
-        d->textFlags = textFlags;
-        update_gui();
-        emit textFlagsChanged(d->textFlags);
-        emit changed();
-    }
+    if (d->textFlags == textFlags)
+        return;
+    d->textFlags = textFlags;
+    update_gui();
+    emit textFlagsChanged(d->textFlags);
+    emit changed();
 }
 
 
@@ -372,13 +449,15 @@ QString MemoItem::text() const
 void MemoItem::setText(const QString &text)
 {
     Q_D(MemoItem);
-    if (d->text != text) {
-        d->text = text;
-        update_gui();
-        emit textChanged(text);
-        emit scriptingStringsChanged();
-        emit changed();
-    }
+    if (d->text == text)
+        return;
+    d->text = text;
+    delete d->textDocument;
+    d->textDocument =  0;
+    update_gui();
+    emit textChanged(text);
+    emit scriptingStringsChanged();
+    emit changed();
 }
 
 
@@ -392,12 +471,12 @@ QFont MemoItem::font() const
 void MemoItem::setFont(const QFont & font)
 {
     Q_D(MemoItem);
-    if (d->font != font) {
-        d->font = font;
-        update_gui();
-        emit fontChanged(d->font);
-        emit changed();
-    }
+    if (d->font == font)
+        return;
+    d->font = font;
+    update_gui();
+    emit fontChanged(d->font);
+    emit changed();
 }
 
 
@@ -411,12 +490,12 @@ QColor MemoItem::textColor() const
 void MemoItem::setTextColor(const QColor & color)
 {
     Q_D(MemoItem);
-    if (d->textColor != color) {
-        d->textColor = color;
-        update_gui();
-        emit textColorChaged(d->textColor);
-        emit changed();
-    }
+    if (d->textColor == color)
+        return;
+    d->textColor = color;
+    update_gui();
+    emit textColorChaged(d->textColor);
+    emit changed();
 }
 
 
@@ -450,12 +529,13 @@ QString MemoItem::delimiters() const
 void MemoItem::setDelimiters(const QString & delimiters)
 {
     Q_D(MemoItem);
-    if (d->delimiters != delimiters) {
-        d->delimiters = delimiters;
-        update_gui();
-        emit delimitersChanged(d->delimiters);
-        emit changed();
-    }
+    if (d->delimiters == delimiters)
+        return;
+
+    d->delimiters = delimiters;
+    update_gui();
+    emit delimitersChanged(d->delimiters);
+    emit changed();
 }
 
 
@@ -464,35 +544,40 @@ void MemoItem::renderInit(RendererPublicInterface * renderer)
     Q_D(const MemoItem);
 
     m_renderer = renderer;
-    m_renderer->registerEvaluationString(d->text, this);
+    if (d->allowExpressions)
+        m_renderer->registerEvaluationString(d->text, d->delimiters.section(",",0,0).trimmed(), d->delimiters.section(",",1,1).trimmed(),  this);
 }
 
 
 void MemoItem::renderReset()
 {
+    //Q_D(MemoItem);
     m_renderer = 0;
 }
 
 
-CuteReport::RenderedItemInterface * MemoItem::render(int customDPI)
+bool MemoItem::renderPrepare()
 {
-    Q_UNUSED(customDPI);
+    emit printBefore();
+    setRenderingPointer(new MemoItemPrivate(*(reinterpret_cast<MemoItemPrivate*>(d_ptr))));
+
     Q_D(MemoItem);
+    emit printDataBefore();
 
-    emit renderingBefore();
+    if (d->allowExpressions)
+        d->text = m_renderer->processString(d->text, d->delimiters.section(",",0,0).trimmed(), d->delimiters.section(",",1,1).trimmed(), this);
+    adjust();
 
-    MemoItemPrivate * pCurrent = d;
-    MemoItemPrivate * pNew = new MemoItemPrivate(*d);
+    emit printDataAfter();
 
-    d_ptr = pNew;
-    emit rendering();
-    d_ptr = pCurrent;
+    return d->enabled;
+}
 
-    RenderedMemoItem * view = new RenderedMemoItem(this, pNew);
 
-    emit rendered(view);
-    emit renderingAfter();
-
+RenderedItemInterface *MemoItem::renderView()
+{
+    Q_D(MemoItem);
+    RenderedMemoItem * view = new RenderedMemoItem(this, new MemoItemPrivate(*(reinterpret_cast<MemoItemPrivate*>(d))));
     return view;
 }
 
@@ -505,23 +590,16 @@ void MemoItem::paint(QPainter * painter, const QStyleOptionGraphicsItem *option,
     ItemInterface::paintBegin(painter, option, data, boundingRect, type);
 
     const MemoItemPrivate * const d = static_cast<const MemoItemPrivate*>(data);
-    painter->setPen(d->textColor);
 
-    QRect rect = boundingRect.toRect();
+    painter->setClipRect( boundingRect );
+    painter->translate( boundingRect.toRect().topLeft() );
 
-    painter->setClipRect( rect );
-    painter->translate( rect.topLeft() );
-
-    if (!d->textDocument) {
-        if (d->adjustedFontPointSize > 3) {
-            QFont font = d->font;
-            font.setPixelSize(d->adjustedFontPointSize);
-            painter->setFont(font);
-            int margin = 0;
-            painter->drawText(margin, margin, rect.width() - margin*2, rect.height() - margin*2, d->textFlags, d->text);
-        }
-    } else {
-        d->textDocument->drawContents(painter, QRectF(QPointF(0,0), rect.size()));
+    if (d->textDocument) {
+        painter->save();
+        painter->translate(d->textPos.x(), d->textPos.y());
+        painter->scale(d->sw, d->sw);
+        d->textDocument->drawContents(painter, d->textClipRect);
+        painter->restore();
     }
 
     ItemInterface::paintEnd(painter, option, data, boundingRect, type);
@@ -534,6 +612,17 @@ BaseItemHelperInterface *MemoItem::helper()
         m_helper = new MemoHelper(this);
 
     return m_helper;
+}
+
+
+void MemoItem::resetDocumentWidth()
+{
+    Q_D(MemoItem);
+    if (d->textDocument) {
+        d->textDocument->setTextWidth(-1);
+        adjust();
+        emit textWidthWasReset();
+    }
 }
 
 
@@ -584,6 +673,9 @@ QString MemoItem::_current_property_description() const
     return ItemInterface::_current_property_description();
 }
 
+
+SUIT_END_NAMESPACE
+
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(memo, MemoItem)
+Q_EXPORT_PLUGIN2(Memo, SUIT_NAMESPACE::MemoItem)
 #endif

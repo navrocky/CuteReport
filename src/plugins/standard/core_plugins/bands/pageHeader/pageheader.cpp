@@ -36,12 +36,14 @@
 #include "rendererpublicinterface.h"
 #include "pageheader.h"
 #include "pageheaderscripting.h"
+#include "item_common/simplerendereditem.h"
 
 using namespace CuteReport;
 
+inline void initMyResource() { Q_INIT_RESOURCE(pageHeader); }
 
 PageHeader::PageHeader(QObject * parent):
-    CuteReport::BandInterface(*new PageHeaderPrivate, parent)
+    CuteReport::BandInterface(new PageHeaderPrivate, parent)
    ,m_renderer(0)
 {
     Q_D(PageHeader);
@@ -50,7 +52,7 @@ PageHeader::PageHeader(QObject * parent):
 }
 
 
-PageHeader::PageHeader(PageHeaderPrivate &dd, QObject * parent)
+PageHeader::PageHeader(PageHeaderPrivate *dd, QObject * parent)
     :CuteReport::BandInterface(dd, parent)
     ,m_renderer(0)
 {
@@ -62,10 +64,16 @@ PageHeader::~PageHeader()
 }
 
 
-CuteReport::BaseItemInterface * PageHeader::clone()
+void PageHeader::moduleInit()
 {
-    Q_D(PageHeader);
-    return new PageHeader(*d, parent());
+    initMyResource();
+}
+
+
+CuteReport::BaseItemInterface * PageHeader::itemClone() const
+{
+    Q_D(const PageHeader);
+    return new PageHeader(new PageHeaderPrivate(*d), parent());
 }
 
 
@@ -119,7 +127,7 @@ QIcon PageHeader::itemIcon() const
 }
 
 
-QString PageHeader::moduleName() const
+QString PageHeader::moduleShortName() const
 {
     return tr("Page Header");
 }
@@ -143,45 +151,46 @@ void PageHeader::renderReset()
 }
 
 
-CuteReport::RenderedItemInterface * PageHeader::render(int customDPI)
+bool PageHeader::renderPrepare()
 {
-    Q_UNUSED(customDPI)
-    return 0;
+    return false;
 }
 
 
-CuteReport::RenderedItemInterface * PageHeader::renderNewPage(int customDPI)
+bool PageHeader::renderNewPage()
 {
+    emit printBefore();
+    setRenderingPointer(new PageHeaderPrivate(*(reinterpret_cast<PageHeaderPrivate*>(d_ptr))));
     Q_D(PageHeader);
+    emit printDataBefore();
 
-    emit renderingBefore();
-
-    PageHeaderPrivate * pCurrent = d;
-    PageHeaderPrivate * pNew = new PageHeaderPrivate(*d);
-
-    d_ptr = pNew;
-    emit rendering();
-    d_ptr = pCurrent;
-
-    CuteReport::RenderedItemInterface * view = 0;
+    bool result = false;
 
     if (m_renderer->currentPageNumber() == 1) {
         if (d->onFirstPage)
-            view = BandInterface::render(customDPI);
+            result = true;
     } else if (m_renderer->currentPageNumber() == 2){
         if (d->once) {
             if (!d->onFirstPage)
-                view = BandInterface::render(customDPI);
+                result = true;
         } else
-            view = BandInterface::render(customDPI);
+            result = true;
     } else
-        view = d->once ? 0 : BandInterface::render(customDPI);
+        result = !d->once;
 
-    emit rendered(view);
-    emit renderingAfter();
+    emit printDataAfter();
 
+    return result;
+}
+
+
+RenderedItemInterface *PageHeader::renderView()
+{
+    Q_D(PageHeader);
+    RenderedItemInterface * view = new SimpleRenderedItem(this, new PageHeaderPrivate(*d));
     return view;
 }
+
 
 
 bool PageHeader::printOnFirstPage() const
@@ -236,5 +245,5 @@ QString PageHeader::_current_property_description() const
 //}//namespace
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(pageHeader, PageHeader)
+Q_EXPORT_PLUGIN2(PageHeader, PageHeader)
 #endif

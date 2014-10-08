@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "CuteReport"
-#define MyAppVersion "1.0beta1"
+#define MyAppVersion "1.0rc3"
 #define MyAppPublisher "Alexander Mikhalov"
 #define MyAppURL "http://cute-report.com"
 #define MyAppExeName "cutereport_gui.exe"
@@ -44,24 +44,24 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescrip
 Source: "*"; Excludes: "*.exp,*.lib"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 ;Qt library
-Source: "C:\Qt\4.8.4\bin\QtXml4.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\4.8.4\bin\QtCore4.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\4.8.4\bin\QtGui4.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\4.8.4\bin\QtSql4.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\4.8.4\bin\QtDesigner4.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\4.8.4\bin\QtScript4.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\4.8.4\bin\QtDesignerComponents4.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\4.8.4\plugins\sqldrivers\*.dll"; DestDir: "{app}\sqldrivers\"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "C:\Qt\4.8.4\plugins\imageformats\*.dll"; DestDir: "{app}\imageformats\"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Qt\4.8.5\bin\QtXml4.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Qt\4.8.5\bin\QtCore4.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Qt\4.8.5\bin\QtGui4.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Qt\4.8.5\bin\QtSql4.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Qt\4.8.5\bin\QtDesigner4.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Qt\4.8.5\bin\QtScript4.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Qt\4.8.5\bin\QtDesignerComponents4.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Qt\4.8.5\plugins\sqldrivers\*.dll"; DestDir: "{app}\sqldrivers\"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Qt\4.8.5\plugins\imageformats\*.dll"; DestDir: "{app}\imageformats\"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\cutereport.ico"
-Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"; IconFilename: "{app}\cutereport.ico"
-Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon ; IconFilename: "{app}\cutereport.ico"
-Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: quicklaunchicon ;IconFilename: "{app}\cutereport.ico"
+Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\cutereport_logo_22x22.ico"
+Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"; IconFilename: "{app}\cutereport_logo_48x48.ico"
+Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon ; IconFilename: "{app}\cutereport_logo_48x48.ico"
+Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: quicklaunchicon ;IconFilename: "{app}\cutereport_logo_48x48.ico"
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent

@@ -50,8 +50,11 @@ public:
     explicit Form(QObject *parent = 0);
     virtual ~Form();
 
+    virtual QString moduleShortName() const {return "Form";}
+    virtual QString suitName() const { return "Standard"; }
     virtual CuteReport::FormHelperInterface * helper();
     virtual CuteReport::FormInterface * createInstance(QObject * parent) const;
+    virtual CuteReport::FormInterface * clone() const;
 
     virtual QString data() const;
     virtual void setData(const QString &data);
@@ -65,6 +68,8 @@ public:
                             const QVariant & arg4 = QVariant(), const QVariant & arg5 = QVariant(), const QVariant & arg6 = QVariant());
 
 private:
+    explicit Form(const Form &dd, QObject * parent);
+
     QString m_data;
     MainThreadObject* m_processor;
 };

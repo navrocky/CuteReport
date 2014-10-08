@@ -5,7 +5,11 @@
 TEMPLATE = lib
 CONFIG += plugin
 
-INCLUDEPATH += ../../../../../core/ \
+HEADERS += plugins_common.h
+
+INCLUDEPATH +=  ../../ \
+                ../../../ \
+                ../../../../../core/ \
                 ../../../../../widgets/widgets \
 
 DEPENDPATH += $$INCLUDEPATH
@@ -20,4 +24,8 @@ contains(DEFINES, SYSTEMINSTALL) {
     DESTDIR = ../../../../../../$$BUILD_DIR/$$REPORT_PLUGINS_PATH
 }
 
+
+contains(DEFINES, STATICPLUGINS_CORE) {
+    CONFIG += static
+}
 

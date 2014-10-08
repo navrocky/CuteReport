@@ -29,6 +29,8 @@
 #include "propertyeditor.h"
 #include <QDebug>
 
+namespace PropertyEditor{
+
 ReportProperties::ReportProperties(CuteDesigner::Core * core, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ReportProperties),
@@ -87,14 +89,14 @@ void ReportProperties::reloadSettings()
 }
 
 
-void ReportProperties::addRendererPropertyEditor(PropertyEditor::PropertyEditor * propertyEditor)
+void ReportProperties::addRendererPropertyEditor(PropertyEditor::EditorWidget * propertyEditor)
 {
     m_rendererPropertyEditor = propertyEditor;
     ui->propertyEditorFrame->layout()->addWidget(propertyEditor);
 }
 
 
-void ReportProperties::addPrinterPropertyEditor(PropertyEditor::PropertyEditor * propertyEditor)
+void ReportProperties::addPrinterPropertyEditor(PropertyEditor::EditorWidget * propertyEditor)
 {
     m_printerPropertyEditor = propertyEditor;
     ui->printerPropertyEditorFrame->layout()->addWidget(propertyEditor);
@@ -123,8 +125,8 @@ void ReportProperties::connectReport(CuteReport::ReportInterface * report)
     ui->renderingModules->addItems(m_core->reportCore()->moduleNames(CuteReport::RendererModule));
     ui->storageModules->addItems(m_core->reportCore()->moduleNames(CuteReport::StorageModule));
 
-    ui->rendererName->setText(m_report->renderer() ? m_report->renderer()->moduleName() : "");
-    ui->printerName->setText(m_report->printer() ? m_report->printer()->moduleName() : "");
+    ui->rendererName->setText(m_report->renderer() ? m_report->renderer()->moduleFullName() : "");
+    ui->printerName->setText(m_report->printer() ? m_report->printer()->moduleFullName() : "");
     ui->lGlobalRenderer->setVisible(!m_report->renderer());
     ui->lGlobalPrinter->setVisible(!m_report->printer());
 
@@ -143,9 +145,9 @@ void ReportProperties::connectReport(CuteReport::ReportInterface * report)
     connect(m_report.data(), SIGNAL(defaultStorageNameChanged(QString)), this, SLOT(setGUIDefaultStorage(QString)));
     connect(m_report.data(), SIGNAL(variablesChanged()), this, SLOT(updateGUIvariables()));
 
-    connect(ui->reportName, SIGNAL(textChanged(QString)), this, SLOT(setReportName(QString)));
-    connect(ui->author, SIGNAL(textChanged(QString)), this, SLOT(setReportAuthor(QString)));
-    connect(ui->description, SIGNAL(textChanged()), this, SLOT(setReportDescription()));
+    connect(ui->reportName, SIGNAL(editingFinished ()), this, SLOT(saveAll()));
+    connect(ui->author, SIGNAL(editingFinished ()), this, SLOT(saveAll()));
+    connect(ui->description, SIGNAL(textChanged()), this, SLOT(saveAll()));
 }
 
 
@@ -157,34 +159,9 @@ void ReportProperties::disconnectReport()
 }
 
 
-void ReportProperties::syncData()
-{
-}
-
-
-
-void ReportProperties::setReportName(const QString & reportName)
-{
-    m_report->setName(reportName);
-}
-
-
-void ReportProperties::setReportAuthor(const QString & reportAuthor)
-{
-    m_report->setAuthor(reportAuthor);
-}
-
-
-void ReportProperties::setReportDescription(const QString & reportDescription)
-{
-    m_report->setDescription(reportDescription);
-}
-
-
-void ReportProperties::setReportDescription()
-{
-    m_report->setDescription(ui->description->toPlainText());
-}
+//void ReportProperties::syncData()
+//{
+//}
 
 
 void ReportProperties::setGUIReportFilePath(const QString & url)
@@ -218,7 +195,7 @@ void ReportProperties::setGUIReportDescription(const QString & reportDescription
 void ReportProperties::setGUIReportPrinter(CuteReport::PrinterInterface* printer)
 {
     ui->printerName->blockSignals(true);
-    ui->printerName->setText(printer ? printer->moduleName() : "");
+    ui->printerName->setText(printer ? printer->moduleFullName() : "");
     ui->lGlobalPrinter->setVisible(!printer);
     m_printerPropertyEditor->setVisible(printer);
     ui->printerName->blockSignals(false);
@@ -228,22 +205,23 @@ void ReportProperties::setGUIReportPrinter(CuteReport::PrinterInterface* printer
 void ReportProperties::setGUIReportRenderer(CuteReport::RendererInterface* renderer)
 {
     ui->rendererName->blockSignals(true);
-    ui->rendererName->setText(renderer ? renderer->moduleName() : "");
+    ui->rendererName->setText(renderer ? renderer->moduleFullName() : "");
     ui->lGlobalRenderer->setVisible(!renderer);
     m_rendererPropertyEditor->setVisible(renderer);
     ui->rendererName->blockSignals(false);
 }
 
 
-void ReportProperties::addGUIReportStorage(CuteReport::StorageInterface* storage)
+void ReportProperties::addGUIReportStorage(CuteReport::StorageInterface * storage)
 {
-    ui->storageList->addTopLevelItem(new QTreeWidgetItem ( ui->storageList, QStringList() << storage->moduleName()));
+    QTreeWidgetItem * newStorage = new QTreeWidgetItem ( ui->storageList, QStringList() << storage->objectName() << storage->moduleFullName() );
+    ui->storageList->addTopLevelItem(new QTreeWidgetItem (newStorage));
 }
 
 
 void ReportProperties::removeGUIReportStorage(CuteReport::StorageInterface *storage)
 {
-    qDeleteAll(ui->storageList->findItems(storage->moduleName(), Qt::MatchExactly));
+    qDeleteAll(ui->storageList->findItems(storage->objectName(), Qt::MatchExactly));
     updateLayout();
 }
 
@@ -337,7 +315,7 @@ void ReportProperties::storagesListIndexChanged(QTreeWidgetItem* current, QTreeW
     QString storageName = current->text(0);
     CuteReport::StorageInterface * storage = 0;
     foreach (CuteReport::StorageInterface * st, m_report->storages()) {
-        if (st->moduleName() == storageName) {
+        if (st->objectName() == storageName) {
             storage = st;
             break;
         }
@@ -352,22 +330,32 @@ void ReportProperties::storagesListIndexChanged(QTreeWidgetItem* current, QTreeW
 
     m_currentStorageHelper = storage->helper();
     ui->storageHelperLayout->addWidget(m_currentStorageHelper);
+    ui->storageType->setText(storage->moduleFullName());
     updateLayout();
 }
 
 
 void ReportProperties::updateLayout()
 {
-    if (m_currentStorageHelper) {
-        ui->storageHSpacer->changeSize(0,0, QSizePolicy::Maximum, QSizePolicy::Maximum);
-    } else {
-        ui->storageHSpacer->changeSize(0,0, QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
-    }
+//    if (m_currentStorageHelper) {
+//        ui->storageHSpacer->changeSize(0,0, QSizePolicy::Maximum, QSizePolicy::Maximum);
+//    } else {
+//        ui->storageHSpacer->changeSize(0,0, QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
+//    }
 }
 
 
 void ReportProperties::saveAll()
 {
+    if (m_report->name() != ui->reportName->text())
+        m_report->setName(ui->reportName->text());
+    if (m_report->author() != ui->author->text())
+        m_report->setAuthor(ui->author->text());
+    if (m_report->description() != ui->description->toPlainText())
+        m_report->setDescription(ui->description->toPlainText());
+
     if (m_currentStorageHelper)
         m_currentStorageHelper->save();
+}
+
 }

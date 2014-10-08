@@ -1,4 +1,4 @@
-! include( $$PWD/../../../../common.pri ) {
+!include( $$PWD/../../../../common.pri ) {
     error( Can not find the common.pri file! )
 }
 
@@ -16,4 +16,8 @@ contains(DEFINES, SYSTEMINSTALL) {
     INSTALLS += target
 } else {
     DESTDIR = ../../../../../$$BUILD_DIR/$$PROPERTYEDITOR_PLUGINS_PATH
+}
+
+contains(DEFINES, STATICPLUGINS_PROPERTYEDITOR) {
+    CONFIG += static
 }

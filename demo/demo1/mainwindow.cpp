@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "cutereport.h"
-#include "previewcontainer.h"
+#include "reportpreview.h"
 #include "stdstoragedialog.h"
 #include "reportinterface.h"
 
@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_report = new CuteReport::Report(this);
 
     ui->view->setReportCore(m_report->core());
-    ui->view->setShowFlags(CuteReport::PreviewContainer::ShowAllTools | CuteReport::PreviewContainer::ShowBorderless
+    ui->view->setShowFlags(CuteReport::ReportPreview::ShowAllTools | CuteReport::ReportPreview::ShowBorderless
                            /*| CuteReport::PreviewContainer::ShowFitted*/ );
 
     connect(ui->actionOpen, SIGNAL(activated()), this, SLOT(loadReport()));

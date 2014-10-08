@@ -46,9 +46,9 @@
 namespace PropertyEditor
 {
 
-PropertyModel::PropertyModel(QObject* parent, QObject* object, const QList<PropertyInterface *> *plugins):
+PropertyModel::PropertyModel(const QList<PropertyInterface *> *plugins, QObject* parent):
     QAbstractItemModel(parent),
-    m_object(object),
+    m_object(0),
     m_plugins(plugins)
 {
     m_sizeHint = QFontMetrics(QFont()).lineSpacing()+6;
@@ -69,6 +69,7 @@ void PropertyModel::clearCreatedProperties()
 
 void PropertyModel::refreshProperties()
 {
+    beginResetModel();
     for (int p = 0;p < m_properties.size();p++)
         delete m_properties[p];
     m_properties.clear();
@@ -97,7 +98,7 @@ void PropertyModel::refreshProperties()
                 }
             }
     }
-
+    endResetModel();
 }
 
 PropertyInterface* PropertyModel::createPropery(QObject* object, int property) const

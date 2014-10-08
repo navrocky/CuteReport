@@ -64,10 +64,10 @@ public:
     void setStdActions(CuteDesigner::Core::StdActions actions);
 
 signals:
-    void closed();
+    void closeRequest();
 
 private slots:
-    void closeEvent( QCloseEvent* );
+    void closeEvent(QCloseEvent* event);
     void slotNewReport_after(CuteReport::ReportInterface *report);
     void slotNewPage_after(CuteReport::PageInterface*);
     void slotLoadReport_after(CuteReport::ReportInterface *report);

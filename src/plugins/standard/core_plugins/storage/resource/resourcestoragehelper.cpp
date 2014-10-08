@@ -46,22 +46,25 @@ ResourceStorageHelper::ResourceStorageHelper(StorageResource *storage, VisibleOp
     Q_UNUSED(visibleOptions);
     ui->setupUi(this);
 
+    CuteReport::ReportInterface * report = dynamic_cast<CuteReport::ReportInterface*>(m_storage->parent());
 
     QMenu *menu = new QMenu();
-    foreach (const QString & moduleName,  m_storage->reportCore()->moduleNames(StorageModule)) {
-        if (moduleName == m_storage->moduleName())
+    foreach (StorageInterface * storage, m_storage->reportCore()->storageObjectList(report)) {
+        if (storage->objectName() == m_storage->objectName() && storage->parent() == m_storage->parent())
             continue;
-        QAction *action = new QAction(moduleName, this);
+        QAction *action = new QAction(QString("%1 (%2)").arg(storage->objectName(), storage->moduleFullName()), this);
+        action->setData(storage->objectName());
         connect(action, SIGNAL(triggered()), this, SLOT(addObject()));
         menu->addAction(action);
     }
 
     QMenu *menu2 = new QMenu();
-    foreach (const QString & moduleName,  m_storage->reportCore()->moduleNames(StorageModule)) {
-        if (moduleName == m_storage->moduleName())
+    foreach (StorageInterface * storage, m_storage->reportCore()->storageObjectList(report)) {
+        if (storage->objectName() == m_storage->objectName() && storage->parent() == m_storage->parent())
             continue;
-        QAction *action = new QAction(moduleName, this);
-        connect(action, SIGNAL(triggered()), this, SLOT(addReport()));
+        QAction *action = new QAction(QString("%1 (%2)").arg(storage->objectName(), storage->moduleFullName()), this);
+        action->setData(storage->objectName());
+        connect(action, SIGNAL(triggered()), this, SLOT(addObject()));
         menu2->addAction(action);
     }
 
@@ -252,7 +255,7 @@ void ResourceStorageHelper::addObject()
     QWidget * parentWidget = m_storage->reportCore()->rootWidget();
 
     CuteReport::StdStorageDialog d(core, report, parentWidget, "Load Object");
-    d.setCurrentStorage(action->text());
+    d.setCurrentStorage(action->data().toString());
     d.setUrlHint("objects");
 
     if (!d.exec())

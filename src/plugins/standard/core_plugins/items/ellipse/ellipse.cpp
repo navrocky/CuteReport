@@ -37,8 +37,10 @@
 
 using namespace CuteReport;
 
+inline void initMyResource() { Q_INIT_RESOURCE(ellipse); }
+
 EllipseItem::EllipseItem(QObject *parent)
-    :ItemInterface(*new EllipseItemPrivate, parent)
+    :ItemInterface(new EllipseItemPrivate, parent)
 {
     Q_INIT_RESOURCE(ellipse);
     Q_D(EllipseItem);
@@ -48,17 +50,23 @@ EllipseItem::EllipseItem(QObject *parent)
 }
 
 
-EllipseItem::EllipseItem(EllipseItemPrivate &dd, QObject * parent)
+void EllipseItem::moduleInit()
+{
+    initMyResource();
+}
+
+
+EllipseItem::EllipseItem(EllipseItemPrivate *dd, QObject * parent)
     :ItemInterface(dd, parent)
 {
     Q_INIT_RESOURCE(ellipse);
 }
 
 
-CuteReport::BaseItemInterface * EllipseItem::clone()
+CuteReport::BaseItemInterface * EllipseItem::itemClone() const
 {
-    Q_D(EllipseItem);
-    return new EllipseItem(*new EllipseItemPrivate(*d), parent());
+    Q_D(const EllipseItem);
+    return new EllipseItem(new EllipseItemPrivate(*d), parent());
 }
 
 
@@ -124,7 +132,7 @@ QIcon EllipseItem::itemIcon() const
 }
 
 
-QString EllipseItem::moduleName() const
+QString EllipseItem::moduleShortName() const
 {
     return tr("Ellipse");
 }
@@ -136,25 +144,20 @@ QString EllipseItem::itemGroup() const
 }
 
 
-CuteReport::RenderedItemInterface * EllipseItem::render(int customDPI)
+bool EllipseItem::renderPrepare()
 {
-    Q_UNUSED(customDPI);
+    emit printBefore();
+    setRenderingPointer(new EllipseItemPrivate(*(reinterpret_cast<EllipseItemPrivate*>(d_ptr))));
+    emit printDataBefore();
+    emit printDataAfter();
+    return true;
+}
+
+
+RenderedItemInterface *EllipseItem::renderView()
+{
     Q_D(EllipseItem);
-
-    emit renderingBefore();
-
-    EllipseItemPrivate * pCurrent = d;
-    EllipseItemPrivate * pNew = new EllipseItemPrivate(*d);
-
-    d_ptr = pNew;
-    emit rendering();
-    d_ptr = pCurrent;
-
-    RenderedEllipseItem * view = new RenderedEllipseItem(this, pNew);
-
-    emit rendered(view);
-    emit renderingAfter();
-
+    RenderedEllipseItem * view = new RenderedEllipseItem(this, new EllipseItemPrivate(*d));
     return view;
 }
 
@@ -233,5 +236,5 @@ QString EllipseItem::_current_property_description() const
 }
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(ellipse, EllipseItem)
+Q_EXPORT_PLUGIN2(Ellipse, EllipseItem)
 #endif

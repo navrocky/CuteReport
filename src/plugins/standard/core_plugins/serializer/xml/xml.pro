@@ -3,11 +3,11 @@
 }
 
 
-TARGET = xmlSerializer
+TARGET = SerializerXML
 
 HEADERS += \
-    xml.h \
+    serializerxml.h \
 
 SOURCES += \
-    xml.cpp \
+    serializerxml.cpp \
 

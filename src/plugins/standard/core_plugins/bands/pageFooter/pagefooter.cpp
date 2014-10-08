@@ -35,12 +35,14 @@
 #include "pagefooter.h"
 #include "rendererpublicinterface.h"
 #include "pagefooterscripting.h"
+#include "item_common/simplerendereditem.h"
 
 using namespace CuteReport;
 
+inline void initMyResource() { Q_INIT_RESOURCE(pageFooter); }
 
 PageFooter::PageFooter(QObject * parent)
-    :CuteReport::BandInterface(*new PageFooterPrivate, parent),
+    :CuteReport::BandInterface(new PageFooterPrivate, parent),
       m_renderer(0)
 {
     Q_D(PageFooter);
@@ -49,7 +51,7 @@ PageFooter::PageFooter(QObject * parent)
 }
 
 
-PageFooter::PageFooter(PageFooterPrivate &dd, QObject * parent)
+PageFooter::PageFooter(PageFooterPrivate *dd, QObject * parent)
     :CuteReport::BandInterface(dd, parent)
 {
 
@@ -61,10 +63,16 @@ PageFooter::~PageFooter()
 }
 
 
-BaseItemInterface *PageFooter::clone()
+void PageFooter::moduleInit()
 {
-    Q_D(PageFooter);
-    return new PageFooter(*d, parent());
+    initMyResource();
+}
+
+
+BaseItemInterface *PageFooter::itemClone() const
+{
+    Q_D(const PageFooter);
+    return new PageFooter(new PageFooterPrivate(*d), parent());
 }
 
 
@@ -124,7 +132,7 @@ QIcon PageFooter::itemIcon() const
 }
 
 
-QString PageFooter::moduleName() const
+QString PageFooter::moduleShortName() const
 {
     return tr("Page Footer");
 }
@@ -148,44 +156,43 @@ void PageFooter::renderReset()
 }
 
 
-CuteReport::RenderedItemInterface * PageFooter::render(int customDPI)
+bool PageFooter::renderPrepare()
 {
-    Q_UNUSED(customDPI);
-    return 0;
+    return false;
 }
 
 
-
-CuteReport::RenderedItemInterface * PageFooter::renderNewPage(int customDPI)
+bool PageFooter::renderNewPage()
 {
+    emit printBefore();
+    setRenderingPointer(new PageFooterPrivate(*(reinterpret_cast<PageFooterPrivate*>(d_ptr))));
     Q_D(PageFooter);
+    emit printDataBefore();
 
-    emit renderingBefore();
-
-    PageFooterPrivate * pCurrent = d;
-    PageFooterPrivate * pNew = new PageFooterPrivate(*d);
-
-    d_ptr = pNew;
-    emit rendering();
-    d_ptr = pCurrent;
-
-    CuteReport::RenderedItemInterface * view = 0;
+    bool result = false;
 
     if (m_renderer->currentPageNumber() == 1) {
         if (d->onFirstPage)
-            view = BandInterface::render(customDPI);
+            result = true;
     } else if (m_renderer->currentPageNumber() == 2){
         if (d->once) {
             if (!d->onFirstPage)
-                view = BandInterface::render(customDPI);
+                result = true;
         } else
-            view = BandInterface::render(customDPI);
+            result = true;
     } else
-        view = d->once ? 0 : BandInterface::render(customDPI);
+        result = !d->once;
 
-    emit rendered(view);
-    emit renderingAfter();
+    emit printDataAfter();
 
+    return result;
+}
+
+
+RenderedItemInterface *PageFooter::renderView()
+{
+    Q_D(PageFooter);
+    CuteReport::RenderedItemInterface * view = new SimpleRenderedItem(this, new PageFooterPrivate(*d));
     return view;
 }
 

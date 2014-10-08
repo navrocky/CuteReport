@@ -34,6 +34,8 @@
 
 class QLabel;
 
+SUIT_BEGIN_NAMESPACE
+
 class PageManipulator : public CuteReport::PageManipulatorInterface
 {
     Q_OBJECT
@@ -75,6 +77,7 @@ private:
     CuteReport::PageAction * magnetBottom;
 };
 
+SUIT_END_NAMESPACE
 
 
 #endif // PAGEMANIPULATOR_H

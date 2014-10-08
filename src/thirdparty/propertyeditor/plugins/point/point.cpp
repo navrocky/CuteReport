@@ -114,5 +114,5 @@ PropertyInterface* Point::createInstance(QObject * object, int property, const P
 }
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(point, Point)
+Q_EXPORT_PLUGIN2(PointProperty, Point)
 #endif

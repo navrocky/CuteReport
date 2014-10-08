@@ -53,10 +53,72 @@ PageInterface::~PageInterface()
 }
 
 
+QString PageInterface::_current_property_description() const
+{
+//    QString propertyName = metaObject()->property(m_currentProperty).name();
+
+//    if (propertyName == "geometry")
+//        return tr("Item geomery");
+//    else if (propertyName == "frame")
+//        return tr("Item frame drawing sides");
+//    else if (propertyName == "opacity")
+//        return tr("Item opacity");
+//    else if (propertyName == "rotation")
+//        return tr("Rotation angle");
+//    else if (propertyName == "borderPen")
+//        return tr("Border pen properties");
+//    else if (propertyName == "backgroundBrush")
+//        return tr("Border pen background properies");
+//    else if (propertyName == "enabled")
+//        return tr("Is item enabled. Disabled items wont processed");
+//    else if (propertyName == "order")
+//        return tr("position order");
+
+    return QString();
+}
+
+
+int PageInterface::_current_property_precision() const
+{
+    return 1;
+}
+
+
+
+
+
+
+PageInterface *PageInterface::clone(bool withChildren, bool init) const
+{
+    PageInterface * newPage = this->objectClone();
+    newPage->setReportCore(this->reportCore());
+
+    if (withChildren) {
+        foreach (CuteReport::BaseItemInterface* item, items()) {
+            if (item->parent() != this)     // only direct children
+                continue;
+            CuteReport::BaseItemInterface * itemCopy = item->clone(true, false);
+            itemCopy->setReportCore(item->reportCore());
+            itemCopy->setParent(newPage);
+            itemCopy->setObjectName(item->objectName());
+        }
+    }
+
+    if (init)
+        newPage->init();
+
+    return newPage;
+}
+
+
 PageManipulatorInterface::PageManipulatorInterface(QObject *parent)
     :QObject(parent)
 {
 
 }
+
+
+
+
 
 } //namespace

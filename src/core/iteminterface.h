@@ -76,7 +76,7 @@ signals:
     void shiftModeChanged(QString shiftMode);
 
 protected:
-    ItemInterface(ItemInterfacePrivate &dd, QObject * parent);
+    ItemInterface(ItemInterfacePrivate *dd, QObject * parent);
 
 private:
     Q_DECLARE_PRIVATE(ItemInterface)

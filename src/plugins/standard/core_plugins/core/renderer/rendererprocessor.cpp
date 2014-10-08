@@ -64,6 +64,12 @@ bool cmpBandsDesc(BandInterface * a, BandInterface * b)
 }
 
 
+bool cmpItems(BaseItemInterface * a, BaseItemInterface * b)
+{
+    return a->order() < b->order();
+}
+
+
 Thread::Thread()
 {
 }
@@ -73,10 +79,10 @@ Thread::~Thread() {
 }
 
 void Thread::stop() {
-//    this->exit();
-//    this->terminate();
-//    this->wait();
-//    this->deleteLater();
+    //    this->exit();
+    //    this->terminate();
+    //    this->wait();
+    //    this->deleteLater();
 }
 
 
@@ -86,7 +92,8 @@ RendererProcessor::RendererProcessor(RendererData * data)
       m_rendererItemInterface(0),
       m_terminate(false),
       m_currentRenderedPage(0),
-      m_runs(false)
+      m_runs(false),
+      m_lastItemId(0)
 {
     m_antialiasing = data->renderer->antialiasing();
     m_textAntialiasing = data->renderer->textAntialiasing();
@@ -138,7 +145,7 @@ void RendererProcessor::start()
 
     connect(renderThread, SIGNAL(started()), this, SLOT(_run()));
     connect(renderThread, SIGNAL(finished()), renderThread, SLOT(deleteLater()));
-//    connect(this, SIGNAL(destroyed()), renderThread, SLOT(stop()), Qt::QueuedConnection);
+    //    connect(this, SIGNAL(destroyed()), renderThread, SLOT(stop()), Qt::QueuedConnection);
 
     renderThread->start();
 }
@@ -253,9 +260,9 @@ void RendererProcessor::initScriptEngine()
     foreach(CuteReport::PageInterface * page, report->pages()) {
         foreach(CuteReport::BaseItemInterface * item, page->items()) {
             scriptEngine->globalObject().setProperty(item->objectName(), scriptEngine->newQObject(item), QScriptValue::ReadOnly);
-            if (!initedItems.contains(item->moduleName())) {
+            if (!initedItems.contains(item->moduleFullName())) {
                 item->initScript(scriptEngine);
-                initedItems.insert(item->moduleName());
+                initedItems.insert(item->moduleFullName());
             }
         }
     }
@@ -353,9 +360,13 @@ void RendererProcessor::renderReportPage(CuteReport::PageInterface * page)
     bottomBands.clear();
     freeBands.clear();
 
+    page->renderInit();
+
     m_currentPage = page;
     m_currentDatasetLine=0;
     m_currentPageNumber = 0;
+    m_processingBand = 0;
+    m_lastProcessedBand = 0;
     setValue("_page", m_currentPageNumber, QScriptValue::ReadOnly);
     setValue("_line", m_currentDatasetLine+0, QScriptValue::ReadOnly);
 
@@ -399,7 +410,7 @@ void RendererProcessor::renderReportPage(CuteReport::PageInterface * page)
         if (dataset)
             processDataset(dataset);
         else
-            processBand(band);
+            processBand(band, CuteReport::RenderingNormal);
     }
 
     m_state = RendererPublicInterface::ContentDone;
@@ -407,6 +418,8 @@ void RendererProcessor::renderReportPage(CuteReport::PageInterface * page)
     if (m_currentRenderedPage) {
         completePage(m_currentRenderedPage);
     }
+
+    page->renderReset();
 }
 
 
@@ -440,29 +453,23 @@ void RendererProcessor::createNewRenderingPage()
     m_zValue = 0;
 
     emit processingPage(m_currentPageNumber, 0);
-    emit m_rendererItemInterface->onPageBefore(m_currentRenderedPage);
+    emit m_rendererItemInterface->pageBefore(m_currentRenderedPage);
 
-    RenderedItemInterface * renderedView;
-
-    foreach(BandInterface * band, freeBands) {   //process listFree first if it want paint on background
-        if ((renderedView = band->renderNewPage()))
-            processBand(band, renderedView);
-    }
+    foreach(BandInterface * band, freeBands)   //process listFree first if it want paint on background
+        if (band != m_processingBand)
+            processBand(band, RenderingNewPage);
 
     m_state = RendererPublicInterface::BackgroundDone;
 
-    foreach(BandInterface * band, topBands) {
-        if ((renderedView = band->renderNewPage()))
-            processBand(band, renderedView);
-    }
+    foreach(BandInterface * band, topBands)
+        if (band != m_processingBand)
+            processBand(band, RenderingNewPage);
 
     m_state = RendererPublicInterface::HeadersDone;
 
-    for (int i = bottomBands.count()-1; i>=0 ;--i) {
-        BandInterface * band = bottomBands.at(i);
-        if ((renderedView = band->renderNewPage()))
-            processBand(band, renderedView);
-    }
+    for (int i = bottomBands.count()-1; i>=0 ;--i)
+        if (bottomBands.at(i) != m_processingBand)
+            processBand(bottomBands.at(i), RenderingNewPage);
 
     m_state = RendererPublicInterface::FootersDone;
 }
@@ -470,15 +477,13 @@ void RendererProcessor::createNewRenderingPage()
 
 void RendererProcessor::completePage(RenderedPageInterface* page)
 {
-    emit m_rendererItemInterface->onPageAfter(m_currentRenderedPage);
+    emit m_rendererItemInterface->pageAfter(m_currentRenderedPage);
 
-    RenderedItemInterface * renderedView;
     foreach(BandInterface * band, freeBands) {   //process listFree first if it want paint on foreground
-        if ((renderedView = band->render()))
-            processBand(band, renderedView);
+        if (band != m_processingBand)
+            processBand(band, RenderingNormal);
     }
 
-    //m_renderedPages.append(page);
     m_currentRenderedPage = 0;
     m_data->appendPage(page);
 
@@ -490,127 +495,196 @@ void RendererProcessor::completePage(RenderedPageInterface* page)
 }
 
 
-void RendererProcessor::processBand(CuteReport::BandInterface * band, RenderedItemInterface * renderedView)
+void RendererProcessor::processBand(CuteReport::BandInterface * band, RenderingStage stage)
 {
     Q_ASSERT(band);
 
-    emit log(CuteReport::LogDebug, QString("rendering band: %1").arg(band->objectName()), "");
-
-    emit m_rendererItemInterface->onBandBefore(band);
-
-    // FIXME: process it on rendered item since band can stretch
-    if (band->layoutType() != BandInterface::LayoutFree && !canFitBandToPage(band) )
-        createNewRenderingPage();
-
-    m_processingBand  = band;
-
-    RenderedItemInterface * renderedItem = renderedView ? renderedView : band->render();
-
-    if (renderedItem) {
-
-        if (band->layoutType() == BandInterface::LayoutFree)
-            renderedItem->setZValue(band->order()>=0 ? (100 + band->order()) : (-100 - band->order()) ); // 100 reserverd for top and bottom
-
-        QRectF geometry;
-
-        /** in case item does not provide its own geometry logic, we are doing it here in renderer */
-        if (band->selfRendering() ) {
-            geometry = renderedItem->absoluteGeometry(Millimeter);
-        } else {
-            geometry.setSize(band->geometry(Millimeter).size());
-            if (band->layoutType()== BandInterface::LayoutTop)
-                geometry.moveTo(m_freeSpace.topLeft());
-            else if (band->layoutType()== BandInterface::LayoutBottom)
-                geometry.moveBottomLeft(m_freeSpace.bottomLeft());
-            else if (band->layoutType()== BandInterface::LayoutFree)
-                geometry = band->geometry(Millimeter);
-
-//            QRectF geometryPixel = convertUnit( geometry, band->unit(), Pixel, band->dpi() );
-//            renderedItem->setParentItem(m_currentRenderedPage);
-//            renderedItem->setPos(geometryPixel.topLeft());
-//            renderedItem->setRect(QRectF(QPointF(0,0), geometryPixel.size()));
-
-            renderedItem->setParentItem(m_currentRenderedPage);
-            renderedItem->setAbsoluteGeometry(geometry);
-//            renderedItem->redraw();
-        }
-
-        m_bandDelta = geometry.topLeft() - band->absoluteGeometry().topLeft();
-
-        QList<CuteReport::RenderedItemInterface*> renderedChildren;
-
-        foreach (CuteReport::BaseItemInterface * const item, band->findChildren<CuteReport::BaseItemInterface *>()) {
-            CuteReport::RenderedItemInterface* child = processItem(m_bandDelta, item, renderedItem, true);
-            if (child)
-                renderedChildren.append(child);
-        }
-
-        if (band->stretchable()) {
-            foreach (RenderedItemInterface * child, renderedChildren) {
-                QRectF childRect = child->absoluteGeometry(Millimeter);
-                if ( childRect.bottom() > geometry.bottom())
-                    geometry.setBottom( childRect.bottom() );
-            }
-            renderedItem->setAbsoluteGeometry(geometry);
-//            renderedItem->redraw();
-        }
-
-        if (band->layoutType()== BandInterface::LayoutTop)
-            m_freeSpace.setTop( qMax (m_freeSpace.top(), geometry.bottom() ) );  // band can be placed in its own logic to any position
-        else if (band->layoutType()== BandInterface::LayoutBottom)
-            m_freeSpace.setBottom( qMin( m_freeSpace.bottom(), geometry.top() ) );
-
+    bool needToBeRendered = false;
+    switch (stage) {
+        case RenderingNewPage:  needToBeRendered = band->renderNewPage(); break;
+        case RenderingNormal:   needToBeRendered = band->renderPrepare(); break;
     }
 
-    m_lastProcessedBand = band;
+    if (!needToBeRendered) {
+        band->renderEnd();
+        return;
+    }
+
+    CuteReport::BandInterface * saveBand = m_processingBand;
+    m_processingBand = band;
+
+    emit log(CuteReport::LogDebug, QString("process band: %1").arg(band->objectName()), "");
+    emit m_rendererItemInterface->bandBefore(band);
+
+    QRectF geometry = band->absoluteGeometry(Millimeter);
+    if (band->layoutType()== BandInterface::LayoutTop)
+        geometry.moveTo(m_freeSpace.topLeft());
+    else if (band->layoutType()== BandInterface::LayoutBottom)
+        geometry.moveBottomLeft(m_freeSpace.bottomLeft());
+    band->setAbsoluteGeometry(geometry, Millimeter);
+
+    QList<BaseItemInterface*> children;
+    foreach (BaseItemInterface* child, band->findChildren<CuteReport::BaseItemInterface*>())
+        if (child->parent() == band)
+            children.append(child);
+    qSort(children.begin(), children.end(), cmpItems);
+    QList<BaseItemInterface*> processedItems ;
+
+    foreach (BaseItemInterface * const item, children)
+        item->beforeSiblingsRendering();
+
+    foreach (BaseItemInterface * const item, children)
+        processItem(item, processedItems, true);
+
+    if (band->stretchable()) {
+        foreach (BaseItemInterface * child, band->findChildren<CuteReport::BaseItemInterface*>()) {
+            if (!processedItems.contains(child))
+                continue;
+            QRectF childRect = child->absoluteBoundingRect(Millimeter);
+            if ( childRect.bottom() > geometry.bottom())
+                geometry.setBottom(childRect.bottom());
+        }
+        band->setAbsoluteGeometry(geometry);
+    }
+
+    foreach (CuteReport::BaseItemInterface * const item, children)
+        item->afterSiblingsRendering();
+
+    if (band->layoutType() != BandInterface::LayoutFree && !canFitBandToPage(band) ) {
+        createNewRenderingPage();
+        geometry = band->absoluteGeometry(Millimeter);
+        if (band->layoutType()== BandInterface::LayoutTop)
+            geometry.moveTo(m_freeSpace.topLeft());
+        else if (band->layoutType()== BandInterface::LayoutBottom)
+            geometry.moveBottomLeft(m_freeSpace.bottomLeft());
+        band->setAbsoluteGeometry(geometry);
+    }
+
+    RenderedItemInterface * renderedBand = band->renderView();
+    Q_ASSERT_X(renderedBand, "Item rendering object is NULL", QString("object name: \'%1\', needrendering: %2").arg(band->objectName()).arg(needToBeRendered).toLatin1());
+
+    renderedBand->setId(++m_lastItemId);
+    m_lastIdForItem.insert(band->objectName(), m_lastItemId);
+    if (band->layoutType() == BandInterface::LayoutFree)
+        renderedBand->setZValue(band->order()>=0 ? (100 + band->order()) : (-100 - band->order()) ); // 100 reserverd for top and bottom
+    renderedBand->setParentItem(m_currentRenderedPage);
+    renderedBand->setAbsoluteGeometry(geometry, Millimeter);
+    renderedBand->redraw();
+
+    foreach (CuteReport::BaseItemInterface * const item, children) {
+        if (processedItems.contains(item)) {
+            deployItem(item, renderedBand, processedItems, true);
+        }
+    }
+
+    foreach (CuteReport::BaseItemInterface * const item, children) {
+        if (processedItems.contains(item)) {
+            renderingEndItem(item, processedItems, true);
+        }
+    }
+
+    band->renderEnd();
+
+    if (band->layoutType() == BandInterface::LayoutTop)
+        m_freeSpace.setTop(qMax(m_freeSpace.top(), geometry.bottom()));  // band can be placed in its own logic to any position
+    else if (band->layoutType() == BandInterface::LayoutBottom)
+        m_freeSpace.setBottom(qMin(m_freeSpace.bottom(), geometry.top()));
 
     m_state = RendererPublicInterface::DrawingContent;
-
-    emit m_rendererItemInterface->onBandAfter(band);
-
+    emit m_rendererItemInterface->bandAfter(band);
+    m_lastProcessedBand = band;
+    m_processingBand = saveBand;
 }
 
 
-RenderedItemInterface * RendererProcessor::processItem(QPointF delta, CuteReport::BaseItemInterface * item, RenderedItemInterface * parent, bool withChildren, RenderedItemInterface * renderedView)
+bool RendererProcessor::processItem(CuteReport::BaseItemInterface * item, QList<CuteReport::BaseItemInterface*> & processedList, bool withChildren)
 {
     Q_ASSERT(item);
-    emit log(CuteReport::LogDebug, QString("rendering item: %1").arg(item->objectName()), "");
+    emit log(CuteReport::LogDebug, QString("processing item: %1").arg(item->objectName()), "");
 
-    emit m_rendererItemInterface->onItemBefore(item);
+    emit m_rendererItemInterface->itemBefore(item);
 
-    RenderedItemInterface * renderedItem = renderedView ? renderedView : item->render();
+    bool needProcessing = item->renderPrepare();
 
-    if (renderedItem) {
-        QRectF geometry = item->absoluteGeometry(Millimeter);
-        geometry.translate(delta);
+    if (!needProcessing) {
+        item->renderEnd();
+        return false;
+    }
 
-        renderedItem->setParentItem(parent ? (QGraphicsItem *)parent : (QGraphicsItem *)m_currentRenderedPage);
-        //        QPointF pos = item->mapToParent(QPointF(0,0), Millimeter, Pixel);
-        //        renderedItem->setPos(pos);
+    processedList.append(item);
 
-//        renderedItem->setParentItem(m_currentRenderedPage);
-        renderedItem->setAbsoluteGeometry(geometry);
-//        renderedItem->redraw();
+    emit m_rendererItemInterface->itemAfter(item);
 
-//        QRectF geometry = renderedItem->absoluteGeometry(Millimeter);
-//        if (delta != QPointF()) {
-//            geometry.translate(delta);
-//            renderedItem->setAbsoluteGeometry(geometry);
-//        }
-
-//        renderedItem->setParentItem(parent ? (QGraphicsItem *)parent : (QGraphicsItem *)m_currentRenderedPage);
-//        QPointF pos = item->mapToParent(QPointF(0,0), Millimeter, Pixel);
-//        renderedItem->setPos(pos);
-
-        emit m_rendererItemInterface->onItemAfter(item);
-
-        if (withChildren) {
-            foreach (CuteReport::BaseItemInterface * const child, item->findChildren<CuteReport::BaseItemInterface *>())
-                processItem(delta, child, renderedItem, true);
+    if (withChildren) {
+        QList<CuteReport::BaseItemInterface *> list;
+        foreach (CuteReport::BaseItemInterface * child, item->findChildren<CuteReport::BaseItemInterface *>())
+            if (child->parent() == item)
+                list.append(child);
+        if (list.count()) {
+            qSort(list.begin(), list.end(), cmpItems);
+            foreach (CuteReport::BaseItemInterface * const child, list)
+                child->beforeSiblingsRendering();
+            foreach (CuteReport::BaseItemInterface * const child, list)
+                processItem(child, processedList, true);
+            foreach (CuteReport::BaseItemInterface * const child, list)
+                child->afterSiblingsRendering();
         }
     }
 
-    return renderedItem;
+    return needProcessing;
+}
+
+
+void RendererProcessor::deployItem(BaseItemInterface *item, RenderedItemInterface *parent, QList<BaseItemInterface*> & processedItems, bool withChildren)
+{
+    emit log(CuteReport::LogDebug, QString("deploy item: %1").arg(item->objectName()), "");
+    emit m_rendererItemInterface->itemBefore(item);
+
+    QRectF geometry = item->absoluteGeometry(Millimeter);
+
+    RenderedItemInterface * renderedItem = item->renderView();
+    if (!renderedItem)
+        return;
+
+    renderedItem->setId(++m_lastItemId);
+    m_lastIdForItem.insert(item->objectName(), m_lastItemId);
+    renderedItem->setParentItem(parent ? (QGraphicsItem *)parent : (QGraphicsItem *)m_currentRenderedPage);
+    renderedItem->setAbsoluteGeometry(geometry, Millimeter);
+    renderedItem->redraw();
+
+    emit m_rendererItemInterface->itemAfter(item);
+
+    if (withChildren) {
+        QList<CuteReport::BaseItemInterface *> list;
+        foreach (CuteReport::BaseItemInterface * child, item->findChildren<CuteReport::BaseItemInterface *>())
+            if (child->parent() == item)
+                list.append(child);
+        qSort(list.begin(), list.end(), cmpItems);
+        foreach (CuteReport::BaseItemInterface * const child, list) {
+            if (processedItems.contains(child))
+                deployItem(child, renderedItem, processedItems, true);
+        }
+    }
+}
+
+
+void RendererProcessor::renderingEndItem(BaseItemInterface *item, QList<BaseItemInterface *> &processedItems, bool withChildren)
+{
+    emit log(CuteReport::LogDebug, QString("renderingEndItem item: %1").arg(item->objectName()), "");
+
+    if (withChildren) {
+        QList<CuteReport::BaseItemInterface *> list;
+        foreach (CuteReport::BaseItemInterface * child, item->findChildren<CuteReport::BaseItemInterface *>())
+            if (child->parent() == item)
+                list.append(child);
+        qSort(list.begin(), list.end(), cmpItems);
+        foreach (CuteReport::BaseItemInterface * const child, list) {
+            if (processedItems.contains(child))
+                renderingEndItem(child, processedItems, withChildren);
+        }
+    }
+
+    item->renderEnd();
 }
 
 
@@ -618,13 +692,11 @@ void RendererProcessor::processDataset(DatasetInterface * dtst)
 {
     emit log(LogInfo, QString("rendering dataset: %1").arg(dtst->objectName()), "");
 
-    emit m_rendererItemInterface->onDatasetBefore(dtst);
+    emit m_rendererItemInterface->datasetBefore(dtst);
 
     /// store dynamic data
     int currentDatasetLine = m_currentDatasetLine;
     DatasetInterface * currentDataset = m_currentDataset;
-
-    //    bool skipIteration = false;
 
     if (!dtst->isPopulated())
         if (!dtst->populate()) {
@@ -642,7 +714,6 @@ void RendererProcessor::processDataset(DatasetInterface * dtst)
     BandsList currentGroup = bandRegisteredToDataset(dtst->objectName());
     qSort(currentGroup.begin(), currentGroup.end(), cmpBands);
 
-
     do {
         if (terminated())
             return;
@@ -651,8 +722,7 @@ void RendererProcessor::processDataset(DatasetInterface * dtst)
         m_aggregateFunctions->processDatasetIteration(m_currentDataset);
 
         foreach(BandInterface * band, currentGroup) {
-            //            q_Debug() << "next band in dataset group =" << band->objectName();
-            processBand(band);
+            processBand(band, RenderingNormal);
         }
 
         m_currentDatasetLine++;
@@ -667,7 +737,7 @@ void RendererProcessor::processDataset(DatasetInterface * dtst)
     m_currentDatasetLine = currentDatasetLine;
     m_currentDataset = currentDataset;
 
-    emit m_rendererItemInterface->onDatasetAfter(dtst);
+    emit m_rendererItemInterface->datasetAfter(dtst);
 }
 
 
@@ -828,6 +898,32 @@ QString RendererProcessor::_processString(const QString & string, const CuteRepo
         evaluationResult = "\'can't evaluate\'";
 
     return evaluationResult;
+}
+
+
+void RendererProcessor::registerEvaluationString(const QString & string, const QString & delimiterBegin, const QString & delimiterEnd, CuteReport::BaseItemInterface *item)
+{
+    // escaping all delimiter characters for prevent problems
+    QString regexp;
+    for (int i=0; i<delimiterBegin.length(); ++i)
+        regexp+=QString("\\") + delimiterBegin.at(i);
+    regexp+="(.*)";
+    for (int i=0; i<delimiterEnd.length(); ++i)
+        regexp+= QString("\\") + delimiterEnd.at(i);
+
+
+    QRegExp rx(regexp);
+    rx.setMinimal(true);
+
+    int pos = 0;
+    while ((pos = rx.indexIn(string, pos)) != -1) {
+        int length = rx.matchedLength();
+
+        QString expression = rx.cap(1);
+        registerEvaluationString(expression, item);
+
+        pos += length;
+    }
 }
 
 

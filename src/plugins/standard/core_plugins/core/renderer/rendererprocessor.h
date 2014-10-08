@@ -77,6 +77,7 @@ public:
 
     QString processString(const QString & string, const QString & delimiterBegin, const QString & delimiterEnd, const CuteReport::BaseItemInterface * item);
     QString processString(const QString & string, const CuteReport::BaseItemInterface * item);
+    void registerEvaluationString(const QString & string, const QString & delimiterBegin, const QString & delimiterEnd, CuteReport::BaseItemInterface *item);
     void registerEvaluationString(const QString & string, CuteReport::BaseItemInterface *item);
     QString preprocessEvaluateString(QString str, const CuteReport::BaseItemInterface *item);
 
@@ -107,8 +108,10 @@ private:
     void initBands(QList<CuteReport::BandInterface*> bands);
     void createNewRenderingPage();
     void completePage(CuteReport::RenderedPageInterface *page);
-    void processBand(CuteReport::BandInterface * band, CuteReport::RenderedItemInterface *renderedView = 0);
-    CuteReport::RenderedItemInterface * processItem(QPointF delta, CuteReport::BaseItemInterface * item, CuteReport::RenderedItemInterface * parent, bool withChildren = true, CuteReport::RenderedItemInterface * renderedView = 0 );
+    void processBand(CuteReport::BandInterface * band, CuteReport::RenderingStage stage);
+    bool processItem(CuteReport::BaseItemInterface * item, QList<CuteReport::BaseItemInterface*> & processedList, bool withChildren);
+    void deployItem(CuteReport::BaseItemInterface * item, CuteReport::RenderedItemInterface *parent, QList<CuteReport::BaseItemInterface*> &processedItems, bool withChildren = true);
+    void renderingEndItem(CuteReport::BaseItemInterface * item, QList<CuteReport::BaseItemInterface*> &processedItems, bool withChildren = true);
     void processDataset(CuteReport::DatasetInterface * dtst);
     bool canFitBandToPage(CuteReport::BandInterface * band);
     bool terminated();
@@ -151,6 +154,8 @@ private:
     bool m_runs;
 
     int m_zValue;
+    quint32 m_lastItemId;
+    QHash<QString, qint32> m_lastIdForItem;
 
     friend class RendererItemInterface;
 };

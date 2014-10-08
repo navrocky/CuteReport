@@ -10,3 +10,6 @@ SOURCES += \
 HEADERS +=  \
     preview.h \
 
+RESOURCES += \
+    preview.qrc
+

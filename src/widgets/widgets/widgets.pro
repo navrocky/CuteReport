@@ -36,3 +36,13 @@ contains(DEFINES, SYSTEMINSTALL) {
     DESTDIR = ../../../$$BUILD_DIR/$$REPORT_LIBS_PATH
 }
 
+HEADERS += \
+    functions_gui.h
+
+SOURCES += \
+    functions_gui.cpp
+
+contains(DEFINES, STATIC_WIDGETS) {
+    CONFIG += static
+    CONFIG += uitools
+}

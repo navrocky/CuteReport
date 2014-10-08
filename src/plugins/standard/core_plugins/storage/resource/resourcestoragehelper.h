@@ -47,11 +47,11 @@ public:
     explicit ResourceStorageHelper(StorageResource * storage, VisibleOptions visibleOptions = AllOptions);
     ~ResourceStorageHelper();
 
-    virtual void load();
-    virtual void save();
-
     void showSyncMessage(const QString &message);
 
+public slots:
+    virtual void load();
+    virtual void save();
     
 private slots:
     void slotSync();
@@ -65,14 +65,17 @@ private slots:
     void fillReports(const QString & currentReport = QString());
     void fillPrefixes(const QString & currentPrefix = QString());
     void fillObjects(const QString &currentObject = QString());
-    void slotCurrentPrefixChanged(QListWidgetItem* current ,QListWidgetItem*);
-    void slotCurrentItemChanged(QListWidgetItem* current ,QListWidgetItem*);
-    void slotCurrentReportChanged(QListWidgetItem* current ,QListWidgetItem*);
+    void slotCurrentPrefixChanged(QListWidgetItem* current, QListWidgetItem*);
+    void slotCurrentItemChanged(QListWidgetItem* current, QListWidgetItem*);
+    void slotCurrentReportChanged(QListWidgetItem* current, QListWidgetItem*);
     void updatePreview();
     void clearPreview();
     void currentPrefixChanged (QListWidgetItem* item);
 
 private:
+    void connectObject();
+    void disconnectObject();
+
     Ui::ResourceStorageHelper *ui;
     StorageResource * m_storage;
     QMultiHash<QString, QString> m_objects;

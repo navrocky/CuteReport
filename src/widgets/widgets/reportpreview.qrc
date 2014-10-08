@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>images/preview_48.png</file>
         <file>images/zoom-fit-width.png</file>
         <file>images/zoom-fit-best.png</file>
         <file>images/zoom-1-to-2.png</file>

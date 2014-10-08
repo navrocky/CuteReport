@@ -23,6 +23,7 @@
 #include "propertyeditor.h"
 #include "pageinterface.h"
 #include "reportinterface.h"
+#include "reportplugininterface.h"
 #include "iteminterface.h"
 #include "bandinterface.h"
 #include "objectinspector.h"
@@ -37,6 +38,7 @@ const char * MODULENAME = "PageEditor";
 
 using namespace CuteDesigner;
 
+inline void initMyResource() { Q_INIT_RESOURCE(page_editor); }
 
 PageEditor::PageEditor(QObject *parent) :
     ModuleInterface(parent),
@@ -45,25 +47,41 @@ PageEditor::PageEditor(QObject *parent) :
     m_currentManipulator(0),
     m_isActive(false)
 {
-    ui = new PageEditorContainer(core());
+}
 
-    ui->addPagePlugins(core()->reportCore()->pageModules());
 
-    m_propertyEditor = new PropertyEditor::PropertyEditor(ui);
+PageEditor::~PageEditor()
+{
+    delete ui;
+}
+
+
+void PageEditor::init(Core *core)
+{
+    initMyResource();
+    ModuleInterface::init(core);
+
+    ui = new PageEditorContainer(this);
+    ui->init();
+    ui->addPagePlugins(core->reportCore()->pageModules());
+
+    m_propertyEditor = core->createPropertyEditor(ui);
     ui->addPropertyEditor(m_propertyEditor);
-
     m_objectInspector = new ObjectInspector(ui);
     ui->addObjectInspector(m_objectInspector);
 
-    foreach (CuteReport::BaseItemInterface* itemPlugin, core()->reportCore()->itemModules())
+    foreach (CuteReport::BaseItemInterface* itemPlugin, core->reportCore()->itemModules())
         if (dynamic_cast<CuteReport::BandInterface*>(itemPlugin))
-            ui->addItem(itemPlugin->itemIcon(), itemPlugin->moduleName(), itemPlugin->metaObject()->className(), itemPlugin->itemGroup());
+            ui->addItem(itemPlugin->itemIcon(), itemPlugin->moduleShortName(), itemPlugin->suitName(), itemPlugin->itemGroup());
 
-    foreach (CuteReport::BaseItemInterface* itemPlugin, core()->reportCore()->itemModules())
-        if (!dynamic_cast<CuteReport::BandInterface*>(itemPlugin))
-            ui->addItem(itemPlugin->itemIcon(), itemPlugin->moduleName(), itemPlugin->metaObject()->className(), itemPlugin->itemGroup());
+    foreach (CuteReport::BaseItemInterface* itemPlugin, core->reportCore()->itemModules())
+        if (!dynamic_cast<CuteReport::BandInterface*>(itemPlugin)) {
+            ui->addItem(itemPlugin->itemIcon(), itemPlugin->moduleShortName(), itemPlugin->suitName(),  itemPlugin->itemGroup());
+        }
 
-    connect(m_core, SIGNAL(currentReportChanged(CuteReport::ReportInterface*)), this, SLOT(slotReportChanged(CuteReport::ReportInterface*)));
+    //connect(core, SIGNAL(loadReport_after(CuteReport::ReportInterface*)), this, SLOT(slotReportCreated(CuteReport::ReportInterface*)));
+    //connect(core, SIGNAL(newReport_after(CuteReport::ReportInterface*)), this, SLOT(slotReportCreated(CuteReport::ReportInterface*)));
+    connect(core, SIGNAL(currentReportChanged(CuteReport::ReportInterface*)), this, SLOT(slotReportChanged(CuteReport::ReportInterface*)));
     connect(m_objectInspector, SIGNAL(objectChanged(QObject*)), this, SLOT(slotActiveObjectChanged(QObject*)));
     connect(m_objectInspector, SIGNAL(selectionChanged()), this, SLOT(slotSelectionChanged()));
 
@@ -73,14 +91,7 @@ PageEditor::PageEditor(QObject *parent) :
     connect(ui.data(), SIGNAL(currentTabChanged(QString)), this, SLOT(slotCurrentPageChangedByGUI(QString)));
     connect(ui.data(), SIGNAL(requestForRenamePage(QString)), this, SLOT(slotRequestForRenamePage(QString)));
 
-    ui->setEnabled(core()->currentReport());
-}
-
-
-PageEditor::~PageEditor()
-{
-    if (ui)
-        delete ui;
+    ui->setEnabled(core->currentReport());
 }
 
 
@@ -212,39 +223,54 @@ void PageEditor::slotSelectionChanged()
 
 void PageEditor::slotReportChanged(CuteReport::ReportInterface * report)
 {
-    ui->setEnabled(core()->currentReport());
+    ui->setEnabled(report);
     ui->removeAllTabs();
+    foreach (CuteReport::PageInterface * page, m_pages) {
+        if (page)
+            page->disconnect(this, 0);
+    }
     m_pages.clear();
+    m_pageNames.clear();
+    if (m_currentReport) {
+        m_currentReport->disconnect(this, 0);
+    }
 
     if (report) {
         foreach (CuteReport::PageInterface * page, report->pages()) {
-            ui->addTab(page->createView(), page->icon(), page->objectName());
-            m_pages.insert(page, page->objectName());
+            _processNewPage(page);
         }
-
         slotChangeCurrentPage( report->pages().count() ? report->pages()[0] : 0);
-
         if (m_currentPage)
             ui->setCurrentTab(m_currentPage->objectName());
+        connect(report, SIGNAL(pageAdded(CuteReport::PageInterface*)), this, SLOT(slotPageCreatedOutside(CuteReport::PageInterface*)));
+        connect(report, SIGNAL(pageDeleted(CuteReport::PageInterface*)), this, SLOT(slotPageDeletedOutside(CuteReport::PageInterface*)));
     } else {
         m_currentPage = 0;
         m_activeObject = 0;
         m_objectInspector->setRootObject(0);
         m_propertyEditor->setObject(0);
     }
+    m_currentReport = report;
 }
 
 
 void PageEditor::slotRequestForCreatePage(QString moduleName)
 {
     CuteReport::PageInterface * page = core()->reportCore()->createPageObject(core()->currentReport(), moduleName);
-    if (page) {
-        page->init();
-        slotChangeCurrentPage(page);
-        m_pages.insert(page, page->objectName());
-        ui->addTab(page->createView(), page->icon(), page->objectName());
-        ui->setCurrentTab(page->objectName());
-    }
+    if (!page)
+        return;
+    page->init();
+    core()->currentReport()->addPage(page);
+}
+
+
+void PageEditor::slotPageCreatedOutside(CuteReport::PageInterface *page)
+{
+    if (!page || m_pages.contains(page))
+        return;
+    _processNewPage(page);
+    slotChangeCurrentPage(page);
+    ui->setCurrentTab(page->objectName());
 }
 
 
@@ -263,21 +289,43 @@ void PageEditor::slotRequestForDeletePage(QString pageName)
         }
 
     ui->removeTab(pageName);
-    m_pages.remove(page);
-    delete page;
-    m_currentPage = 0;
+//    int index = m_pages.indexOf(page);
+    m_pages.removeAt(index);
+    m_pageNames.removeAt(index);
+    m_currentReport->deletePage(page);
+//    m_currentPage = 0;
 
-    pages = core()->currentReport()->findChildren<CuteReport::PageInterface*>();
+//    pages = core()->currentReport()->findChildren<CuteReport::PageInterface*>();
 
-    if (index > pages.count() -1)
-        index = pages.count() -1;
-    if (index < 0)
-        index = 0;
+//    if (index > pages.count() -1)
+//        index = pages.count() -1;
+//    if (index < 0)
+//        index = 0;
 
-    slotChangeCurrentPage( pages.count() ? pages[index] : 0);
+//    slotChangeCurrentPage( pages.count() ? pages[index] : 0);
 
-    if (m_currentPage)
-        ui->setCurrentTab(m_currentPage->objectName());
+//    if (m_currentPage)
+//        ui->setCurrentTab(m_currentPage->objectName());
+}
+
+
+void PageEditor::slotPageDeletedOutside(CuteReport::PageInterface *page)
+{
+    int index = m_pages.indexOf(page);
+    m_pages.removeAt(index);
+    m_pageNames.removeAt(index);
+    ui->removeTab(page->objectName());
+    if (m_currentPage == page) {
+        m_currentPage = 0;
+        int index = -1;
+        if (index > m_pages.count() -1)
+            index = m_pages.count() -1;
+        if (index < 0)
+            index = 0;
+        slotChangeCurrentPage( m_pages.count() ? m_pages[index] : 0);
+        if (m_currentPage)
+            ui->setCurrentTab(m_currentPage->objectName());
+    }
 }
 
 
@@ -315,9 +363,21 @@ void PageEditor::slotRequestForRenamePage(QString pageName)
         d.setWindowTitle("Page renaming");
         if (d.exec() == QDialog::Accepted) {
             page->setObjectName(d.newName());
-            ui->setNewPageName( pageName, d.newName());
+//            ui->setNewPageName( pageName, d.newName());
         }
     }
+}
+
+
+void PageEditor::slotPageNameChangedOutside(const QString & name)
+{
+    CuteReport::PageInterface * page = qobject_cast<CuteReport::PageInterface*>(sender());
+    Q_ASSERT(page);
+    int index = m_pages.indexOf(page);
+    QString newName = page->objectName();
+    QString oldName = m_pageNames.at(index);
+    ui->setNewPageName(oldName, newName);
+    m_pageNames[index] = newName;
 }
 
 
@@ -346,10 +406,28 @@ void PageEditor::slotDeletePage()
 }
 
 
+//void PageEditor::slotReportCreated(CuteReport::ReportInterface * report)
+//{
+//    connect(report, SIGNAL(pageAdded(CuteReport::PageInterface*)), this
+//}
+
+
+void PageEditor::_processNewPage(CuteReport::PageInterface *page)
+{
+    if (!page)
+        return;
+
+    m_pages.append(page);
+    m_pageNames.append(page->objectName());
+    ui->addTab(page->createView(), page->icon(), page->objectName());
+    connect(page, SIGNAL(objectNameChanged(QString)), this, SLOT(slotPageNameChangedOutside(QString)));
+}
+
+
 void PageEditor::slotChangeCurrentPage(CuteReport::PageInterface* page)
 {
     if (m_currentPage) {
-        disconnect(m_currentPage, 0, this, 0);
+        disconnect(m_currentPage, SIGNAL(activeObjectChanged(QObject*)), this, SLOT(slotActiveObjectChanged(QObject*)));
         if (m_currentManipulator)
             foreach (QLabel * label, m_currentManipulator->statusBarLabels())
                 label->hide();
@@ -398,8 +476,6 @@ void PageEditor::slotChangeCurrentPage(CuteReport::PageInterface* page)
 }
 
 
-//} //namespace
-
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(pageEditor, PageEditor)
+Q_EXPORT_PLUGIN2(PageEditor, PageEditor)
 #endif

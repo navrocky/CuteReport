@@ -57,8 +57,8 @@ public:
     explicit ModuleInterface(QObject *parent = 0);
     virtual ~ModuleInterface();
 
-    static CuteDesigner::Core * core();
-    static void setCore(CuteDesigner::Core *core);
+    virtual void init(CuteDesigner::Core *core);
+    virtual CuteDesigner::Core * core();
 
     virtual void reloadSettings() = 0;
     virtual void saveSettings() = 0;
@@ -70,8 +70,13 @@ public:
     // module might have no view;
     virtual QWidget * view() = 0;
 
+    // for modules that can have some instancies ie widget, like editors, etc.
+    virtual QWidget * createWidget(QWidget * parent = 0) {Q_UNUSED(parent); return 0;}
+    virtual QString getResult(QWidget * editorWidget) {Q_UNUSED(editorWidget); return QString();}
+
     virtual QIcon icon() = 0;
     virtual QString name() = 0;
+    virtual QString toolTip() {return QString();}
     virtual qint16 priority() = 0;
 
     virtual QList<CuteDesigner::DesignerMenu*> mainMenu();
@@ -83,8 +88,7 @@ signals:
 protected:
     QAction * createAction(const QString & objectName, const QString & text, const QString & iconPath, const QString & keySequence, const char * method);
 
-    static CuteDesigner::Core * m_core;
-    
+    CuteDesigner::Core * m_core;
 };
 
 } //namespace

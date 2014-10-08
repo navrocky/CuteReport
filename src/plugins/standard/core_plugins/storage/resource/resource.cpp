@@ -36,6 +36,8 @@
 
 #define MODULENAME "StorageResource"
 
+inline void initMyResource() { Q_INIT_RESOURCE(resource_storage); }
+
 using namespace CuteReport;
 
 //static const QString reportsPrefix = "reports";
@@ -54,8 +56,8 @@ StorageResource::StorageResource(QObject * parent)
 }
 
 
-StorageResource::StorageResource( const StorageResource& p ):
-    StorageInterface(p.parent()),
+StorageResource::StorageResource(const StorageResource& p):
+    StorageInterface(p, p.parent()),
     m_lastError(p.lastError()),
     m_helper(0),
     m_localPath(p.localPath()),
@@ -69,6 +71,12 @@ StorageResource::StorageResource( const StorageResource& p ):
 StorageResource::~StorageResource()
 {
     delete m_helper;
+}
+
+
+void StorageResource::moduleInit()
+{
+    initMyResource();
 }
 
 

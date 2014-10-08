@@ -37,7 +37,7 @@ namespace CuteReport {
 
 
 DummyItem::DummyItem(QObject *parent)
-    :ItemInterface(*new DummyItemPrivate, parent)
+    :ItemInterface(new DummyItemPrivate, parent)
 {
     Q_D(DummyItem);
     setResizeFlags( ResizeLeft | ResizeRight | ResizeTop | ResizeBottom);
@@ -46,16 +46,17 @@ DummyItem::DummyItem(QObject *parent)
 }
 
 
-DummyItem::DummyItem(DummyItemPrivate &dd, QObject * parent)
+DummyItem::DummyItem(DummyItemPrivate *dd, QObject * parent)
     :ItemInterface(dd, parent)
 {
 }
 
 
-BaseItemInterface *DummyItem::clone()
+
+BaseItemInterface *DummyItem::itemClone() const
 {
-    Q_D(DummyItem);
-    return new DummyItem(*new DummyItemPrivate(*d), parent());
+    Q_D(const DummyItem);
+    return new DummyItem(new DummyItemPrivate(*d), parent());
 }
 
 
@@ -123,7 +124,7 @@ QIcon DummyItem::itemIcon() const
 }
 
 
-QString DummyItem::moduleName() const
+QString DummyItem::moduleShortName() const
 {
     return tr("DummyItem");
 }
@@ -149,13 +150,24 @@ void DummyItem::setOriginalModuleName(const QString & name)
 }
 
 
-CuteReport::RenderedItemInterface * DummyItem::render(int customDPI)
+bool DummyItem::renderPrepare()
 {
-    Q_UNUSED(customDPI);
     Q_D(DummyItem);
-    DummyItemPrivate * p = new DummyItemPrivate(*d);
-    return new RenderedDummyItem(this, p);
+    emit printBefore();
+    setRenderingPointer(new DummyItemPrivate(*d));
+    emit printDataBefore();
+    emit printDataAfter();
+    return true;
 }
+
+
+RenderedItemInterface *DummyItem::renderView()
+{
+    Q_D(DummyItem);
+    RenderedItemInterface * view = new RenderedDummyItem(this, new DummyItemPrivate(*d));
+    return view;
+}
+
 
 
 void DummyItem::paint(QPainter * painter, const QStyleOptionGraphicsItem *option, const BaseItemInterfacePrivate * data, const QRectF &boundingRect, RenderingType type)

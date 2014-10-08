@@ -48,6 +48,28 @@ SqlDataset::SqlDataset(QObject *parent)
 }
 
 
+SqlDataset::SqlDataset(const SqlDataset &dd, QObject * parent)
+    : DatasetInterface(parent)
+{
+    m_currentRow = 0;
+    m_isPopulated = false;
+    m_queryText = dd.m_queryText;
+    m_dbhost = dd.m_dbhost;
+    m_dbname = dd.m_dbname;
+    m_dbuser = dd.m_dbuser;
+    m_dbpasswd = dd.m_dbpasswd;
+    m_driver = dd.m_driver;
+    m_connectionName = dd.m_connectionName;
+    m_lastError = dd.m_lastError;
+    m_model = new QSqlQueryModel(this);
+    m_fmodel = new QSortFilterProxyModel(this);
+    m_fmodel->setSourceModel(m_model);
+    if (dd.m_isPopulated) {
+        populate();
+        setCurrentRow(dd.m_currentRow);
+    }
+}
+
 SqlDataset::~SqlDataset()
 {
     if (m_helper)
@@ -65,6 +87,12 @@ QIcon SqlDataset::icon()
 CuteReport::DatasetInterface * SqlDataset::createInstance(QObject* parent) const
 {
     return new SqlDataset(parent);
+}
+
+
+DatasetInterface *SqlDataset::objectClone() const
+{
+    return new SqlDataset(*this, parent());
 }
 
 
@@ -87,12 +115,19 @@ QString SqlDataset::lastError()
 
 QString SqlDataset::fieldName(int column )
 {
-    if (m_isPopulated) {
-        m_model->headerData ( column, Qt::Horizontal);
-        return m_model->record().fieldName(column);
-    } else
-        return QString();
+    if (!m_isPopulated)
+        populate();
+    return m_model->record().fieldName(column);
+//    } else
+//        return m_model->headerData ( column, Qt::Horizontal).toString();
 }
+
+
+QVariant::Type SqlDataset::fieldType(int column)
+{
+    return QVariant::String;
+}
+
 
 
 QAbstractItemModel * SqlDataset::model()
@@ -338,7 +373,15 @@ bool SqlDataset::setCurrentRow(int index)
 
 int SqlDataset::rows()
 {
-	return m_fmodel->rowCount();
+    return m_fmodel->rowCount();
+}
+
+
+int SqlDataset::columns()
+{
+    if (!m_isPopulated)
+        populate();
+    return m_fmodel->columnCount();
 }
 
 

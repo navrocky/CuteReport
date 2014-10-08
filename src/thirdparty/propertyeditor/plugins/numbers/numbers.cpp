@@ -32,6 +32,7 @@
 #include <QDoubleSpinBox>
 #include <QSpinBox>
 #include <QtPlugin>
+#include <QDebug>
 
 #include "numbers.h"
 
@@ -48,11 +49,15 @@ QWidget* Numbers::createEditor(QWidget * parent, const QModelIndex & index)
 	Q_UNUSED(index);
 	if (value().type() == QVariant::Double)
 	{
+        qDebug() << objectPropertyName();
+        int precision = propertyPrecision();
 		QDoubleSpinBox *dsb = new QDoubleSpinBox(parent);
 		dsb->setMaximum(1e10);
 		dsb->setMinimum(-1e10);
 		dsb->setSingleStep(0.1);
 		dsb->setAutoFillBackground ( false );
+        if (precision > 0)
+            dsb->setDecimals(precision);
 		connect(dsb, SIGNAL(valueChanged(double)), this, SLOT(setValue(double)));
 		return dsb;
 	}
@@ -81,8 +86,16 @@ QVariant Numbers::data(const QModelIndex & index)
 	{
 		case 0:
 			return object()->metaObject()->property(objectProperty()).name();
-		case 1:
-			return value();
+        case 1: {
+                QVariant val = value();
+                switch (val.type()) {
+                    case QVariant::Double: {
+                        int precision = propertyPrecision();
+                        return QString("%1").arg(val.toDouble(), 0, 'f', precision);
+                    }
+                    default: return val;
+                }
+            }
 	}
 	return QVariant();
 }
@@ -124,5 +137,5 @@ PropertyInterface* Numbers::createInstance(QObject * object, int property, const
 }
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(numbers, Numbers)
+Q_EXPORT_PLUGIN2(NumbersProperty, Numbers)
 #endif

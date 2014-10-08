@@ -30,15 +30,34 @@
 
 using namespace CuteDesigner;
 
+inline void initMyResource() { Q_INIT_RESOURCE(dataset_editor); }
 
 DatasetEditor::DatasetEditor(QObject *parent) :
     ModuleInterface(parent),
-    m_currentDataset(0)
+    m_currentDataset(0),
+    ui(0)
 {
-    ui = new DatasetContainer(core());
-    ui->addDatasetPlugins(core()->reportCore()->datasetModules());
+}
 
-    m_propertyEditor = new PropertyEditor::PropertyEditor(ui);
+
+DatasetEditor::~DatasetEditor()
+{
+    if (ui)
+        delete ui;
+}
+
+
+void DatasetEditor::init(Core *core)
+{
+    initMyResource();
+    ModuleInterface::init(core);
+
+    ui = new DatasetContainer(this);
+    ui->setEnabled(false);
+    ui->addDatasetPlugins(core->reportCore()->datasetModules());
+    ui->setEnabled(core->currentReport());
+
+    m_propertyEditor = core->createPropertyEditor(ui);
     ui->addPropertyEditor(m_propertyEditor);
 
     connect(ui.data(), SIGNAL(requestForCreateDataset(QString)) , this, SLOT(slotRequestForCreateDataset(QString)), Qt::QueuedConnection);
@@ -47,16 +66,7 @@ DatasetEditor::DatasetEditor(QObject *parent) :
     connect(ui.data(), SIGNAL(requestForPopulateDataset()), this, SLOT(slotRequestForPopulatedataset()), Qt::QueuedConnection);
     connect(ui.data(), SIGNAL(requestForRename(QString)), this, SLOT(slotRequestForRename(QString)));
 
-    connect(core(), SIGNAL(currentReportChanged(CuteReport::ReportInterface*)), this, SLOT(slotCurrentReportChanged(CuteReport::ReportInterface*)));
-
-    ui->setEnabled(core()->currentReport());
-}
-
-
-DatasetEditor::~DatasetEditor()
-{
-    if (ui)
-        delete ui;
+    connect(core, SIGNAL(currentReportChanged(CuteReport::ReportInterface*)), this, SLOT(slotCurrentReportChanged(CuteReport::ReportInterface*)));
 }
 
 
@@ -102,7 +112,7 @@ void DatasetEditor::deactivate()
 
 QIcon DatasetEditor::icon()
 {
-    return QIcon(":images/database_48.png");
+    return QIcon(":/images/database_48.png");
 }
 
 
@@ -194,7 +204,7 @@ void DatasetEditor::slotRequestForPopulatedataset()
 
 void DatasetEditor::slotCurrentReportChanged(CuteReport::ReportInterface * report)
 {
-    core()->reportCore()->log(CuteReport::LogDebug, "DatasetEditor", "slotCurrentReportChanged");
+    CuteReport::ReportCore::log(CuteReport::LogDebug, "DatasetEditor", "slotCurrentReportChanged");
     ui->setEnabled(core()->currentReport());
 
     ui->deleteAllTabs();
@@ -271,8 +281,8 @@ void DatasetEditor::slotRequestForRename(QString currentName)
     }
 }
 
-//} //namespace
+//suit_end_namespace
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(datasetEditor, DatasetEditor)
+Q_EXPORT_PLUGIN2(DatasetEditor, DatasetEditor)
 #endif

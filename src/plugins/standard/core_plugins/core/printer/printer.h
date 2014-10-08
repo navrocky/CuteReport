@@ -57,10 +57,12 @@ public:
     explicit Printer(QObject *parent = 0);
     ~Printer();
 
-    virtual QString moduleName() const {return QString("Standard");}
+    virtual QString moduleShortName() const {return QString("Printer");}
+    virtual QString suitName() const { return "Standard"; }
 
     CuteReport::PrinterHelperInterface * helper();
     virtual PrinterInterface * createInstance( QObject * parent=0) const;
+    virtual PrinterInterface * clone() const;
 
     virtual bool print(CuteReport::ReportInterface * report);
     virtual QString lastError();
@@ -97,6 +99,8 @@ private:
     bool process_(CuteReport::ReportInterface * report, bool forceShowDialog = false);
 
 private:
+    explicit Printer(const Printer &dd, QObject *parent);
+
     QString m_lastError;
     bool m_showDialog;
     bool m_scaleToFit;

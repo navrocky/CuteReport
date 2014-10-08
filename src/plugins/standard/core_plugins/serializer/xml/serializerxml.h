@@ -27,26 +27,37 @@
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
  *   GNU General Public License for more details.                          *
  ****************************************************************************/
-#ifndef SAVEXML_H
-#define SAVEXML_H
+#ifndef SERIALIZER_XML_H
+#define SERIALIZER_XML_H
 
 #include "serializerinterface.h"
 #include "globals.h"
 #include <QDomDocument>
 
+namespace CuteReport {
+class ReportInterface;
+class PageInterface;
+class DatasetInterface;
+class PrinterInterface;
+class RendererInterface;
+class StorageInterface;
+class FormInterface;
+}
+
+using namespace CuteReport;
+
 class SerializerXML : public CuteReport::SerializerInterface
 {
     Q_OBJECT
+    Q_INTERFACES(CuteReport::SerializerInterface)
 #if QT_VERSION >= 0x050000
     Q_PLUGIN_METADATA(IID "CuteReport.SerializerInterface/1.0")
 #endif
 
-    Q_INTERFACES(CuteReport::SerializerInterface)
 public:
-    typedef QPair<QString, QString> StringPair;
     explicit SerializerXML(QObject * parent = 0);
     ~SerializerXML();
-    virtual SerializerXML * createInstance(QObject * parent = 0) const;
+    virtual SerializerInterface * createInstance(QObject * parent = 0) const;
 
     virtual QByteArray serialize(const QObject * object, bool * ok = 0);
     virtual QObject * deserialize(const QByteArray &data, bool * ok = 0);
@@ -54,9 +65,11 @@ public:
     virtual QString lastError();
 
     virtual int moduleVersion() const {return 1;}
-    virtual QString moduleName() const {return QString("xml");}
+    virtual QString moduleShortName() const {return QString("XML");}
+    virtual QString suitName() const { return "Standard"; }
 
 private:
+    typedef QPair<QString, QString> StringPair;
 //    QDomDocument reportToDom(const CuteReport::ReportInterface * report);
     CuteReport::ReportInterface * reportFromDom(QDomDocument * doc);
     QDomElement objectProperties(const QObject *object, QDomDocument * doc, const QString &objectName = QString());
@@ -84,7 +97,8 @@ private:
 
 private:
     QString m_lastError;
+
 };
 
 
-#endif // SAVEXML_H
+#endif // SERIALIZER_XML_H

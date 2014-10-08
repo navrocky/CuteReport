@@ -33,6 +33,7 @@
 #include "pageinterface.h"
 #include "globals.h"
 #include "types.h"
+#include "plugins_common.h"
 
 namespace CuteReport {
     class BaseItemInterface;
@@ -40,9 +41,17 @@ namespace CuteReport {
     class RenderedPageInterface;
 }
 
+SUIT_BEGIN_NAMESPACE
 class PageGUI;
 class LayoutManager;
+class PageFormat;
+class Page;
 struct PagePrivateData;
+SUIT_END_NAMESPACE
+
+USING_SUIT_NAMESPACE
+
+SUIT_BEGIN_NAMESPACE
 
 class PageFormat {
 public:
@@ -54,10 +63,10 @@ public:
 class Page: public CuteReport::PageInterface
 {
     Q_OBJECT
+    Q_INTERFACES(CuteReport::PageInterface)
 #if QT_VERSION >= 0x050000
     Q_PLUGIN_METADATA(IID "CuteReport.PageInterface/1.0")
 #endif
-    Q_INTERFACES(CuteReport::PageInterface)
 
 //    Q_PROPERTY(qreal bandsIndention READ bandsIndention WRITE setBandsIndention NOTIFY bandsIndentionsChanged)
     Q_PROPERTY(bool useGrid READ useGrid WRITE setUseGrid NOTIFY useGridChanged)
@@ -78,12 +87,12 @@ public:
     virtual void moduleInit();
 
     virtual QIcon icon();
-    virtual QString moduleName() const {return QString("Standard");}
+    virtual QString moduleShortName() const {return QString("Page");}
+    virtual QString suitName() const { return SUIT_NAMESPACE_STR; }
 
     virtual void init();  // work after restoring
 
-
-    virtual CuteReport::PageInterface * createInstance(QObject * parent=0) const;
+    virtual CuteReport::PageInterface * createInstance(QObject * parent = 0) const;
     virtual QWidget * createHelper();
 
     virtual bool canContain(const QObject * object);
@@ -97,8 +106,15 @@ public:
     virtual QSizeF paperSize(CuteReport::Unit unit = CuteReport::UnitNotDefined) const;
     virtual void setPaperSize(const QSizeF & size, CuteReport::Unit unit = CuteReport::UnitNotDefined);   // for custom formats
     virtual QRectF pageRect(CuteReport::Unit unit = CuteReport::UnitNotDefined);
-    virtual CuteReport::Margins margins(CuteReport::Unit unit = CuteReport::UnitNotDefined) const;
-    virtual void setMargins(const CuteReport::Margins & margins, CuteReport::Unit unit = CuteReport::UnitNotDefined);
+    virtual qreal marginLeft(CuteReport::Unit unit = CuteReport::UnitNotDefined) const;
+    virtual qreal marginTop(CuteReport::Unit unit = CuteReport::UnitNotDefined) const;
+    virtual qreal marginRight(CuteReport::Unit unit = CuteReport::UnitNotDefined) const;
+    virtual qreal marginBottom(CuteReport::Unit unit = CuteReport::UnitNotDefined) const;
+    virtual void setMarginLeft(qreal margin, CuteReport::Unit unit = CuteReport::UnitNotDefined);
+    virtual void setMarginTop(qreal margin, CuteReport::Unit unit = CuteReport::UnitNotDefined);
+    virtual void setMarginRight(qreal margin, CuteReport::Unit unit = CuteReport::UnitNotDefined);
+    virtual void setMarginBottom(qreal margin, CuteReport::Unit unit = CuteReport::UnitNotDefined);
+    virtual void setMargins(qreal left, qreal top, qreal right, qreal bottom, CuteReport::Unit unit = CuteReport::UnitNotDefined);
     virtual CuteReport::Unit unit() const;
     virtual void setUnit(const CuteReport::Unit & unit);
     virtual QString unitStr() const;
@@ -111,11 +127,14 @@ public:
     virtual void setBackground(const QColor &background);
 
     virtual bool addItem(CuteReport::BaseItemInterface *item, QPointF pagePos, QString * error = 0);
+    virtual bool addItem(CuteReport::BaseItemInterface * item);
     virtual bool addItem(const QString & moduleName, QPointF pagePos, QString * error = 0);
     virtual void deleteItem(CuteReport::BaseItemInterface * item);
+    virtual void deleteItem(const QString & itemName);
 
     /** methods */
     virtual QList <CuteReport::BaseItemInterface*> items() const;
+    virtual CuteReport::BaseItemInterface* item(const QString & objectName) const;
     virtual CuteReport::BaseItemInterface *itemAt(QPointF pos);
     virtual QList<CuteReport::BaseItemInterface *> itemsAt(QPointF pos);
 
@@ -148,11 +167,10 @@ public:
     void bringCurrentItemBackward();
     bool useGrid() const;
     void setUseGrid(bool b);
-    qreal gridStep();
-    void setGridStep(qreal value);
+    qreal gridStep(CuteReport::Unit unit = CuteReport::UnitNotDefined);
+    void setGridStep(qreal value, CuteReport::Unit unit = CuteReport::UnitNotDefined);
     QString gridSteps();
     void setGridSteps(QString values);
-
 
     /** propertyeditor hints   */
     QStringList _format_variants() const;
@@ -163,21 +181,23 @@ public:
 
 signals:
     void useGridChanged(bool);
-    void gridStepChanged(qreal);
+    void gridStepChanged(qreal, CuteReport::Unit unit = CuteReport::UnitNotDefined);
     void bandsIndentionsChanged();
     void magnetRateChanged(int);
     void magnetValueChanged(int);
 
 private:
     Page(const Page & dd, QObject * parent);
+    virtual PageInterface * objectClone() const;
     static void initFormats();
     void initGUI();
     void checkGUI() {if (!m_gui) this->initGUI();}
     void updateMeassure();
     void prepareNewItem(CuteReport::BaseItemInterface *item, bool doLayout = false, bool withChildren = true);
-    void _deleteItem(CuteReport::BaseItemInterface * item, bool emitSignals = true);
+    void _deleteItem(CuteReport::BaseItemInterface * item, bool emitSignals = true, bool directDeletion = true);
     int layerLevel(CuteReport::BaseItemInterface *item);
     void afterGeometryChanged();
+    void _setMargin(qreal & currentValue, const qreal & newValue, CuteReport::Unit unit, bool processGeometry = true);
 
 
 private slots:
@@ -207,7 +227,11 @@ struct PagePrivateData : public QSharedData
     PageFormat format;
     CuteReport::PageInterface::Orientation orientation;
     int dpi;
-    CuteReport::Margins margins;
+//    CuteReport::Margins margins;
+    qreal marginLeft;
+    qreal marginTop;
+    qreal marginRight;
+    qreal marginBottom;
     QRectF pageRect;
     CuteReport::Units units;
     qreal bandsIndention;
@@ -216,6 +240,7 @@ struct PagePrivateData : public QSharedData
     QColor background;
     bool useGrid;
     QHash<CuteReport::Unit,qreal> gridSteps;
+    bool renderingStage;
 };
 
 
@@ -226,7 +251,7 @@ public:
     virtual void paintBegin ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
     virtual CuteReport::PageInterface::Orientation orientation() const {return m_orientation;}
-    virtual CuteReport::Margins margins(CuteReport::Unit unit) const;
+//    virtual CuteReport::Margins margins(CuteReport::Unit unit) const;
     virtual QRectF paperRect(CuteReport::Unit unit) const;
     virtual QSizeF paperSize(CuteReport::Unit unit) const;
     virtual QRectF pageRect(CuteReport::Unit unit) const;
@@ -238,14 +263,18 @@ public:
 private:
 
     QSizeF m_paperSizeMM;
-    CuteReport::Margins m_marginsMM;
+    qreal m_marginLeft;
+    qreal m_marginRight;
+    qreal m_marginTop;
+    qreal m_marginBottom;
     int m_dpi;
     QRectF m_rect;
     QRectF m_border;
     CuteReport::PageInterface::Orientation m_orientation;
-//    CuteReport::Margins m_margins;
 
 friend class Page;
 };
+
+SUIT_END_NAMESPACE
 
 #endif

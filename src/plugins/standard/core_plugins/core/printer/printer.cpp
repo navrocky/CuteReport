@@ -38,6 +38,7 @@
 
 using namespace CuteReport;
 
+
 Printer::Printer(QObject *parent) :
     PrinterInterface(parent),
     m_showDialog(true),
@@ -46,6 +47,18 @@ Printer::Printer(QObject *parent) :
     m_doubleSided(false),
     m_useDuplexer(false),
     m_duplexerMargins(Margins(0,0,0,15))
+{
+}
+
+
+Printer::Printer(const Printer &dd, QObject *parent)
+    : PrinterInterface(dd, parent),
+    m_showDialog(dd.m_showDialog),
+    m_scaleToFit(dd.m_scaleToFit),
+    m_keepAspectRatio(dd.m_keepAspectRatio),
+    m_doubleSided(dd.m_doubleSided),
+    m_useDuplexer(dd.m_useDuplexer),
+    m_duplexerMargins(dd.m_duplexerMargins)
 {
 }
 
@@ -65,6 +78,12 @@ CuteReport::PrinterHelperInterface * Printer::helper()
 PrinterInterface * Printer::createInstance( QObject * parent) const
 {
     return new Printer(parent);
+}
+
+
+PrinterInterface *Printer::clone() const
+{
+    return new Printer(*this, 0);
 }
 
 
@@ -365,5 +384,5 @@ QString Printer::_current_property_description() const
 
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(printer, Printer)
+Q_EXPORT_PLUGIN2(Printer, Printer)
 #endif

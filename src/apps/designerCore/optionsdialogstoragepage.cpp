@@ -37,8 +37,8 @@ OptionsDialogStoragePage::OptionsDialogStoragePage(CuteDesigner::Core *core) :
     CuteReport::StorageInterface* defaultStorage  = m_core->reportCore()->defaultStorage();
 
     if (defaultStorage) {
-        ui->modules->setCurrentIndex(ui->modules->findText(defaultStorage->moduleName()));
-        currentModuleChanged(defaultStorage->moduleName());
+        ui->modules->setCurrentIndex(ui->modules->findText(defaultStorage->moduleFullName()));
+        currentModuleChanged(defaultStorage->moduleFullName());
     }
 
     connect(ui->modules, SIGNAL(currentIndexChanged(QString)), this, SLOT(currentModuleChanged(QString)));
@@ -62,7 +62,8 @@ void OptionsDialogStoragePage::deactivate()
 {
     if (m_currentStorage) {
         m_currentStorage->helper()->save();
-        m_core->settings()->setValue(QString("Designer/Storage_%1_options").arg(m_currentStorage->moduleName()), m_core->reportCore()->moduleOptionsStr(m_currentStorage));
+        m_core->settings()->setValue(QString("CuteReport/Storage_%1_options").arg(m_currentStorage->moduleFullName().replace("::","_")),
+                                     m_core->reportCore()->moduleOptionsStr(m_currentStorage));
     }
 }
 
@@ -89,7 +90,8 @@ void OptionsDialogStoragePage::currentModuleChanged(QString moduleName)
 {
     if (m_currentStorage) {
         m_currentStorage->helper()->save();
-        m_core->settings()->setValue(QString("Designer/Storage_%1_options").arg(m_currentStorage->moduleName()), m_core->reportCore()->moduleOptionsStr(m_currentStorage)) ;
+        m_core->settings()->setValue(QString("CuteReport/Storage_%1_options").arg(m_currentStorage->moduleFullName().replace("::","_")),
+                                     m_core->reportCore()->moduleOptionsStr(m_currentStorage)) ;
         delete m_currentStorage->helper();
     }
 
@@ -97,10 +99,11 @@ void OptionsDialogStoragePage::currentModuleChanged(QString moduleName)
 
     if (module) {
         m_currentStorage = module;
-        m_core->reportCore()->setModuleOptionsStr(m_currentStorage, m_core->settings()->value(QString("Designer/Storage_%1_options").arg(m_currentStorage->moduleName())).toString());
+        m_core->reportCore()->setModuleOptionsStr(m_currentStorage, m_core->settings()->value(QString("CuteReport/Storage_%1_options")
+                                                                                              .arg(m_currentStorage->moduleFullName().replace("::","_"))).toString());
         ui->optionsLayout->addWidget(m_currentStorage->helper());
         ui->cbDefault->blockSignals(true);
-        ui->cbDefault->setChecked(m_core->reportCore()->defaultStorage() && m_core->reportCore()->defaultStorage()->moduleName() == m_currentStorage->moduleName());
+        ui->cbDefault->setChecked(m_core->reportCore()->defaultStorage() && m_core->reportCore()->defaultStorage()->moduleFullName() == m_currentStorage->moduleFullName());
         ui->cbDefault->blockSignals(false);
     }
 }
@@ -108,7 +111,7 @@ void OptionsDialogStoragePage::currentModuleChanged(QString moduleName)
 
 void OptionsDialogStoragePage::defaultStateChanged(bool state)
 {
-    m_core->reportCore()->setDefaultStorage(state ? m_currentStorage->moduleName() : "");
-    m_core->settings()->setValue(QString("Designer/PrimaryStorage"), m_core->reportCore()->defaultStorage()->moduleName());
+    m_core->reportCore()->setDefaultStorage(state ? m_currentStorage->moduleFullName() : "");
+    m_core->settings()->setValue(QString("CuteReport/PrimaryStorage"), m_core->reportCore()->defaultStorage()->moduleFullName());
 }
 

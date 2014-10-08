@@ -30,20 +30,19 @@
 #ifndef SERIALIZERINTERFACE_H
 #define SERIALIZERINTERFACE_H
 
-#include "reportcore.h"
 #include "reportplugininterface.h"
-#include <QString>
 
 namespace CuteReport
 {
 
 class CUTEREPORT_EXPORTS SerializerInterface : public ReportPluginInterface
 {
+    Q_OBJECT
     Q_INTERFACES(CuteReport::ReportPluginInterface)
-public:
-    explicit SerializerInterface(QObject * parent):ReportPluginInterface(parent) {}
-    virtual ~SerializerInterface(){}
 
+public:
+    explicit SerializerInterface(QObject * parent);
+    virtual ~SerializerInterface();
 
     virtual QByteArray serialize(const QObject * object, bool * ok = 0) = 0;
     virtual QObject * deserialize(const QByteArray &data, bool * ok = 0) = 0;
@@ -51,10 +50,11 @@ public:
     virtual QString lastError() = 0;
 
 signals:
-    void changed();
 
 protected:
     virtual SerializerInterface * createInstance(QObject * parent = 0) const = 0;
+    explicit SerializerInterface(const SerializerInterface & source)
+        :ReportPluginInterface(source.parent()){}
 
     friend class ReportCore;
 };
@@ -62,4 +62,5 @@ protected:
 }
 
 Q_DECLARE_INTERFACE(CuteReport::SerializerInterface, "CuteReport.SerializerInterface/1.0")
+
 #endif // SERIALIZERINTERFACE_H

@@ -39,7 +39,7 @@ namespace CuteReport {
 
 
 DummyBand::DummyBand(QObject * parent)
-    : CuteReport::BandInterface(*new DummyBandPrivate, parent)
+    : CuteReport::BandInterface(new DummyBandPrivate, parent)
 {
     Q_D(DummyBand);
     setResizeFlags(FixedPos | ResizeBottom);
@@ -49,7 +49,7 @@ DummyBand::DummyBand(QObject * parent)
 }
 
 
-DummyBand::DummyBand(DummyBandPrivate &dd, QObject * parent)
+DummyBand::DummyBand(DummyBandPrivate *dd, QObject * parent)
     :CuteReport::BandInterface(dd, parent)
 {
 }
@@ -61,10 +61,10 @@ CuteReport::BaseItemInterface * DummyBand::createInstance(QObject * parent) cons
 }
 
 
-CuteReport::BaseItemInterface * DummyBand::clone()
+CuteReport::BaseItemInterface * DummyBand::itemClone() const
 {
-    Q_D(DummyBand);
-    return new DummyBand(*d, parent());
+    Q_D(const DummyBand);
+    return new DummyBand(new DummyBandPrivate(*d), parent());
 }
 
 
@@ -108,13 +108,32 @@ bool DummyBand::canContain(QObject * object)
 }
 
 
+bool DummyBand::renderPrepare()
+{
+    Q_D(DummyBand);
+    emit printBefore();
+    setRenderingPointer(new DummyBandPrivate(*d));
+    emit printDataBefore();
+    emit printDataAfter();
+    return true;
+}
+
+
+RenderedItemInterface *DummyBand::renderView()
+{
+    Q_D(DummyBand);
+    RenderedItemInterface * view = new RenderedDummyBand(this, new DummyBandPrivate(*d));
+    return view;
+}
+
+
 QIcon DummyBand::itemIcon() const
 {
     return QIcon();
 }
 
 
-QString DummyBand::moduleName() const
+QString DummyBand::moduleShortName() const
 {
     return tr("DummyBand");
 }
@@ -165,13 +184,6 @@ void DummyBand::setLayoutPriority(int priority)
 {
     Q_D(DummyBand);
     d->layoutPriority = priority;
-}
-
-
-CuteReport::RenderedItemInterface * DummyBand::render(int customDPI)
-{
-    Q_UNUSED(customDPI);
-    return 0;
 }
 
 

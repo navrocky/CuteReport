@@ -30,7 +30,7 @@
 #ifndef FUNCTIONS_GUI_H
 #define FUNCTIONS_GUI_H
 
-#include "globals.h"
+#include "widgets_export.h"
 
 #include <QString>
 #include <QWidget>
@@ -38,8 +38,8 @@
 namespace CuteReport
 {
 
-CUTEREPORT_EXPORTS QString widgetGeometryToString(QWidget * widget);
-CUTEREPORT_EXPORTS bool widgetGeometryFromString(QWidget * widget, const QString & geometry);
+WIDGET_EXPORTS QString widgetGeometryToString(QWidget * widget);
+WIDGET_EXPORTS bool widgetGeometryFromString(QWidget * widget, const QString & geometry);
 
 } //namespace
 #endif // FUNCTIONS_H

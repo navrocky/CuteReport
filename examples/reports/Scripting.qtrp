@@ -4,14 +4,14 @@
   <name type="QString"></name>
   <author type="QString">Author</author>
   <description type="QString"></description>
-  <script type="QString">memoitem.rendering.connect(memo_test);&lt;newline>&lt;newline>function memo_test() {&lt;newline>     memoitem.text = data.value("name");&lt;newline>     memoitem.backgroundBrush = new QBrush(new QColor("#665544"));&lt;newline>}&lt;newline></script>
+  <script type="QString">memoitem.printDataBefore.connect(memo_test);&lt;newline>&lt;newline>function memo_test() {&lt;newline>     memoitem.text = data.value("name");&lt;newline>     memoitem.backgroundBrush = new QBrush(new QColor("#665544"));&lt;newline>}&lt;newline></script>
   <version type="int">0</version>
   <filePath type="QString">git:reports/Scripting.qtrp</filePath>
   <defaultStorageName type="QString"></defaultStorageName>
   <variables type="QVariantHash"/>
  </properties>
  <children>
-  <Page moduleName="Standard" moduleVersion="1" className="Page">
+  <Page moduleName="Page" moduleVersion="1" className="Page">
    <properties>
     <objectName type="QString">page</objectName>
     <orientation type="int">0</orientation>
@@ -98,7 +98,7 @@
         </backgroundBrush>
         <order type="int">1</order>
         <shiftMode type="int">0</shiftMode>
-        <sourceType alternateValue="0" type="QString">Script</sourceType>
+        <sourceType alternateValue="0" type="QString">Storage</sourceType>
         <source type="QString">file://[data."name"]</source>
         <image type="QPixmap"></image>
         <paintType alternateValue="3" type="QString">ResizeImageToItem_keepAspectRatio</paintType>
@@ -210,7 +210,7 @@
     </PageGUI>
    </children>
   </Page>
-  <Dataset moduleName="FileSystem Dataset" moduleVersion="1" className="FileSystemDataset">
+  <Dataset moduleName="FileSystem" moduleVersion="1" className="FileSystemDataset">
    <properties>
     <objectName type="QString">data</objectName>
     <parentDataset type="QString"></parentDataset>

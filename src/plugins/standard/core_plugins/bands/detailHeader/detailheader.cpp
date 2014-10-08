@@ -31,17 +31,19 @@
 #include <QtScript>
 #include "pageinterface.h"
 #include "rendererpublicinterface.h"
-
+#include  "bandinterface.h"
 #include "detailheader.h"
 #include "detailheader_p.h"
 #include "detailheaderscripting.h"
+#include "item_common/simplerendereditem.h"
 
 using namespace CuteReport;
 
+inline void initMyResource() { Q_INIT_RESOURCE(detailHeader); }
 
 DetailHeader::DetailHeader(QObject * parent):
-    CuteReport::BandInterface(*new DetailHeaderPrivate, parent)
-   ,m_renderer(0)
+    CuteReport::BandInterface(new DetailHeaderPrivate, parent)
+  ,m_renderer(0)
 {
     Q_D(DetailHeader);
     d->rect = QRectF(0,0,50,20);
@@ -49,7 +51,7 @@ DetailHeader::DetailHeader(QObject * parent):
 }
 
 
-DetailHeader::DetailHeader(DetailHeaderPrivate &dd, QObject * parent)
+DetailHeader::DetailHeader(DetailHeaderPrivate *dd, QObject * parent)
     :CuteReport::BandInterface(dd, parent)
     ,m_renderer(0)
 {
@@ -61,10 +63,16 @@ DetailHeader::~DetailHeader()
 }
 
 
-BaseItemInterface *DetailHeader::clone()
+void DetailHeader::moduleInit()
 {
-    Q_D(DetailHeader);
-    return new DetailHeader(*d, parent());
+    initMyResource();
+}
+
+
+BaseItemInterface *DetailHeader::itemClone() const
+{
+    Q_D(const DetailHeader);
+    return new DetailHeader(new DetailHeaderPrivate(*d), parent());
 }
 
 
@@ -89,7 +97,7 @@ void DetailHeader::deserialize(QByteArray &data)
 QDataStream &operator<<(QDataStream &s, const DetailHeaderPrivate &p) {
     s << static_cast<const BandInterfacePrivate&>(p);
     s << p.dataset << p.condition << p.lastConditionResult << p.startNewPage << p.printOnNewPageOnce
-         << p.lastPageNumber << p.reprintOnNewPage << p.resetDetailNumber;
+      << p.lastPageNumber << p.reprintOnNewPage << p.resetDetailNumber;
 
     return s;
 }
@@ -121,7 +129,7 @@ QIcon DetailHeader::itemIcon() const
 }
 
 
-QString DetailHeader::moduleName() const
+QString DetailHeader::moduleShortName() const
 {
     return tr("Detail Header");
 }
@@ -236,71 +244,82 @@ void DetailHeader::renderInit(RendererPublicInterface * renderer)
     } else {
         m_renderer->error(this->objectName(), "\'dataset\' field is empty");
     }
+    d->lastConditionResult = QString();
 }
 
 
 void DetailHeader::renderReset()
 {
+    Q_D(DetailHeader);
     m_renderer = 0;
+    d->lastConditionResult = QString();
 }
 
 
-CuteReport::RenderedItemInterface * DetailHeader::render(int customDPI)
+bool DetailHeader::renderNewPage()
 {
-    Q_UNUSED(customDPI)
+    DetailHeaderPrivate * orig_d = reinterpret_cast<DetailHeaderPrivate*>(d_ptr);
+    if (!orig_d->reprintOnNewPage)
+        return false;
+
+    if (!m_renderer->currentProcessingBand() || !(m_renderer->currentProcessingBand()->dataset() == orig_d->dataset)
+            || orig_d->lastPageNumber < 0)
+        return false;
+
+    emit printBefore();
+    setRenderingPointer(new DetailHeaderPrivate(*(reinterpret_cast<DetailHeaderPrivate*>(d_ptr))));
     Q_D(DetailHeader);
+    emit printDataBefore();
 
-    emit renderingBefore();
+    orig_d->lastPageNumber = m_renderer->currentPageNumber();
+    orig_d->lastConditionResult = m_renderer->processString(d->condition, this);
 
-    DetailHeaderPrivate * pCurrent = d;
-    DetailHeaderPrivate * pNew = new DetailHeaderPrivate(*d);
+    emit printDataAfter();
 
-    d_ptr = pNew;
-    emit rendering();
-    d_ptr = pCurrent;
+    return true;
+}
 
+
+bool DetailHeader::renderPrepare()
+{
+    emit printBefore();
+    setRenderingPointer(new DetailHeaderPrivate(*(reinterpret_cast<DetailHeaderPrivate*>(d_ptr))));
+    Q_D(DetailHeader);
+    emit printDataBefore();
+
+    DetailHeaderPrivate * orig_d = reinterpret_cast<DetailHeaderPrivate*>(orig_ptr);
     bool needRendering = false;
     bool doNotResetNumber = false;
 
-    // do not make overhead if makes no sence
-    if (!pNew->condition.isEmpty()) {
-
-        QString condition = m_renderer->processString(pNew->condition, this);
-
-        if (pNew->lastConditionResult != condition) {
-
-            if (pNew->startNewPage && !pNew->lastConditionResult.isEmpty() &&
-                    pNew->lastPageNumber == m_renderer->currentPageNumber()) {
-
+    if (!d->condition.isEmpty()) {
+        QString condition = m_renderer->processString(d->condition, this);
+        if (d->lastConditionResult != condition) {
+            if (d->startNewPage && !d->lastConditionResult.isEmpty() &&
+                    d->lastPageNumber == m_renderer->currentPageNumber()) {
                 m_renderer->createNewPage();
                 needRendering = true;
-
             } else
                 needRendering = true;
         }
-
-        d->lastConditionResult = condition;
-
+        orig_d->lastConditionResult = condition;
     } else
         needRendering = true;
 
-    if (pNew->reprintOnNewPage && pNew->lastPageNumber != m_renderer->currentPageNumber()) {
-        if (!needRendering)                 // its reprinting, not general rendering
-            doNotResetNumber = true;        // so we don't need to reset
-        needRendering = true;
-    }
-
-    if (needRendering && pNew->resetDetailNumber && !doNotResetNumber)
+    if (needRendering && d->resetDetailNumber && !doNotResetNumber)
         m_renderer->setValue("_line", 1);
 
-     d->lastPageNumber = m_renderer->currentPageNumber();
+    orig_d->lastPageNumber = m_renderer->currentPageNumber();
 
-     CuteReport::RenderedItemInterface * view = needRendering ? BandInterface::render(customDPI) : 0;
+    emit printDataAfter();
+    return needRendering;
+}
 
-     emit rendered(view);
-     emit renderingAfter();
 
-     return view;
+RenderedItemInterface *DetailHeader::renderView()
+{
+    Q_D(DetailHeader);
+    CuteReport::RenderedItemInterface * view = new SimpleRenderedItem(this, new DetailHeaderPrivate(*d));
+    return view;
 }
 
 
@@ -323,5 +342,5 @@ QString DetailHeader::_current_property_description() const
 }
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(detailHeader, DetailHeader)
+Q_EXPORT_PLUGIN2(DetailHeader, DetailHeader)
 #endif

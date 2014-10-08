@@ -30,18 +30,25 @@
 #ifndef MAGNETS_H
 #define MAGNETS_H
 
+#include "plugins_common.h"
+
 #include <QObject>
 #include <QPointF>
 
-class PageGUI;
 class QGraphicsItem;
 
 namespace CuteReport {
     class BaseItemInterface;
 }
 
+SUIT_BEGIN_NAMESPACE
+class PageGUI;
 class Page;
+SUIT_END_NAMESPACE
 
+USING_SUIT_NAMESPACE
+
+SUIT_BEGIN_NAMESPACE
 class Magnets : public QObject
 {
     Q_OBJECT
@@ -58,7 +65,7 @@ public:
         Horizontal = 32
     };
 
-    explicit Magnets(PageGUI *pageGUI);
+    explicit Magnets(SUIT_NAMESPACE::PageGUI *pageGUI);
     ~Magnets();
     
     int magnetsValue();
@@ -75,18 +82,22 @@ public:
 
     void clear();
 
-    QPointF delta(const QList<QPointF> & pointList, const QList<CuteReport::BaseItemInterface *> &excludeItems, MagnetDirection direction);
+    QPointF delta(const QList<QPointF> & pointList, const QList<CuteReport::BaseItemInterface *> &checkingItems, MagnetDirection direction);
+
+    qreal magnetRangeMM() const;
 
 public slots:
-     void setMagnetRate(int rate);
+    void setMagnetRate(int rate);
 
 
 private:
-//    int m_magnets;
+    //    int m_magnets;
 //    int m_magnetRate;
-    int m_magnetRange;
+    qreal m_magnetRangeMM;
     Page * m_page;
     QList <QGraphicsItem *> m_gideLines;
 };
+
+SUIT_END_NAMESPACE
 
 #endif // MAGNETS_H

@@ -40,13 +40,13 @@ namespace CuteReport
 {
 
 BandInterface::BandInterface(QObject * parent)
-    :BaseItemInterface(*new BandInterfacePrivate, parent)
+    :BaseItemInterface(new BandInterfacePrivate, parent)
 {
     initMe();
 }
 
 
-BandInterface::BandInterface(BandInterfacePrivate &dd, QObject * parent)
+BandInterface::BandInterface(BandInterfacePrivate *dd, QObject * parent)
     :BaseItemInterface(dd, parent)
 {
     initMe();
@@ -248,11 +248,11 @@ void BandInterface::init_gui()
 }
 
 
-CuteReport::RenderedItemInterface * BandInterface::render(int /*customDPI*/)
-{
-    Q_D(BandInterface);
-    return new SimpleRenderedItem(this, new BandInterfacePrivate(*d));
-}
+//RenderedItemInterface *BandInterface::renderView()
+//{
+//    Q_D(BandInterface);
+//    return new SimpleRenderedItem(this, new BandInterfacePrivate(*d));
+//}
 
 
 QByteArray BandInterface::serialize() const

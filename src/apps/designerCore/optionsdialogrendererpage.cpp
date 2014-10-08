@@ -37,8 +37,8 @@ OptionsDialogRendererPage::OptionsDialogRendererPage(CuteDesigner::Core *core) :
     CuteReport::RendererInterface* defaultModule  = m_core->reportCore()->defaultRenderer();
 
     if (defaultModule) {
-        ui->cbModules->setCurrentIndex(ui->cbModules->findText(defaultModule->moduleName()));
-        currentModuleChanged(defaultModule->moduleName());
+        ui->cbModules->setCurrentIndex(ui->cbModules->findText(defaultModule->moduleFullName()));
+        currentModuleChanged(defaultModule->moduleFullName());
     }
 
     connect(ui->cbModules, SIGNAL(currentIndexChanged(QString)), this, SLOT(currentModuleChanged(QString)));
@@ -58,9 +58,9 @@ void OptionsDialogRendererPage::activate()
 void OptionsDialogRendererPage::deactivate()
 {
     if (m_currentModule) {
-        m_core->settings()->setValue("Designer/PrimaryRenderer", m_currentModule->moduleName());
+        m_core->settings()->setValue("CuteReport/PrimaryRenderer", m_currentModule->moduleFullName());
 //        m_currentModule->helper()->save();
-        m_core->settings()->setValue(QString("Designer/Renderer_%1_options").arg(m_currentModule->moduleName()), m_core->reportCore()->moduleOptionsStr(m_currentModule)) ;
+        m_core->settings()->setValue(QString("CuteReport/Renderer_%1_options").arg(m_currentModule->moduleFullName()), m_core->reportCore()->moduleOptionsStr(m_currentModule)) ;
     }
 }
 
@@ -81,7 +81,7 @@ void OptionsDialogRendererPage::currentModuleChanged(QString moduleName)
 {
     if (m_currentModule) {
         //m_currentModule->helper()->save();
-        m_core->settings()->setValue(QString("Designer/Renderer_%1_options").arg(m_currentModule->moduleName()), m_core->reportCore()->moduleOptionsStr(m_currentModule)) ;
+        m_core->settings()->setValue(QString("CuteReport/Renderer_%1_options").arg(m_currentModule->moduleFullName()), m_core->reportCore()->moduleOptionsStr(m_currentModule)) ;
 //        delete m_currentModule->helper();
     }
 
@@ -90,6 +90,6 @@ void OptionsDialogRendererPage::currentModuleChanged(QString moduleName)
     if (module) {
         m_core->reportCore()->setDefaultRenderer( moduleName );
         m_currentModule = m_core->reportCore()->defaultRenderer();
-        m_core->reportCore()->setModuleOptionsStr( m_currentModule, m_core->settings()->value(QString("Designer/Storage_%1_options").arg(m_currentModule->moduleName())).toString());
+        m_core->reportCore()->setModuleOptionsStr( m_currentModule, m_core->settings()->value(QString("CuteReport/Renderer_%1_options").arg(m_currentModule->moduleFullName())).toString());
     }
 }

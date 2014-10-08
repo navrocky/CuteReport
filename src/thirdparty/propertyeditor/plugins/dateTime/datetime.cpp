@@ -99,5 +99,5 @@ PropertyInterface* DateTime::createInstance(QObject * object, int property, cons
 }
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(datetime, DateTime);
+Q_EXPORT_PLUGIN2(DateTimeProperty, DateTime)
 #endif

@@ -60,7 +60,7 @@ class Renderer : public CuteReport::RendererInterface
     Q_PROPERTY(bool antialiasing READ antialiasing WRITE setAntialiasing NOTIFY antialiasingChanged)
     Q_PROPERTY(bool textAntialiasing READ textAntialiasing WRITE setTextAntialiasing NOTIFY textAntialiasingChanged)
     Q_PROPERTY(bool smoothPixmapTransform READ smoothPixmapTransform WRITE setSmoothPixmapTransform NOTIFY textAntialiasingChanged)
-    Q_PROPERTY(int dpi READ dpi WRITE setDpi NOTIFY dpiChanged)
+//    Q_PROPERTY(int dpi READ dpi WRITE setDpi NOTIFY dpiChanged)
     Q_PROPERTY(int iterationDelay READ delay WRITE setDelay NOTIFY delayChanged)
 
 public:
@@ -70,7 +70,8 @@ public:
     virtual RendererInterface * createInstance(QObject * parent) const;
     virtual RendererInterface * clone() const;
 
-    virtual QString moduleName() const;
+    virtual QString moduleShortName() const;
+    virtual QString suitName() const { return "Standard"; }
 
     virtual void run(CuteReport::ReportInterface* report);
     virtual void stop();
@@ -105,13 +106,13 @@ signals:
          void done(bool errorsFound);
          void cancelled();
          void processingPage(int page, int total);
+         void dpiChanged(int);
     */
 
     void antialiasingChanged(bool);
     void textAntialiasingChanged(bool);
     void smoothPixmapTransformChanged(bool);
     void workWithReportCopyChanged(bool);
-    void dpiChanged(int);
     void delayChanged(int);
 
 

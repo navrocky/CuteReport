@@ -45,7 +45,7 @@ using namespace CuteReport;
 
 ReportInterface::ReportInterface(QObject *parent)
     : QObject(parent),
-//      m_reportCore(0),
+      //      m_reportCore(0),
       m_version(0.0),
       m_isDirty(false),
       m_isValid(true),
@@ -57,7 +57,7 @@ ReportInterface::ReportInterface(QObject *parent)
 
 ReportInterface::ReportInterface(const ReportInterface & dd, QObject * parent)
     :QObject(parent),
-//      m_reportCore(dd.m_reportCore),
+      //      m_reportCore(dd.m_reportCore),
       m_name(dd.m_name),
       m_author(dd.m_author),
       m_script(dd.m_script),
@@ -66,11 +66,13 @@ ReportInterface::ReportInterface(const ReportInterface & dd, QObject * parent)
       m_filePath(dd.m_filePath),
       m_defaultStorageName(dd.m_defaultStorageName),
       m_variables(dd.m_variables),
-      m_flags(dd.m_flags),
+      m_flags(0),
       m_isDirty(dd.m_isDirty),
+      m_isValid(dd.m_isValid),
       m_renderedReport(0)
 {
     Log::refCounterInc();
+    setFlags(dd.m_flags);
 }
 
 
@@ -82,20 +84,22 @@ ReportInterface::~ReportInterface()
 
 void ReportInterface::init()
 {
+    QList<CuteReport::ReportPluginInterface*> modules = this->findChildren<CuteReport::ReportPluginInterface*>();
+    qDebug() << modules.count();
     QList<CuteReport::PageInterface*> pages = this->findChildren<CuteReport::PageInterface*>();
     foreach(CuteReport::PageInterface* page, pages) {
         page->init();
         connect(page, SIGNAL(destroyed(QObject*)), this, SLOT(childDestroyed(QObject*)));
-        connect(page, SIGNAL(afterNewItemAdded(CuteReport::BaseItemInterface*,QPointF)),
-                this, SLOT(slotItemAdded(CuteReport::BaseItemInterface*,QPointF)));
-        connect(page, SIGNAL(afterItemRemoved(CuteReport::BaseItemInterface*)),
-                this, SLOT(slotItemRemoved(CuteReport::BaseItemInterface*)));
+        connect(page, SIGNAL(afterNewItemAdded(CuteReport::BaseItemInterface*)),
+                this, SLOT(slotItemAdded(CuteReport::BaseItemInterface*)));
+        connect(page, SIGNAL(afterItemRemoved(CuteReport::BaseItemInterface*,QString,bool)),
+                this, SLOT(slotItemRemoved(CuteReport::BaseItemInterface*, QString, bool)));
     }
 
-//    QList<CuteReport::BaseItemInterface*> items = this->findChildren<CuteReport::BaseItemInterface*>();
-//    foreach(CuteReport::BaseItemInterface* item, items) {
-//        item->init();
-//    }
+    //    QList<CuteReport::BaseItemInterface*> items = this->findChildren<CuteReport::BaseItemInterface*>();
+    //    foreach(CuteReport::BaseItemInterface* item, items) {
+    //        item->init();
+    //    }
 
     QList<CuteReport::DatasetInterface*> datasets = this->findChildren<CuteReport::DatasetInterface*>();
     foreach(CuteReport::DatasetInterface* dataset, datasets) {
@@ -109,24 +113,52 @@ void ReportInterface::init()
         connect(form, SIGNAL(destroyed(QObject*)), this, SLOT(childDestroyed(QObject*)));
     }
 
+    precessFlags(m_flags);
 }
 
 
-ReportInterface * ReportInterface::clone(bool withChildren)
+ReportInterface * ReportInterface::clone(bool withChildren, bool init)
 {
-    ReportInterface * report = new ReportInterface(*this, this->parent());
-    if (!withChildren)
-        return report;
+    ReportInterface * newReport = new ReportInterface(*this, this->parent());
+    if (withChildren) {
+        foreach (QObject * child, children()) {
+            if (PageInterface * page = dynamic_cast<PageInterface*>(child)) {
+                PageInterface * newPage = page->clone(true, false);
+                newPage->setParent(newReport);
+                newPage->setObjectName(page->objectName());
+            }
+            if (DatasetInterface * ds = dynamic_cast<DatasetInterface*>(child)) {
+                DatasetInterface * newds = ds->clone();
+                newds->setParent(newReport);
+                newds->setObjectName(ds->objectName());
+            }
+            if (FormInterface * form = dynamic_cast<FormInterface*>(child)) {
+                FormInterface * newForm = form->clone();
+                newForm->setParent(newReport);
+                newForm->setObjectName(form->objectName());
+            }
+            if (RendererInterface * renderer = dynamic_cast<RendererInterface*>(child)) {
+                RendererInterface * newRenderer = renderer->clone();
+                newRenderer->setParent(newReport);
+                newRenderer->setObjectName(renderer->objectName());
+            }
+            if (PrinterInterface * printer = dynamic_cast<PrinterInterface*>(child)) {
+                PrinterInterface * newPrinter = printer->clone();
+                newPrinter->setParent(newReport);
+                newPrinter->setObjectName(printer->objectName());
+            }
+            if (StorageInterface * storage = dynamic_cast<StorageInterface*>(child)) {
+                StorageInterface * newStorage = storage->clone();
+                newStorage->setParent(newReport);
+                newStorage->setObjectName(storage->objectName());
+            }
+        }
+    }
 
-//    foreach (QObject * child, children()) {
-//        if (dynamic_cast<PageInterface*>(child)) {
-//            PageInterface * page = reinterpret_cast<PageInterface*>(child)->clone(true);
-//            foreach (BaseItemInterface * item, children()))
-//        }
-//    }
+    if (init)
+        newReport->init();
 
-
-    return report;
+    return newReport;
 }
 
 
@@ -145,6 +177,7 @@ void ReportInterface::setScript(const QString & script)
 
     emit scriptChanged(m_script);
     emit changed();
+    emit propertyChanged();
 }
 
 
@@ -162,6 +195,7 @@ void ReportInterface::setName(const QString & name)
 
     emit nameChanged(m_name);
     emit changed();
+    emit propertyChanged();
 }
 
 
@@ -179,12 +213,39 @@ void ReportInterface::setAuthor(const QString & author)
 
     emit authorChanged(m_author);
     emit changed();
+    emit propertyChanged();
+}
+
+
+QList<BaseItemInterface *> ReportInterface::items()
+{
+    return this->findChildren<CuteReport::BaseItemInterface*>();
+}
+
+
+CuteReport::BaseItemInterface * ReportInterface::item (const QString & itemName)
+{
+    foreach (PageInterface* page, pages())
+        foreach (BaseItemInterface * item, page->items()) {
+            if (item->objectName() == itemName) {
+                return item;
+            }
+        }
+    return 0;
 }
 
 
 QList<PageInterface *> ReportInterface::pages()
 {
     return this->findChildren<CuteReport::PageInterface*>();
+}
+
+
+PageInterface *ReportInterface::page(const QString &pageName)
+{
+    if (pageName.isEmpty())
+        return 0;
+    return findChild<PageInterface *>(pageName);
 }
 
 
@@ -207,9 +268,30 @@ void ReportInterface::deletePage(PageInterface * page)
 {
     /** disconnect for prevent triggering destroyed object postprocessing */
     disconnect(page, 0, this, 0);
-    delete page;
+    page->deleteLater();
 
     emit pageDeleted(page);
+    emit changed();
+}
+
+
+void ReportInterface::deletePage(const QString &pageName)
+{
+    QList<CuteReport::PageInterface*> pages = findChildren<CuteReport::PageInterface*>();
+    CuteReport::PageInterface* existentPage = 0;
+    foreach(CuteReport::PageInterface* page, pages)
+        if (pageName == page->objectName()) {
+            existentPage = page;
+            break;
+        }
+
+    if (!existentPage)
+        return;
+
+    disconnect(existentPage, 0, this, 0);
+    existentPage->deleteLater();
+
+    emit pageDeleted(existentPage);
     emit changed();
 }
 
@@ -222,6 +304,8 @@ QList<DatasetInterface *> ReportInterface::datasets()
 
 DatasetInterface * ReportInterface::dataset(const QString & datasetName)
 {
+    if (datasetName.isEmpty())
+        return 0;
     return findChild<DatasetInterface *>(datasetName);
 }
 
@@ -257,7 +341,6 @@ void ReportInterface::deleteDataset(DatasetInterface* dataset)
     /** disconnect for prevent triggering destroyed object postprocessing */
     disconnect(dataset, 0, this, 0);
     delete dataset;
-
     emit datasetDeleted(dataset);
     emit changed();
 }
@@ -301,21 +384,20 @@ void ReportInterface::deleteForm(FormInterface * form )
 
 CuteReport::RendererInterface *ReportInterface::renderer() const
 {
-    return findChild<CuteReport::RendererInterface*>();
+    CuteReport::RendererInterface * r = findChild<CuteReport::RendererInterface*>();
+    return r;
 }
 
 
 void ReportInterface::setRenderer(CuteReport::RendererInterface * renderer)
 {
-    if (!renderer)
-        return;
-
     CuteReport::RendererInterface* currentRenderer = findChild<CuteReport::RendererInterface*>();
     if (currentRenderer == renderer)
         return;
 
     delete currentRenderer;
-    renderer->setParent(this);
+    if (renderer)
+        renderer->setParent(this);
 
     emit rendererChanged(renderer);
     emit changed();
@@ -330,28 +412,24 @@ PrinterInterface * ReportInterface::printer() const
 
 void ReportInterface::setPrinter(PrinterInterface *printer)
 {
-    if (!printer)
-        return;
-
     CuteReport::PrinterInterface* currentPrinter = findChild<CuteReport::PrinterInterface*>();
     if (currentPrinter == printer)
         return;
 
     delete currentPrinter;
-    printer->setParent(this);
+    if (printer)
+        printer->setParent(this);
 
     emit printerChanged(printer);
     emit changed();
 }
 
 
-StorageInterface *ReportInterface::storage(const QString &storageName) const
+StorageInterface *ReportInterface::storage(const QString &objectName) const
 {
-    QList<StorageInterface *> list = findChildren<CuteReport::StorageInterface*>();
     StorageInterface * module = 0;
-
-    foreach (StorageInterface * m, list) {
-        if (m->moduleName() == storageName) {
+    foreach (StorageInterface * m, findChildren<CuteReport::StorageInterface*>()) {
+        if (m->objectName() == objectName) {
             module = m;
             break;
         }
@@ -363,23 +441,30 @@ StorageInterface *ReportInterface::storage(const QString &storageName) const
 
 StorageInterface *ReportInterface::storageByUrl(const QString &url) const
 {
-    QString scheme = url.section(':', 0,0);
-    return storageByScheme(scheme);
+    QString storageName = url.section(':', 0,0);
+    return storage(storageName);
 }
 
 
-CuteReport::StorageInterface* ReportInterface::storageByScheme(const QString & scheme) const
+QList<StorageInterface *> ReportInterface::storageListByScheme(const QString & scheme) const
 {
-    QList<StorageInterface *> list = findChildren<CuteReport::StorageInterface*>();
-    StorageInterface * module = 0;
-    foreach (StorageInterface * m, list) {
-        if (m->urlScheme() == scheme) {
-            module = m;
-            break;
-        }
+    QList<StorageInterface *> resultList;
+    foreach (StorageInterface * m, findChildren<CuteReport::StorageInterface*>()) {
+        if (m->urlScheme() == scheme)
+            resultList << m;
     }
+    return resultList;
+}
 
-    return module;
+
+QList<StorageInterface *> ReportInterface::storageListByModuleName(const QString & moduleName) const
+{
+    QList<StorageInterface *> resultList;
+    foreach (StorageInterface * m, findChildren<CuteReport::StorageInterface*>()) {
+        if (m->moduleFullName() == moduleName)
+            resultList << m;
+    }
+    return resultList;
 }
 
 
@@ -393,42 +478,30 @@ QStringList ReportInterface::storagesName() const
 {
     QStringList list;
     foreach (StorageInterface * storage, storages())
-        list << storage->moduleName();
+        list << storage->objectName();
     return list;
 }
 
 
-void ReportInterface::setStorage(StorageInterface *storage)
+void ReportInterface::addStorage(StorageInterface *storage)
 {
     if (!storage || storage->parent() == this)
         return;
 
-    QList<CuteReport::StorageInterface*> storages = findChildren<CuteReport::StorageInterface*>();
-    CuteReport::StorageInterface* existentStorage = 0;
-    foreach(CuteReport::StorageInterface* st, storages) {
-        if (storage->moduleName() == st->moduleName()) {
-            existentStorage = st;
-            break;
-        }
-    }
-
-    if (existentStorage) {
-        deleteStorage(existentStorage);
-    }
-
     storage->setParent(this);
+    storage->setObjectName( ReportCore::uniqueName(storage, storage->urlScheme(), this) );
 
     emit storageAdded(storage);
     emit changed();
 }
 
 
-void ReportInterface::deleteStorage(const QString & moduleName)
+void ReportInterface::deleteStorage(const QString & storageName)
 {
     QList<CuteReport::StorageInterface*> storages = findChildren<CuteReport::StorageInterface*>();
     CuteReport::StorageInterface* existentStorage = 0;
     foreach(CuteReport::StorageInterface* st, storages)
-        if (moduleName == st->moduleName()) {
+        if (storageName == st->objectName()) {
             existentStorage = st;
             break;
         }
@@ -436,8 +509,8 @@ void ReportInterface::deleteStorage(const QString & moduleName)
     if (!existentStorage)
         return;
 
-    if (m_defaultStorageName == existentStorage->moduleName())
-        m_defaultStorageName = QString();
+    if (defaultStorageName() == existentStorage->objectName())
+        setDefaultStorageName(QString());
 
     existentStorage->deleteLater();
 
@@ -448,33 +521,25 @@ void ReportInterface::deleteStorage(const QString & moduleName)
 
 void ReportInterface::deleteStorage(StorageInterface * storage)
 {
-    QList<CuteReport::StorageInterface*> storages = findChildren<CuteReport::StorageInterface*>();
-    CuteReport::StorageInterface* existentStorage = 0;
-    foreach(CuteReport::StorageInterface* st, storages)
-        if (storage->moduleName() == st->moduleName()) {
-            existentStorage = st;
-            break;
-        }
-
-    if (!existentStorage)
+    if (!storage || storage->parent() != this)
         return;
 
-    if (m_defaultStorageName == existentStorage->moduleName())
-        m_defaultStorageName = QString();
+    if (defaultStorageName() == storage->objectName())
+        setDefaultStorageName(QString());
 
-    existentStorage->deleteLater();
+    storage->deleteLater();
 
-    emit storageDeleted(existentStorage);
+    emit storageDeleted(storage);
     emit changed();
 }
 
 
-bool ReportInterface::hasStorage(const QString & moduleName)
+bool ReportInterface::hasStorageModule(const QString & moduleName)
 {
     QList<CuteReport::StorageInterface*> storages = findChildren<CuteReport::StorageInterface*>();
     CuteReport::StorageInterface* existentStorage = 0;
     foreach(CuteReport::StorageInterface* st, storages)
-        if (moduleName == st->moduleName()) {
+        if (moduleName == st->moduleFullName()) {
             existentStorage = st;
             break;
         }
@@ -498,6 +563,7 @@ void ReportInterface::setDefaultStorageName(const QString & name)
 
     emit defaultStorageNameChanged(m_defaultStorageName);
     emit changed();
+    emit propertyChanged();
 }
 
 
@@ -507,7 +573,7 @@ StorageInterface * ReportInterface::defaultStorage() const
 
     if (!m_defaultStorageName.isEmpty()) {
         foreach (CuteReport::StorageInterface * storage, storages())
-            if (storage->moduleName() == m_defaultStorageName) {
+            if (storage->objectName() == m_defaultStorageName) {
                 defaultStorage = storage;
                 break;
             }
@@ -551,6 +617,7 @@ void ReportInterface::setDescription(const QString & description)
 
     emit descriptionChanged(m_description);
     emit changed();
+    emit propertyChanged();
 }
 
 
@@ -569,6 +636,7 @@ void ReportInterface::setFilePath(const QString & filePath)
 
     emit filePathChanged(m_filePath);
     emit changed();
+    emit propertyChanged();
 }
 
 
@@ -643,15 +711,15 @@ void ReportInterface::childDestroyed(QObject * object)
 }
 
 
-void ReportInterface::slotItemAdded(CuteReport::BaseItemInterface*item,QPointF)
+void ReportInterface::slotItemAdded(CuteReport::BaseItemInterface*item)
 {
     emit itemAdded(item);
 }
 
 
-void ReportInterface::slotItemRemoved(CuteReport::BaseItemInterface* item)
+void ReportInterface::slotItemRemoved(CuteReport::BaseItemInterface* item, QString, bool directDeletion)
 {
-    emit itemDeleted(item);
+    emit itemDeleted(item, directDeletion);
 }
 
 
@@ -718,7 +786,7 @@ void ReportInterface::precessFlags(ReportFlags previousFlags)
 
     if (m_flags.testFlag(DirtynessAutoUpdate) && !previousFlags.testFlag(DirtynessAutoUpdate)) {
         foreach (PageInterface * page, pages()) {
-            connect(page, SIGNAL(afterNewItemAdded(CuteReport::BaseItemInterface*,QPointF)),
+            connect(page, SIGNAL(afterNewItemAdded(CuteReport::BaseItemInterface*)),
                     this, SLOT(slotNewItemAdded(CuteReport::BaseItemInterface*)), Qt::UniqueConnection);
             foreach (BaseItemInterface * item, page->items())
                 connect(item, SIGNAL(changed()), this, SLOT(setDirty()), Qt::UniqueConnection);
@@ -734,7 +802,7 @@ void ReportInterface::precessFlags(ReportFlags previousFlags)
     if (!m_flags.testFlag(DirtynessAutoUpdate) && previousFlags.testFlag(DirtynessAutoUpdate)) {
         foreach (PageInterface * page, pages()) {
             disconnect(page, SIGNAL(afterNewItemAdded(CuteReport::BaseItemInterface*,QPointF)),
-                    this, SLOT(slotNewItemAdded(CuteReport::BaseItemInterface*)));
+                       this, SLOT(slotNewItemAdded(CuteReport::BaseItemInterface*)));
             foreach (BaseItemInterface * item, page->items())
                 disconnect(item, SIGNAL(changed()), this, SLOT(setDirty()));
         }

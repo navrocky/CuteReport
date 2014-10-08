@@ -25,10 +25,21 @@
 #include "qscriptedit_p.h"
 #include "core.h"
 
+inline void initMyResource() { Q_INIT_RESOURCE(script_editor); }
 
 ScriptEditor::ScriptEditor(QObject *parent)
-        : ModuleInterface(parent)
+    : ModuleInterface(parent)
+    ,m_gui(0)
 {
+
+}
+
+
+void ScriptEditor::init(CuteDesigner::Core *core)
+{
+    initMyResource();
+    ModuleInterface::init(core);
+
     m_gui = new QWidget();
     gridLayout = new QGridLayout(m_gui);
 //	QSplitter *splitter = new QSplitter(Qt::Vertical, this);
@@ -48,45 +59,45 @@ ScriptEditor::ScriptEditor(QObject *parent)
 //	splitter->addWidget(varsWidget);
 //	splitter->setStretchFactor(0, 1);
 
-	gridLayout->addWidget(tb, 0, 0, 1, 1);
-	gridLayout->addWidget(textEdit, 1, 0, 1, 1);
+    gridLayout->addWidget(tb, 0, 0, 1, 1);
+    gridLayout->addWidget(textEdit, 1, 0, 1, 1);
 
-	QMetaObject::connectSlotsByName(this);
+    QMetaObject::connectSlotsByName(this);
 
-	m_copyAction = tb->addAction(QIcon(":/images/editcopy.png"), tr("Copy"));
-	m_cutAction = tb->addAction(QIcon(":/images/editcut.png"), tr("Cut"));
-	m_pasteAction = tb->addAction(QIcon(":/images/editpaste.png"), tr("Paste"));
-	tb->addSeparator();
-	m_undoAction = tb->addAction(QIcon(":/images/editundo.png"), tr("Undo"));
-	m_redoAction = tb->addAction(QIcon(":/images/editredo.png"), tr("Redo"));
-	tb->addSeparator();
-	m_validateAction = tb->addAction(QIcon(":/images/validate.png"), tr("Validate"));
+    m_copyAction = tb->addAction(QIcon(":/images/editcopy.png"), tr("Copy"));
+    m_cutAction = tb->addAction(QIcon(":/images/editcut.png"), tr("Cut"));
+    m_pasteAction = tb->addAction(QIcon(":/images/editpaste.png"), tr("Paste"));
+    tb->addSeparator();
+    m_undoAction = tb->addAction(QIcon(":/images/editundo.png"), tr("Undo"));
+    m_redoAction = tb->addAction(QIcon(":/images/editredo.png"), tr("Redo"));
+    tb->addSeparator();
+    m_validateAction = tb->addAction(QIcon(":/images/validate.png"), tr("Validate"));
 
-	m_copyAction->setEnabled(false);
-	m_cutAction->setEnabled(false);
-	m_undoAction->setEnabled(false);
-	m_redoAction->setEnabled(false);
+    m_copyAction->setEnabled(false);
+    m_cutAction->setEnabled(false);
+    m_undoAction->setEnabled(false);
+    m_redoAction->setEnabled(false);
     m_pasteAction->setEnabled(false/*textEdit ->canPaste()*/);
 
-	connect(textEdit , SIGNAL(copyAvailable(bool)) , m_copyAction, SLOT(setEnabled(bool)));
-	connect(textEdit , SIGNAL(copyAvailable(bool)) , m_cutAction, SLOT(setEnabled(bool)));
+    connect(textEdit , SIGNAL(copyAvailable(bool)) , m_copyAction, SLOT(setEnabled(bool)));
+    connect(textEdit , SIGNAL(copyAvailable(bool)) , m_cutAction, SLOT(setEnabled(bool)));
 
-	connect(m_validateAction, SIGNAL(triggered()), this, SLOT(validate()));
+    connect(m_validateAction, SIGNAL(triggered()), this, SLOT(validate()));
 
-	connect(m_copyAction, SIGNAL(triggered()), textEdit , SLOT(copy()));
-	connect(m_cutAction, SIGNAL(triggered()), textEdit , SLOT(cut()));
-	connect(m_pasteAction, SIGNAL(triggered()), textEdit , SLOT(paste()));
+    connect(m_copyAction, SIGNAL(triggered()), textEdit , SLOT(copy()));
+    connect(m_cutAction, SIGNAL(triggered()), textEdit , SLOT(cut()));
+    connect(m_pasteAction, SIGNAL(triggered()), textEdit , SLOT(paste()));
 
-	connect(textEdit , SIGNAL(undoAvailable(bool)) , m_undoAction, SLOT(setEnabled(bool)));
-	connect(textEdit , SIGNAL(redoAvailable(bool)) , m_redoAction, SLOT(setEnabled(bool)));
+    connect(textEdit , SIGNAL(undoAvailable(bool)) , m_undoAction, SLOT(setEnabled(bool)));
+    connect(textEdit , SIGNAL(redoAvailable(bool)) , m_redoAction, SLOT(setEnabled(bool)));
 
-	connect(m_undoAction, SIGNAL(triggered()), textEdit , SLOT(undo()));
-	connect(m_redoAction, SIGNAL(triggered()), textEdit , SLOT(redo()));
+    connect(m_undoAction, SIGNAL(triggered()), textEdit , SLOT(undo()));
+    connect(m_redoAction, SIGNAL(triggered()), textEdit , SLOT(redo()));
 
-    connect(core(), SIGNAL(currentReportChanged(CuteReport::ReportInterface*)), this, SLOT(slotCurrentReportChanged(CuteReport::ReportInterface*)));
-
-    m_gui->setEnabled(core()->currentReport());
+    m_gui->setEnabled(core->currentReport());
 //	varsWidget->hide();
+
+    connect(core, SIGNAL(currentReportChanged(CuteReport::ReportInterface*)), this, SLOT(slotCurrentReportChanged(CuteReport::ReportInterface*)));
 }
 
 
@@ -172,6 +183,9 @@ ScriptEditor::~ScriptEditor()
     delete m_gui;
 }
 
+
+
+
 QStringList ScriptEditor::variables()
 {
     QStringList list;
@@ -193,10 +207,9 @@ QStringList ScriptEditor::variables()
 void ScriptEditor::slotCurrentReportChanged(CuteReport::ReportInterface* report)
 {
     m_gui->setEnabled(core()->currentReport());
-    if (report)
-        textEdit->setPlainText(report->script());
+    textEdit->setPlainText(report ? report->script() : QString());
 }
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(scriptEditor, ScriptEditor)
+Q_EXPORT_PLUGIN2(ScriptEditor, ScriptEditor)
 #endif

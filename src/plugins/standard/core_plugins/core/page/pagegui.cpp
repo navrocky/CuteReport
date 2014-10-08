@@ -34,18 +34,17 @@
 #include "bandinterface.h"
 #include "pageitemselection.h"
 #include "magnets.h"
-#include "functions.h"
 #include "emptydialog.h"
+#include "scene.h"
+#include "view.h"
 
-#include <QtGui>
-#include <QtCore>
-#include <QGraphicsItem>
+#include <QLabel>
+#include <QGraphicsSceneMouseEvent>
 #include <QGridLayout>
 #include <QScrollBar>
 
-//namespace CuteReport
-//{
 
+SUIT_BEGIN_NAMESPACE
 
 using namespace CuteReport;
 
@@ -60,7 +59,7 @@ PageGUI::PageGUI(Page * page) :
 
   //    m_zoom(1.0)
 {
-    m_scene = new QGraphicsScene(this);
+    m_scene = new Scene(m_page, this);
 
     m_pageItem = new PageItem();
     m_pageItem->setFlag(QGraphicsItem::ItemClipsChildrenToShape, true);
@@ -73,10 +72,14 @@ PageGUI::PageGUI(Page * page) :
 
     updateScene();
 
+    connect (m_scene, SIGNAL(mousePressed(QGraphicsSceneMouseEvent*)), this, SLOT(slotMousePressed(QGraphicsSceneMouseEvent*)));
+    connect (m_scene, SIGNAL(mouseReleased(QGraphicsSceneMouseEvent*)), this, SLOT(slotMouseReleased(QGraphicsSceneMouseEvent*)));
+    connect (m_scene, SIGNAL(mouseDoubleClicked(QGraphicsSceneMouseEvent*)), this, SLOT(slotMouseDoubleClicked(QGraphicsSceneMouseEvent*)));
+
     connect(m_page, SIGNAL(paperSizeChanged(QSizeF)), this, SLOT(slotPaperSizeChanged(QSizeF)));
-    connect(m_page, SIGNAL(marginsChanged(CuteReport::Margins)), this, SLOT(slotMarginChanged(CuteReport::Margins)));
+    connect(m_page, SIGNAL(marginChanged()), this, SLOT(slotMarginChanged()));
     connect(m_page, SIGNAL(dpiChanged(int)), this, SLOT(slotDPIChanged(int)));
-    connect(m_page, SIGNAL(unitChanged(CuteReport::Unit)), this, SLOT(updateScene()));
+    connect(m_page, SIGNAL(unitChanged(CuteReport::Unit)), this, SLOT(slotUnitChanged(CuteReport::Unit)));
     connect(m_page, SIGNAL(backgroundChanged(QColor)), this, SLOT(slotBackgroundChanged(QColor)));
 }
 
@@ -104,12 +107,20 @@ void PageGUI::updateScene()
     redrawPageMargin();
     //    drawPageGrid();
     //    updateItems();
+    emit sceneUpdated();
 }
 
 
-PageViewInterface *PageGUI::createView(QWidget * parent)
+PageViewInterface *PageGUI::createView()
 {
-    PageView * newView = new PageView(m_page, this, parent);
+    PageView * newView = new PageView(m_page, this);
+    return newView;
+}
+
+
+PageViewInterface *PageGUI::createSimpleView()
+{
+    PageView * newView = new PageView(m_page, this);
     return newView;
 }
 
@@ -183,7 +194,7 @@ void PageGUI::itemAdded(BaseItemInterface * item)
 void PageGUI::updateItem(BaseItemInterface *item, bool withChildren)
 {
     //    ItemInterfaceView * view = item->view();
-//        QGraphicsItem* parentItem = item->parentItem() ? (QGraphicsItem*)item->parentItem()->view() : (QGraphicsItem*)m_pageItem;
+    //        QGraphicsItem* parentItem = item->parentItem() ? (QGraphicsItem*)item->parentItem()->view() : (QGraphicsItem*)m_pageItem;
 
     //    view->setParentItem(parentItem);
 
@@ -286,14 +297,17 @@ void PageGUI::setCurrentItem(BaseItemInterface * item)
 }
 
 
-void PageGUI::setItemAjustedGeometry(BaseItemInterface * item, const QRectF & geometry)
+void PageGUI::setItemAjustedAbsoluteGeometryMM(BaseItemInterface * item, const QRectF & geometry)
 {
     QRectF newGeometry = geometry;
-    newGeometry.setLeft(floor(geometry.left() / m_page->gridStep()) * m_page->gridStep());
-    newGeometry.setTop(floor(geometry.top() / m_page->gridStep()) * m_page->gridStep());
-    newGeometry.setRight(floor(geometry.right() / m_page->gridStep()) * m_page->gridStep());
-    newGeometry.setBottom(floor(geometry.bottom() / m_page->gridStep()) * m_page->gridStep());
-    item->setGeometry(newGeometry);
+    if (m_page->useGrid()) {
+        qreal pageStepMM =  convertUnit(m_page->gridStep(), m_page->unit(), Millimeter, m_page->dpi());
+        newGeometry.setLeft(floor(geometry.left() / pageStepMM + pageStepMM/2) * pageStepMM);
+        newGeometry.setTop(floor(geometry.top() / pageStepMM + pageStepMM/2) * pageStepMM);
+        newGeometry.setRight(floor(geometry.right() / pageStepMM + pageStepMM/2) * pageStepMM);
+        newGeometry.setBottom(floor(geometry.bottom() / pageStepMM + pageStepMM/2) * pageStepMM);
+    }
+    item->setAbsoluteGeometry(newGeometry, Millimeter);
 }
 
 
@@ -308,18 +322,6 @@ QGraphicsItem *PageGUI::pageItem()
     return m_pageItem;
 }
 
-//qreal PageGUI::zoom()
-//{
-//    return m_zoom;
-//}
-
-//void PageGUI::setZoom(qreal zoom)
-//{
-//    m_zoom =qBound(0.5, zoom, 10.0);
-//    resizeScene();
-//}
-
-
 
 void PageGUI::redrawPageMargin()
 {
@@ -331,11 +333,11 @@ void PageGUI::redrawPageMargin()
         m_pageMarginItem->setPen(QPen(QColor("#DDDDDD")));
     }
 
-    Margins margin = m_page->margins(CuteReport::Millimeter);
+    //Margins margin = m_page->margins(CuteReport::Millimeter);
     QRectF rect = QRectF(QPointF(0,0), m_page->paperSize(CuteReport::Millimeter));
 
-    rect.setTopLeft(rect.topLeft() + QPointF(margin.left(), margin.top()));
-    rect.setBottomRight(rect.bottomRight() - QPointF(margin.right(), margin.bottom()));
+    rect.setTopLeft(rect.topLeft() + QPointF(m_page->marginLeft(Millimeter), m_page->marginTop(Millimeter)));
+    rect.setBottomRight(rect.bottomRight() - QPointF(m_page->marginRight(Millimeter), m_page->marginBottom(Millimeter)));
 
     QRectF pixRect = convertUnit(rect, Millimeter, Pixel, page()->dpi());
     m_pageMarginItem->setPos(pixRect.topLeft());
@@ -385,39 +387,31 @@ void PageGUI::redrawPageGrid()
 void PageGUI::slotPaperSizeChanged(QSizeF size)
 {
     Q_UNUSED(size)
-    qDebug("PageGUI::slotFormatChanged");
+    qDebug("Extended::PageGUI::slotFormatChanged");
     updateScene();
 }
 
 
-void PageGUI::slotMarginChanged(Margins margins)
+void PageGUI::slotMarginChanged()
 {
-    Q_UNUSED(margins)
     redrawPageMargin();
 }
 
 
-void PageGUI::slotMousePressed(QMouseEvent *event, QPointF scenePos)
+void PageGUI::slotMousePressed(QGraphicsSceneMouseEvent *event)
 {
-    Q_UNUSED(event)
-    Q_UNUSED(scenePos)
-}
-
-
-void PageGUI::slotMouseReleased(QMouseEvent * event, QPointF scenePos)
-{
-    m_magnets->clear();
+//    m_magnets->clear();
 
     if (m_ignoreObjectSelection) {
         m_ignoreObjectSelection = false;
         return;
     }
 
-    GraphicsView * view = qobject_cast<GraphicsView *>(sender());
-    Q_ASSERT(view);
-
-    QPointF pagePos =  convertUnit(scenePos, Pixel, page()->unit(), page()->dpi()) - convertUnit(QPointF(PAGE_BORDER, PAGE_BORDER), CuteReport::Millimeter, m_page->unit(), m_page->dpi());
+    QPointF pagePos =  convertUnit(event->scenePos(), Pixel, page()->unit(), page()->dpi()) - convertUnit(QPointF(PAGE_BORDER, PAGE_BORDER), CuteReport::Millimeter, m_page->unit(), m_page->dpi());
     BaseItemInterface * item = m_page->itemAt(pagePos);
+
+    qDebug() << "pagePos" << pagePos;
+
 
     if (event->modifiers()&Qt::ShiftModifier) {
         if (isItemSelected(item)) {
@@ -439,10 +433,17 @@ void PageGUI::slotMouseReleased(QMouseEvent * event, QPointF scenePos)
 }
 
 
-void PageGUI::slotMouseDoubleClicked(QMouseEvent * event, QPointF scenePos)
+void PageGUI::slotMouseReleased(QGraphicsSceneMouseEvent *event)
 {
     Q_UNUSED(event)
-    QPointF pagePos =  convertUnit(scenePos, Pixel, page()->unit(), page()->dpi()) - convertUnit(QPointF(PAGE_BORDER, PAGE_BORDER), CuteReport::Millimeter, m_page->unit(), m_page->dpi());
+    m_magnets->clear();
+}
+
+
+void PageGUI::slotMouseDoubleClicked(QGraphicsSceneMouseEvent * event)
+{
+    Q_UNUSED(event)
+    QPointF pagePos =  convertUnit(event->scenePos(), Pixel, page()->unit(), page()->dpi()) - convertUnit(QPointF(PAGE_BORDER, PAGE_BORDER), CuteReport::Millimeter, m_page->unit(), m_page->dpi());
     BaseItemInterface * item = m_page->itemAt(pagePos);
 
     if (!item)
@@ -454,8 +455,8 @@ void PageGUI::slotMouseDoubleClicked(QMouseEvent * event, QPointF scenePos)
         return;
 
     EmptyDialog d(m_page->reportCore()->rootWidget());
-    d.setWindowTitle(item->moduleName());
-    d.setWidget(helper);
+    d.setWindowTitle(QString("%1 (%2)").arg(item->moduleShortName(), item->suitName()));
+    d.setHelperWidget(helper);
     if (d.exec() == QDialog::Accepted)
         helper->sync();
 }
@@ -485,7 +486,7 @@ void PageGUI::addToSelection(BaseItemInterface * item)
     if (!item)
         return;
     m_selectedItems.insert(0, item);
-    /*ItemSelection * selecter =*/ new ItemSelection(this, item);
+    /*ItemSelection * selecter =*/ new SUIT_NAMESPACE::ItemSelection(this, item);
 }
 
 
@@ -532,163 +533,25 @@ void PageGUI::slotBackgroundChanged(QColor color)
     m_pageItem->setBrush(color);
 }
 
-/// ===================================== PageItem ====================================================
 
-//void PageItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 )
-//{
-
-//}
-
-
-/// ==================================== PageView ====================================================
-GraphicsView::GraphicsView(Page *page, PageGUI *pageGui):
-    m_page(page),
-    m_pageGui(pageGui)
+void PageGUI::slotUnitChanged(Unit unit)
 {
-    setAcceptDrops(true);
+    Q_UNUSED(unit)
+    updateScene();
 }
-
-
-void GraphicsView::dragMoveEvent ( QDragMoveEvent * event )
-{
-    QString moduleName = event->mimeData()->text().section("::", 2);
-    if (event->mimeData()->hasFormat("text/plain")) {
-        QPointF pagePos = convertUnit( m_pageGui->m_pageItem->mapFromScene(mapToScene(event->pos())), Pixel, m_page->unit(), m_page->dpi());
-
-        const BaseItemInterface * item = m_page->reportCore()->itemModule(moduleName);
-        if (m_page->canContainAt(item, pagePos)) {
-            event->acceptProposedAction();
-        } else {
-            event->ignore();
-        }
-        if (m_pageGui->m_posLabel) {
-            m_pageGui->m_posLabel->setText(QString("pos(%1, %2)").arg(pagePos.x(),4,'f',2,'0').arg(pagePos.y(),4,'f',2,'0'));
-            m_pageGui->m_posLabel->setMinimumSize(m_pageGui->m_posLabel->geometry().size());
-        }
-    } else {
-        event->ignore();
-    }
-
-}
-
-
-void GraphicsView::dropEvent(QDropEvent *event)
-{
-    QString moduleName = event->mimeData()->text().section("::", 2);
-    QPointF pagePos = convertUnit(m_pageGui->m_pageItem->mapFromScene(mapToScene(event->pos())), Pixel, m_page->unit(), m_page->dpi());
-
-    if (m_page->pageRect().contains(pagePos))
-        emit dropItem(moduleName, pagePos);
-
-    event->acceptProposedAction();
-}
-
-
-void GraphicsView::mousePressEvent (QMouseEvent * event)
-{
-    QGraphicsView::mousePressEvent(event);
-    QPointF scenePos = this->mapToScene(event->pos());
-    emit mousePressed(event, scenePos);
-}
-
-
-void GraphicsView::mouseReleaseEvent (QMouseEvent * event)
-{
-    QGraphicsView::mouseReleaseEvent(event);
-    QPointF scenePos = this->mapToScene(event->pos());
-    emit mouseReleased(event, scenePos);
-}
-
-
-void GraphicsView::mouseMoveEvent ( QMouseEvent * event )
-{
-    QPointF pos = convertUnit(m_pageGui->m_pageItem->mapFromScene(mapToScene(event->pos())), Pixel, m_page->unit(), m_page->dpi());
-    pos.setX(int(pos.x() / m_page->gridStep()) * m_page->gridStep());
-    pos.setY(int(pos.y() / m_page->gridStep()) * m_page->gridStep());
-
-    if (m_pageGui->m_posLabel) {
-        m_pageGui->m_posLabel->setText(QString("pos(%1, %2)").arg(pos.x(),4,'f',2,'0').arg(pos.y(),4,'f',2,'0'));
-        m_pageGui->m_posLabel->setMinimumSize(m_pageGui->m_posLabel->geometry().size());
-    }
-
-    QGraphicsView::mouseMoveEvent(event);
-}
-
-
-void GraphicsView::mouseDoubleClickEvent(QMouseEvent * event)
-{
-    QGraphicsView::mouseDoubleClickEvent(event);
-    QPointF scenePos = this->mapToScene(event->pos());
-    emit mouseDoubleClicked(event, scenePos);
-}
-
-
-void GraphicsView::keyPressEvent ( QKeyEvent * event )
-{
-    switch (event->key()) {
-    case Qt::Key_Delete: {
-        BaseItemInterface * item = m_pageGui->currentItem();
-        if (item) {
-            m_page->deleteItem(item);
-        }
-    }
-        break;
-    case Qt::Key_Left: {
-        BaseItemInterface * item = m_pageGui->currentItem();
-        if (item && !(item->resizeFlags()&CuteReport::BaseItemInterface::FixedPos)) {
-            QRectF rect= item->geometry().translated(-m_pageGui->page()->gridStep(),0);
-            m_pageGui->setItemAjustedGeometry(item, rect);
-        }
-    }
-        break;
-    case Qt::Key_Right: {
-        BaseItemInterface * item = m_pageGui->currentItem();
-        if (item && !(item->resizeFlags()&CuteReport::BaseItemInterface::FixedPos)) {
-            QRectF rect= item->geometry().translated(m_pageGui->page()->gridStep(), 0);
-            m_pageGui->setItemAjustedGeometry(item, rect);
-        }
-    }
-        break;
-    case Qt::Key_Up: {
-        BaseItemInterface * item = m_pageGui->currentItem();
-        if (item && !(item->resizeFlags()&CuteReport::BaseItemInterface::FixedPos)) {
-            QRectF rect= item->geometry().translated(0, -m_pageGui->page()->gridStep());
-            m_pageGui->setItemAjustedGeometry(item, rect);
-        }
-    }
-        break;
-    case Qt::Key_Down: {
-        BaseItemInterface * item = m_pageGui->currentItem();
-        if (item && !(item->resizeFlags()&CuteReport::BaseItemInterface::FixedPos)) {
-            QRectF rect= item->geometry().translated(0, m_pageGui->page()->gridStep());
-            m_pageGui->setItemAjustedGeometry(item, rect);
-        }
-    }
-        break;
-    }
-
-    //    QGraphicsView::keyPressEvent(event);
-}
-
-
-/// ====================================================================================================================
 
 
 PageView::PageView(Page * page, PageGUI * pageGui, QWidget * parent, Qt::WindowFlags f)
     :PageViewInterface(parent, f),
       m_pageGui(pageGui)
 {
-    m_view = new GraphicsView(page, pageGui);
+    m_view = new View(page, pageGui);
     m_view->setScene(pageGui->m_scene);
     m_view->centerOn( 0, 0 );
     m_view->setRenderHints(/*QPainter::Antialiasing |*/ QPainter::SmoothPixmapTransform);
     m_view->setMouseTracking(true);
 
     connect (m_view, SIGNAL(dropItem(QString,QPointF)), pageGui, SLOT(slotDropItem(QString,QPointF)), Qt::QueuedConnection);
-    connect (m_view, SIGNAL(mousePressed(QMouseEvent*, QPointF)), pageGui, SLOT(slotMousePressed(QMouseEvent*, QPointF)));
-    connect (m_view, SIGNAL(mouseReleased(QMouseEvent*, QPointF)), pageGui, SLOT(slotMouseReleased(QMouseEvent*, QPointF)));
-    connect (m_view, SIGNAL(mouseDoubleClicked(QMouseEvent*,QPointF)), pageGui, SLOT(slotMouseDoubleClicked(QMouseEvent*, QPointF)));
-
     connect (this, SIGNAL(destroyed(QObject*)), pageGui, SLOT(viewDestroyed(QObject*)));
 
     QLayout * layout = new QGridLayout(this);
@@ -709,4 +572,11 @@ void PageView::fit()
     m_view->scale(resultScale, resultScale);
 }
 
-//} //namespace
+
+View *PageView::graphicsView()
+{
+     return m_view;
+}
+
+
+SUIT_END_NAMESPACE

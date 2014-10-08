@@ -35,9 +35,10 @@
 #include <QtCore>
 #include <QtGui>
 
+inline void initMyResource() { Q_INIT_RESOURCE(rectangle); }
 
 RectangleItem::RectangleItem(QObject *parent)
-    :ItemInterface(*new RectangleItemPrivate, parent)
+    :ItemInterface(new RectangleItemPrivate, parent)
 {
     Q_INIT_RESOURCE(rectangle);
     Q_D(RectangleItem);
@@ -46,17 +47,23 @@ RectangleItem::RectangleItem(QObject *parent)
 }
 
 
-RectangleItem::RectangleItem(RectangleItemPrivate &dd, QObject * parent)
+void RectangleItem::moduleInit()
+{
+    initMyResource();
+}
+
+
+RectangleItem::RectangleItem(RectangleItemPrivate *dd, QObject * parent)
     :ItemInterface(dd, parent)
 {
     Q_INIT_RESOURCE(rectangle);
 }
 
 
-CuteReport::BaseItemInterface * RectangleItem::clone()
+CuteReport::BaseItemInterface * RectangleItem::itemClone() const
 {
-    Q_D(RectangleItem);
-    return new RectangleItem(*new RectangleItemPrivate(*d), parent());
+    Q_D(const RectangleItem);
+    return new RectangleItem(new RectangleItemPrivate(*d), parent());
 }
 
 
@@ -122,7 +129,7 @@ QIcon RectangleItem::itemIcon() const
 }
 
 
-QString RectangleItem::moduleName() const
+QString RectangleItem::moduleShortName() const
 {
     return tr("Rectangle");
 }
@@ -134,25 +141,20 @@ QString RectangleItem::itemGroup() const
 }
 
 
-CuteReport::RenderedItemInterface * RectangleItem::render(int customDPI)
+bool RectangleItem::renderPrepare()
 {
-    Q_UNUSED(customDPI);
+    emit printBefore();
+    setRenderingPointer(new RectangleItemPrivate(*(reinterpret_cast<RectangleItemPrivate*>(d_ptr))));
+    emit printDataBefore();
+    emit printDataAfter();
+    return true;
+}
+
+
+RenderedItemInterface *RectangleItem::renderView()
+{
     Q_D(RectangleItem);
-
-    emit renderingBefore();
-
-    RectangleItemPrivate * pCurrent = d;
-    RectangleItemPrivate * pNew = new RectangleItemPrivate(*d);
-
-    d_ptr = pNew;
-    emit rendering();
-    d_ptr = pCurrent;
-
-    RenderedRectangleItem * view = new RenderedRectangleItem(this, pNew);
-
-    emit rendered(view);
-    emit renderingAfter();
-
+    RenderedRectangleItem * view = new RenderedRectangleItem(this, new RectangleItemPrivate(*d));
     return view;
 }
 
@@ -163,5 +165,5 @@ void RectangleItem::initScript(QScriptEngine *scriptEngine)
 }
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(rectangle, RectangleItem)
+Q_EXPORT_PLUGIN2(Rectangle, RectangleItem)
 #endif

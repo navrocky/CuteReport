@@ -120,5 +120,5 @@ PropertyInterface* Strings::createInstance(QObject * object, int property, const
 }
 
 #if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(strings, Strings)
+Q_EXPORT_PLUGIN2(StringsProperty, Strings)
 #endif

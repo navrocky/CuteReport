@@ -51,7 +51,8 @@ public:
     explicit ExportPDF(QObject *parent = 0);
     ~ExportPDF();
 
-    virtual QString moduleName() const {return QString("PDF");}
+    virtual QString moduleShortName() const {return QString("PDF");}
+    virtual QString suitName() const { return "Standard"; }
     virtual QString format() const {return QString("PDF");}
     virtual QIcon icon() const;
 
