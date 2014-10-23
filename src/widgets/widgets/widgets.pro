@@ -34,7 +34,7 @@ contains(DEFINES, SYSTEMINSTALL) {
     target.path += $$REPORT_LIBS_PATH
     INSTALLS += target 
 } else {
-    DESTDIR = $$OUT_PWD/../../../../$$BUILD_DIR/$$REPORT_LIBS_PATH
+    DESTDIR = $$OUT_PWD/../../../$$BUILD_DIR/$$REPORT_LIBS_PATH
     target.files += $$HEADERS widgets_export.h
     target.path += $$OUT_PWD/../../../$$BUILD_DIR/$$REPORT_HEADERS_PATH
     INSTALLS += target 
