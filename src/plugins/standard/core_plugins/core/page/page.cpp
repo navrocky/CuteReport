@@ -70,6 +70,7 @@ Page::Page(QObject * parent):
     d->magnetValue = 0;
     d->background = QColor(Qt::white);
     d->renderingStage = false;
+    d->useGrid = false;
 
     //    d->grid = new Grid();
 }
