@@ -93,7 +93,8 @@ RendererProcessor::RendererProcessor(RendererData * data)
       m_terminate(false),
       m_currentRenderedPage(0),
       m_runs(false),
-      m_lastItemId(0)
+      m_lastItemId(0),
+      m_currentDataset(0)
 {
     m_antialiasing = data->renderer->antialiasing();
     m_textAntialiasing = data->renderer->textAntialiasing();
